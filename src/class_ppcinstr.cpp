@@ -558,6 +558,12 @@ bool PPCInstr_stbx(PPCInterpreter *cpu, PPCInstruction instr) {
 	return cpu->write<uint8_t>(addr, cpu->core->regs[instr.rS()]);
 }
 
+bool PPCInstr_sthx(PPCInterpreter *cpu, PPCInstruction instr) {
+	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr.rB()];
+	return cpu->write<uint16_t>(addr, cpu->core->regs[instr.rS()]);
+}
+
 bool PPCInstr_stwx(PPCInterpreter *cpu, PPCInstruction instr) {
 	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
 	uint32_t addr = base + cpu->core->regs[instr.rB()];
@@ -808,6 +814,7 @@ PPCInstrCallback PPCInstruction::decode() {
 				case 316: return PPCInstr_xor;
 				case 339: return PPCInstr_mfspr;
 				case 371: return PPCInstr_mftb;
+				case 407: return PPCInstr_sthx;
 				case 444: return PPCInstr_or;
 				case 459: return PPCInstr_divwu;
 				case 467: return PPCInstr_mtspr;
