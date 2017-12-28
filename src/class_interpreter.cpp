@@ -33,18 +33,11 @@ void Interpreter::setAlarm(uint32_t alarm, AlarmCB callback) {
 	alarmCB = callback;
 }
 
-bool Interpreter::handleMemoryError(uint32_t addr, bool isWrite, bool isCode) {
+void Interpreter::handleMemoryError(uint32_t addr, bool isWrite, bool isCode) {
 	if (isCode) {
-		if (fetchErrorCB) {
-			fetchErrorCB(addr);
-		}
-		return false;
+		if (fetchErrorCB) fetchErrorCB(addr);
 	}
-	
-	if (dataErrorCB) {
-		return dataErrorCB(addr, isWrite) && isWrite;
-	}
-	return false;
+	if (dataErrorCB) dataErrorCB(addr, isWrite);
 }
 
 bool Interpreter::run(int steps) {

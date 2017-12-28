@@ -27,13 +27,15 @@ class Interpreter {
 
 		IVirtualMemory::Access type = isCode ? IVirtualMemory::Instruction : IVirtualMemory::DataRead;
 		if (!virtmem->translate(&addr, sizeof(T), type)) {
-			return handleMemoryError(addr, false, isCode);
+			handleMemoryError(addr, false, isCode);
+			return false;
 		}
 
 		int result = physmem->read<sizeof(T)>(addr, value);
 		if (result == -1) return false;
 		else if (result == -2) {
-			return handleMemoryError(addr, false, isCode);
+			handleMemoryError(addr, false, isCode);
+			return false;
 		}
 		if (swapEndian) Endian::swap<sizeof(T)>(value);
 		return true;
@@ -47,13 +49,15 @@ class Interpreter {
 		
 		if (swapEndian) Endian::swap<sizeof(T)>(&value);
 		if (!virtmem->translate(&addr, sizeof(T), IVirtualMemory::DataWrite)) {
-			return handleMemoryError(addr, true, false);
+			handleMemoryError(addr, true, false);
+			return false;
 		}
 		
 		int result = physmem->write<sizeof(T)>(addr, &value);
 		if (result == -1) return false;
 		else if (result == -2) {
-			return handleMemoryError(addr, true, false);
+			handleMemoryError(addr, true, false);
+			return false;
 		}
 		return true;
 	}
@@ -95,5 +99,5 @@ class Interpreter {
 	bool swapEndian;
 	
 	void checkWatchpoints(bool write, uint32_t addr, uint32_t length);
-	bool handleMemoryError(uint32_t addr, bool isWrite, bool isCode);
+	void handleMemoryError(uint32_t addr, bool isWrite, bool isCode);
 };
