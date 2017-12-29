@@ -13,44 +13,54 @@ inline uint32_t getShifted(ARMCore *core, int shift, int reg, bool update_cond) 
 	int amount;
 	if (shift & 1) {
 		amount = core->regs[shift >> 4] & 0xFF;
+		if (!amount) { //If this byte is zero, the value and carry will remain unchanged
+			return value;
+		}
 	}
 	else {
+		//Need to handle instruction specified shift amount even if it's zero,
+		//because LSR/ASR/ROR #0 => #32
 		amount = shift >> 3;
 	}
 	
+	//Shifts by more than 32 bits are undefined
+	//Need to handle those separately
 	switch ((shift >> 1) & 3) {
 		case 0: //Logical left
-			if (update_cond && amount) {
-				if (amount <= 32) {
-					core->cpsr.set(ARMCore::C, value & (1 << (32 - amount)));
+			if (amount) {
+				if (update_cond) {
+					if (amount <= 32) core->cpsr.set(ARMCore::C, value & (1 << (32 - amount)));
+					else core->cpsr.set(ARMCore::C, false);
 				}
-				else {
-					core->cpsr.set(ARMCore::C, false);
-				}
+				
+				if (amount < 32) value <<= amount;
+				else value = 0;
 			}
-			value <<= amount;
 			break;
 		case 1: //Logical right
 			if (amount == 0) amount = 32;
+			
 			if (update_cond) {
-				core->cpsr.set(ARMCore::C, value & (1 << (amount - 1)));
+				if (amount <= 32) core->cpsr.set(ARMCore::C, value & (1 << (amount - 1)));
+				else core->cpsr.set(ARMCore::C, false);
 			}
-			value >>= amount;
+			
+			if (amount < 32) value >>= amount;
+			else value = 0;
 			break;
 		case 2: //Arithmetic right
 			if (amount == 0) amount = 32;
+
 			if (update_cond && amount) {
-				if (amount <= 32) {
-					core->cpsr.set(ARMCore::C, value & (1 << (amount - 1)));
-				}
-				else {
-					core->cpsr.set(ARMCore::C, value >> 31);
-				}
+				if (amount <= 32) core->cpsr.set(ARMCore::C, value & (1 << (amount - 1)));
+				else core->cpsr.set(ARMCore::C, value >> 31);
 			}
-			value = (int32_t)value >> amount;
+			
+			if (amount < 32) value = (int32_t)value >> amount;
+			else value = 0;
 			break;
 		case 3: //Rotate right
-			if (amount == 0) {
+			if (amount == 0) { //RRX
 				bool carry = core->cpsr.get(ARMCore::C);
 				if (update_cond) {
 					core->cpsr.set(ARMCore::C, value & 1);
@@ -58,8 +68,12 @@ inline uint32_t getShifted(ARMCore *core, int shift, int reg, bool update_cond) 
 				value = (value >> 1) | (carry << 31);
 			}
 			else {
-				uint32_t rotmask = (1 << amount) - 1;
-				value = (value >> amount) | ((value & rotmask) << (32 - amount));
+				amount = (amount - 1) % 32 + 1; //Reduce into range 1 - 32
+				
+				if (amount != 32) {
+					uint32_t rotmask = (1 << amount) - 1;
+					value = (value >> amount) | ((value & rotmask) << (32 - amount));
+				}	
 				if (update_cond) {
 					core->cpsr.set(ARMCore::C, value >> 31);
 				}
@@ -117,10 +131,11 @@ bool ARMInstr_DataProcessing(ARMInterpreter *cpu, ARMInstruction instr) {
 	uint32_t opnd2;
 	if (instr.i()) {
 		int rot = instr.rotate() * 2;
-		uint32_t rotmask = (1 << rot) - 1;
-		
 		opnd2 = instr.value & 0xFF;
-		opnd2 = (opnd2 >> rot) | ((opnd2 & rotmask) << (32 - rot));
+		if (rot) {
+			uint32_t rotmask = (1 << rot) - 1;
+			opnd2 = (opnd2 >> rot) | ((opnd2 & rotmask) << (32 - rot));
+		}
 	}
 	else {
 		opnd2 = getShifted(cpu->core, instr.shift(), instr.r3(), instr.s());
@@ -421,10 +436,11 @@ bool ARMInstr_PSRTransfer(ARMInterpreter *cpu, ARMInstruction instr) {
 		uint32_t value;
 		if (instr.i()) {
 			int rot = instr.rotate() * 2;
-			uint32_t rotmask = (1 << rot) - 1;
-		
 			value = instr.value & 0xFF;
-			value = (value >> rot) | ((value & rotmask) << (32 - rot));
+			if (rot) {
+				uint32_t rotmask = (1 << rot) - 1;
+				value = (value >> rot) | ((value & rotmask) << (32 - rot));
+			}
 		}
 		else {
 			value = cpu->core->regs[instr.r3()];
