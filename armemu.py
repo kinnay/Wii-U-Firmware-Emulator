@@ -184,18 +184,14 @@ class UNDHandler:
 		self.file_logger = log.FileLogger("files.txt")
 
 	def handle(self):
-		try:
-			self.log_syscall()
-		except Exception as e:
-			print(e)
+		self.log_syscall()
 		self.core.trigger_exception(self.core.UNDEFINED_INSTRUCTION)
 		
 	def handle_breakpoint(self, pc):
 		for req in self.requests:
 			if pc == req[0] and self.get_thread() == req[1]:
-				try: self.handle_result(pc, *req[2:])
-				except Exception as e: print(e)
-				finally: self.requests.remove(req)
+				self.handle_result(pc, *req[2:])
+				self.requests.remove(req)
 				return
 				
 	def handle_result(self, pc, syscall, *args):
@@ -228,23 +224,13 @@ class UNDHandler:
 		elif syscall == self.IOS_IOCTL:
 			self.ipc_logger.print("[%s:%08X] IOCTL[%s](%08X, %i) -> %08X" %(module, lr, *args[:3], result))
 
-			dev, ioctl = args[0], args[2]
-			indata = self.reader.read(args[3], args[4])
-			outdata = self.reader.read(args[5], args[6])
+			dev, fd, ioctl, indata, outdata = args
 			self.handle_ioctl(dev, ioctl, indata, outdata, result)
 
 		elif syscall == self.IOS_IOCTLV:
 			self.ipc_logger.print("[%s:%08X] IOCTLV[%s](%08X, %i) -> %08X" %(module, lr, *args[:3], result))
 			
-			dev, ioctlv = args[0], args[2]
-			
-			offs = args[5]
-			vectors = []
-			for i in range(args[3] + args[4]):
-				ptr, size = self.reader.u32(offs), self.reader.u32(offs + 4)
-				vectors.append(self.reader.read(ptr, size))
-				offs += 12
-			
+			dev, fd, ioctlv, vectors = args
 			self.handle_ioctlv(dev, ioctlv, vectors, result)
 					
 		elif syscall == self.IOS_RESUME:
@@ -253,28 +239,17 @@ class UNDHandler:
 	def handle_async_result(self, pc, lr, syscall, result, *args):
 		module = self.get_module_name(pc)
 		if syscall == self.IOS_IOCTL_ASYNC:
-			fd, ioctl = args[0], args[1]
+			fd, ioctl, indata, outdata = args
 			name = self.ipc_names[fd]
-			
-			indata = self.reader.read(args[2], args[3])
-			outdata = self.reader.read(args[4], args[5])
 			
 			self.ipc_logger.print("[%s:%08X] IOCTL_ASYNC[%s](%08X, %i) -> %08X" %(module, lr, name, fd, ioctl, result))
 			self.handle_ioctl(name, ioctl, indata, outdata, result)
 		
 		elif syscall == self.IOS_IOCTLV_ASYNC:
-			fd, ioctlv = args[0], args[1]
+			fd, ioctlv, vectors = args
 			name = self.ipc_names[fd]
 		
 			self.ipc_logger.print("[%s:%08X] IOCTLV_ASYNC[%s](%08X, %i) -> %08X" %(module, lr, name, fd, ioctlv, result))
-			
-			offs = args[4]
-			vectors = []
-			for i in range(args[2] + args[3]):
-				ptr, size = self.reader.u32(offs), self.reader.u32(offs + 4)
-				vectors.append(self.reader.read(ptr, size))
-				offs += 12
-				
 			self.handle_ioctlv(name, ioctlv, vectors, result)
 		
 		elif syscall == self.IOS_RESUME_ASYNC:
@@ -398,24 +373,50 @@ class UNDHandler:
 				self.ipc_names.pop(fd)
 			elif syscall == self.IOS_IOCTL:
 				args = self.get_args(6)
-				fd = args[0]
-				self.add_request(pc, syscall, self.ipc_names[fd], *args)
+				fd, ioctl = args[0], args[1]
+				indata = self.reader.read(args[2], args[3])
+				outdata = self.reader.read(args[4], args[5])
+				self.add_request(pc, syscall, self.ipc_names[fd], fd, ioctl, indata, outdata)
 			elif syscall == self.IOS_IOCTLV:
 				args = self.get_args(5)
-				fd = args[0]
-				self.add_request(pc, syscall, self.ipc_names[fd], *args)
+				
+				fd, ioctlv = args[0], args[1]
+				
+				offs = args[4]
+				vectors = []
+				for i in range(args[2] + args[3]):
+					ptr, size = self.reader.u32(offs), self.reader.u32(offs + 4)
+					vectors.append(self.reader.read(ptr, size))
+					offs += 12
+
+				self.add_request(pc, syscall, self.ipc_names[fd], fd, ioctlv, vectors)
+
 			elif syscall == self.IOS_IOCTL_ASYNC:
 				args = self.get_args(8)
-				self.add_async(pc, lr, *args[6:], syscall, *args[:6])
+				fd, ioctl = args[0], args[1]
+				indata = self.reader.read(args[2], args[3])
+				outdata = self.reader.read(args[4], args[5])
+				self.add_async(pc, lr, *args[6:], syscall, fd, ioctl, indata, outdata)
 			elif syscall == self.IOS_IOCTLV_ASYNC:
 				args = self.get_args(7)
-				self.add_async(pc, lr, *args[5:], syscall, *args[:5])
+
+				fd, ioctlv = args[0], args[1]
+				
+				offs = args[4]
+				vectors = []
+				for i in range(args[2] + args[3]):
+					ptr, size = self.reader.u32(offs), self.reader.u32(offs + 4)
+					vectors.append(self.reader.read(ptr, size))
+					offs += 12
+
+				self.add_async(pc, lr, *args[5:], syscall, fd, ioctlv, vectors)
+
 			elif syscall == self.IOS_RESUME:
 				fd = core.reg(0)
 				self.add_request(pc, syscall, self.ipc_names[fd], fd)
 			elif syscall == self.IOS_RESUME_ASYNC:
 				args = self.get_args(5)
-				self.add_async(pc, lr, *args[3:], syscall, *args[:3])
+				self.add_async(pc, lr, *args[3:], syscall, args[0])
 				
 	def get_args(self, num):
 		args = []
@@ -487,7 +488,7 @@ class ARMEmulator:
 		self.interpreter.on_breakpoint(self.breakpoints.handle)
 		
 		self.debugger = debug.ARMDebugger(self)
-		
+
 		self.breakpoints.add(0x5055324, self.handle_syslog)
 		self.logger = log.FileLogger("log.txt")
 		
