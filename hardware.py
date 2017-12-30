@@ -1047,7 +1047,7 @@ class NANDBank:
 			if length == 0x840:
 				self.file.seek((self.addr2 << 11) | self.addr1)
 				self.physmem.write(self.databuf, self.file.read(0x800))
-				
+
 				self.filespare.seek(self.addr2 << 6)
 				sparedata = self.filespare.read(0x40)
 				self.physmem.write(self.eccbuf, sparedata)
@@ -1067,14 +1067,14 @@ class NANDBank:
 			assert not read and write and length == 0x800
 			data = self.physmem.read(self.databuf, length)
 			self.file.seek((self.addr2 << 11) | self.addr1)
-			#self.file.write(data)
+			self.file.write(data)
 			self.next_spare = self.addr2 << 6
 			
 		elif command == 0x85: #Write spare
 			assert not read and write and length == 0x40
 			data = self.physmem.read(self.databuf, length)
 			self.filespare.seek(self.next_spare)
-			#self.filespare.write(data)
+			self.filespare.write(data)
 
 		elif command == 0x90: #Get chip id
 			assert read and not write and length == 0x20
@@ -1102,21 +1102,14 @@ NAND_START = 0xD010000
 NAND_END = 0xD020000
 
 class NANDController:
-
 	def __init__(self, scheduler, armirq, physmem):
 		self.scheduler = scheduler
-	
-		#self.slc = open("slc_work.bin", "r+b")
-		#self.slcspare = open("slcspare_work.bin", "r+b")
-		
-		#self.slccmpt = open("slccmpt_work.bin", "r+b")
-		#self.slccmptspare = open("slccmptspare_work.bin", "r+b")
-		
-		self.slc = open("slc.bin", "rb")
-		self.slcspare = open("slcspare.bin", "rb")
-		
-		self.slccmpt = open("slccmpt.bin", "rb")
-		self.slccmptspare = open("slccmptspare.bin", "rb")
+
+		self.slc = open("slc_work.bin", "r+b")
+		self.slcspare = open("slcspare_work.bin", "r+b")
+
+		self.slccmpt = open("slccmpt_work.bin", "r+b")
+		self.slccmptspare = open("slccmptspare_work.bin", "r+b")
 		
 		self.armirq = armirq
 		self.physmem = physmem
@@ -1125,7 +1118,7 @@ class NANDController:
 		self.banks = [self.create_bank() for i in range(8)]
 		
 		self.reset()
-		
+
 	def create_bank(self):
 		return NANDBank(self.scheduler, self.armirq, self.physmem, self.slc, self.slcspare, self.slccmpt, self.slccmptspare)
 		
@@ -1158,6 +1151,7 @@ class NANDController:
 	def write(self, addr, value):
 		if NAND_MAIN_START <= addr < NAND_MAIN_END: self.main_bank.write(addr - NAND_MAIN_START, value)
 		elif addr == NAND_BANK:
+			self.main_bank.set_bank(not value & 2)
 			for bank in self.banks:
 				bank.set_bank(not value & 2)
 			self.bank = value
