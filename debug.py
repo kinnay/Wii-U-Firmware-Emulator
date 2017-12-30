@@ -198,8 +198,14 @@ class DebugShell:
 					print("Usage: virt read <address> <length>")
 					
 		elif cmd == "translate":
-			addr = virtmem.translate(self.eval(args))
-			print("0x%08X" %addr)
+			if not args:
+				print("Usage: translate <addr> (type)")
+			else:				
+				type = pyemu.IVirtualMemory.DATA_READ
+				if len(args) == 2:
+					type = self.eval(args[1])
+				addr = virtmem.translate(self.eval(args[:1]), type)
+				print("0x%08X" %addr)
 					
 		elif cmd == "getreg":
 			if len(args) != 1:
