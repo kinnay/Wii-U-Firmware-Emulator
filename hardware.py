@@ -1171,20 +1171,23 @@ class NANDController:
 			print("NAND WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 
 			
-AES_CTRL = 0xD020000
-AES_SRC = 0xD020004
-AES_DEST = 0xD020008
-AES_KEY = 0xD02000C
-AES_IV = 0xD020010
+AES_CTRL = 0
+AES_SRC = 4
+AES_DEST = 8
+AES_KEY = 0xC
+AES_IV = 0x10
 
 AES_START = 0xD020000
 AES_END = 0xD030000
+AESS_START = 0xD180000
+AESS_END = 0xD190000
 
 class AESController:
-	def __init__(self, scheduler, armirq, physmem):
+	def __init__(self, scheduler, armirq, physmem, index):
 		self.scheduler = scheduler
 		self.armirq = armirq
 		self.physmem = physmem
+		self.index = index
 		self.reset()
 		
 	def reset(self):
@@ -1221,7 +1224,7 @@ class AESController:
 				self.physmem.write(self.dest, data)
 
 				if value & 0x40000000:
-					self.armirq.trigger_irq_all(2)
+					self.trigger_interrupt()
 
 			else:
 				self.reset()
@@ -1235,26 +1238,34 @@ class AESController:
 		else:
 			print("AES WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 			
+	def trigger_interrupt(self):
+		if self.index == 0: self.armirq.trigger_irq_all(2)
+		else: self.armirq.trigger_irq_lt(8)
+			
 
-SHA_CTRL = 0xD030000
-SHA_SRC = 0xD030004
-SHA_H0 = 0xD030008
-SHA_H1 = 0xD03000C
-SHA_H2 = 0xD030010
-SHA_H3 = 0xD030014
-SHA_H4 = 0xD030018
+SHA_CTRL = 0
+SHA_SRC = 4
+SHA_H0 = 8
+SHA_H1 = 0xC
+SHA_H2 = 0x10
+SHA_H3 = 0x14
+SHA_H4 = 0x18
 			
 SHA_START = 0xD030000
 SHA_END = 0xD040000
+SHAS_START = 0xD190000
+SHAS_END = 0xD1A0000
 
 class SHAController:
-	def __init__(self, scheduler, armirq, physmem):
+	def __init__(self, scheduler, armirq, physmem, index):
 		self.scheduler = scheduler
 		self.armirq = armirq
 		self.physmem = physmem
-		self.sha1 = pyemu.SHA1()
+		self.index = index
+		self.reset()
 		
 	def reset(self):
+		self.sha1 = pyemu.SHA1()
 		self.control = 0
 		self.srcaddr = 0
 
@@ -1280,7 +1291,7 @@ class SHAController:
 					self.sha1.process_block(data)
 
 				if value & 0x40000000:
-					self.armirq.trigger_irq_all(3)
+					self.trigger_interrupt()
 				self.control = value & ~0x80000000
 			else:
 				self.reset()
@@ -1292,6 +1303,10 @@ class SHAController:
 		elif addr == SHA_H4: self.sha1.h4 = value
 		else:
 			print("SHA WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
+			
+	def trigger_interrupt(self):
+		if self.index == 0: self.armirq.trigger_irq_all(3)
+		else: self.armirq.trigger_irq_lt(9)
 			
 			
 LATTE_START = 0xD000000
@@ -2103,8 +2118,10 @@ class HardwareController:
 		self.sdio2 = SDIOController(scheduler, armirq, physmem, 2, SDIOController.TYPE_UNK)
 		self.wifi = SDIOController(scheduler, armirq, physmem, 3, SDIOController.TYPE_UNK)
 		self.nand = NANDController(scheduler, armirq, physmem)
-		self.aes = AESController(scheduler, armirq, physmem)
-		self.sha = SHAController(scheduler, armirq, physmem)
+		self.aes = AESController(scheduler, armirq, physmem, 0)
+		self.aess = AESController(scheduler, armirq, physmem, 1)
+		self.sha = SHAController(scheduler, armirq, physmem, 0)
+		self.shas = SHAController(scheduler, armirq, physmem, 1)
 		
 		self.scheduler = scheduler
 
@@ -2138,8 +2155,10 @@ class HardwareController:
 		elif SDIO2_START <= addr < SDIO2_END: value = self.sdio2.read(addr - SDIO2_START)
 		elif WIFI_START <= addr < WIFI_END: value = self.wifi.read(addr - WIFI_START)
 		elif NAND_START <= addr < NAND_END: value = self.nand.read(addr)
-		elif AES_START <= addr < AES_END: value = self.aes.read(addr)
-		elif SHA_START <= addr < SHA_END: value = self.sha.read(addr)
+		elif AES_START <= addr < AES_END: value = self.aes.read(addr - AES_START)
+		elif AESS_START <= addr < AESS_END: value = self.aess.read(addr - AESS_START)
+		elif SHA_START <= addr < SHA_END: value = self.sha.read(addr - SHA_START)
+		elif SHAS_START <= addr < SHAS_END: value = self.shas.read(addr - SHAS_START)
 		else:
 			print("HW READ 0x%X at %08X" %(addr, self.scheduler.pc()))
 			value = 0
@@ -2179,7 +2198,9 @@ class HardwareController:
 		elif SDIO2_START <= addr < SDIO2_END: self.sdio2.write(addr - SDIO2_START, value)
 		elif WIFI_START <= addr < WIFI_END: self.wifi.write(addr - WIFI_START, value)
 		elif NAND_START <= addr < NAND_END: self.nand.write(addr, value)
-		elif AES_START <= addr < AES_END: self.aes.write(addr, value)
-		elif SHA_START <= addr < SHA_END: self.sha.write(addr, value)
+		elif AES_START <= addr < AES_END: self.aes.write(addr - AES_START, value)
+		elif AESS_START <= addr < AESS_END: self.aess.write(addr - AESS_START, value)
+		elif SHA_START <= addr < SHA_END: self.sha.write(addr - SHA_START, value)
+		elif SHAS_START <= addr < SHAS_END: self.shas.write(addr - SHAS_START, value)
 		else:
 			print("HW WRITE 0x%X 0x%08X at %08X" %(addr, value, self.scheduler.pc()))
