@@ -217,6 +217,13 @@ bool PPCInstr_mullw(PPCInterpreter *cpu, PPCInstruction instr) {
 	return true;
 }
 
+bool PPCInstr_mulhw(PPCInterpreter *cpu, PPCInstruction instr) {
+	uint64_t result = (int64_t)cpu->core->regs[instr.rA()] * (int64_t)cpu->core->regs[instr.rB()];
+	if (instr.rc()) PPC_UpdateConditions(cpu->core, result >> 32);
+	cpu->core->regs[instr.rD()] = result >> 32;
+	return true;
+}
+
 bool PPCInstr_mulhwu(PPCInterpreter *cpu, PPCInstruction instr) {
 	uint64_t result = (uint64_t)cpu->core->regs[instr.rA()] * cpu->core->regs[instr.rB()];
 	if (instr.rc()) PPC_UpdateConditions(cpu->core, result >> 32);
@@ -810,6 +817,7 @@ PPCInstrCallback PPCInstruction::decode() {
 				case 54: return PPCInstr_dcbst;
 				case 55: return PPCInstr_lwzux;
 				case 60: return PPCInstr_andc;
+				case 75: return PPCInstr_mulhw;
 				case 83: return PPCInstr_mfmsr;
 				case 86: return PPCInstr_dcbf;
 				case 87: return PPCInstr_lbzx;
