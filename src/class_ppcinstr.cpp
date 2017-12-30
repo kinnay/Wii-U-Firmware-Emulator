@@ -466,6 +466,15 @@ bool PPCInstr_lhz(PPCInterpreter *cpu, PPCInstruction instr) {
 	return true;
 }
 
+bool PPCInstr_lha(PPCInterpreter *cpu, PPCInstruction instr) {
+	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
+	
+	int16_t value;
+	if (!cpu->read<int16_t>(addr, &value)) return false;
+	cpu->core->regs[instr.rD()] = value;
+	return true;
+}
+
 bool PPCInstr_lwz(PPCInterpreter *cpu, PPCInstruction instr) {
 	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
 	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr.rD()]);
@@ -842,6 +851,7 @@ PPCInstrCallback PPCInstruction::decode() {
 		case 38: return PPCInstr_stb;
 		case 39: return PPCInstr_stbu;
 		case 40: return PPCInstr_lhz;
+		case 42: return PPCInstr_lha;
 		case 44: return PPCInstr_sth;
 		case 46: return PPCInstr_lmw;
 		case 47: return PPCInstr_stmw;
