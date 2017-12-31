@@ -232,10 +232,10 @@ class DebugShell:
 			if not args:
 				print("Usage: translate <addr> (type)")
 			else:				
-				type = pyemu.IVirtualMemory.DATA_READ
+				access = pyemu.IVirtualMemory.DATA_READ
 				if len(args) == 2:
-					type = self.eval(args[1])
-				addr = virtmem.translate(self.eval(args[:1]), type)
+					access = self.eval(args[1])
+				addr = virtmem.translate(self.eval(args[:1]), access)
 				print("0x%08X" %addr)
 					
 		elif cmd == "getreg":
