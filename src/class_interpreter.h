@@ -12,7 +12,7 @@ class Interpreter {
 	typedef std::function<bool(uint32_t addr, bool isWrite)> DataErrorCB;
 	typedef std::function<bool(uint32_t addr)> FetchErrorCB;
 	typedef std::function<bool(uint32_t addr)> BreakpointCB;
-	typedef std::function<bool(uint32_t addr)> WatchpointCB;
+	typedef std::function<bool(uint32_t addr, bool isWrite)> WatchpointCB;
 	typedef std::function<bool()> AlarmCB;
 	
 	Interpreter(IPhysicalMemory *physmem, IVirtualMemory *virtmem, bool bigEndian);

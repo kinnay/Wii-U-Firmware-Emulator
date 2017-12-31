@@ -68,14 +68,14 @@ bool Interpreter::run(int steps) {
 					RuntimeError("No watchpoint handler installed (write)");
 					return false;
 				}
-				if (!watchpointWriteCB(watchpointAddr)) return false;
+				if (!watchpointWriteCB(watchpointAddr, true)) return false;
 			}
 			else {
 				if (!watchpointReadCB) {
 					RuntimeError("No watchpoint handler installed (read)");
 					return false;
 				}
-				if (!watchpointReadCB(watchpointAddr)) return false;
+				if (!watchpointReadCB(watchpointAddr, false)) return false;
 			}
 		}
 		#endif

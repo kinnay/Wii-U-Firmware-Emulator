@@ -152,6 +152,8 @@ class PPCEmulator:
 		self.interpreter.on_fetch_error(self.exc_handler.handle_isi)
 		self.interpreter.on_data_error(self.exc_handler.handle_dsi)
 		self.interpreter.on_breakpoint(self.breakpoints.handle)
+		self.interpreter.on_watchpoint(False, self.breakpoints.handle_watch)
+		self.interpreter.on_watchpoint(True, self.breakpoints.handle_watch)
 		self.interpreter.set_alarm(5000, self.update_timer)
 		
 		self.core.on_spr_read(self.spr_handler.read)
@@ -164,7 +166,6 @@ class PPCEmulator:
 		
 	def check_interrupts(self):
 		if self.interrupts.check_interrupts():
-			#print("EXTERNAL INTERRUPT")
 			self.core.trigger_exception(self.core.EXTERNAL_INTERRUPT)
 		
 	def handle_log(self, addr):

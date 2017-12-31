@@ -7,6 +7,8 @@ class BreakpointHandler:
 	def __init__(self, interpreter):
 		self.interpreter = interpreter
 		self.callbacks = {}
+		self.callbacks_write = {}
+		self.callbacks_read = {}
 		
 	def add(self, addr, callback):
 		self.interpreter.add_breakpoint(addr)
@@ -18,9 +20,27 @@ class BreakpointHandler:
 		self.interpreter.remove_breakpoint(addr)
 		self.callbacks[addr].remove(callback)
 		
+	def watch(self, write, addr, callback):
+		self.interpreter.add_watchpoint(write, addr)
+
+		callbacks = self.callbacks_write if write else self.callbacks_read
+		if addr not in callbacks:
+			callbacks[addr] = []
+		callbacks[addr].append(callback)
+		
+	def unwatch(self, write, addr, callback):
+		self.interpreter.remove_watchpoint(write, addr)
+		callbacks = self.callbacks_write if write else self.callbacks_read
+		callbacks[addr].remove(callback)
+		
 	def handle(self, addr):
 		for callback in self.callbacks[addr]:
 			callback(addr)
+			
+	def handle_watch(self, addr, write):
+		callbacks = self.callbacks_write if write else self.callbacks_read
+		for callback in callbacks[addr]:
+			callback(addr, write)
 
 
 printables = "\0\n\t\"\\ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" \
@@ -112,10 +132,11 @@ class DebugShell:
 		print("%s: Breakpoint hit at %08X\n" %(name, addr))
 		self.show(True)
 			
-	def handle_watchpoint(self, addr):
+	def handle_watchpoint(self, addr, write):
 		self.current_override = None
 		debugger = self.get_current().debugger
-		print("%s: Watchpoint %08X hit at %08X\n" %(debugger.name(), addr, debugger.pc()))
+		type = "write" if write else "read"
+		print("%s: Watchpoint %08X (%s) hit at %08X\n" %(debugger.name(), addr, type, debugger.pc()))
 		self.show(True)
 		
 	def show(self, is_break):
@@ -151,7 +172,7 @@ class DebugShell:
 	
 		elif cmd == "break":
 			if len(args) < 2:
-				print("Usage: break (add/del) <address>")
+				print("Usage: break add/del <address>")
 			else:
 				addr = self.eval(args[1:])
 				if args[0] == "add":
@@ -159,15 +180,25 @@ class DebugShell:
 				elif args[0] == "del":
 					breakpoints.remove(addr, self.handle_breakpoint)
 				else:
-					print("Usage: break (add/del) <address>")
+					print("Usage: break add/del <address>")
 					
 		elif cmd == "watch":
-			addr = self.eval(args[1:])
-			write = {
-				"write": True,
-				"read": False
-			}[args[0]]
-			interpreter.add_watchpoint(write, addr)
+			if len(args) < 3:
+				print("Usage: watch add/del read/write <address>")
+
+			elif args[0] not in ["add", "del"] or args[1] not in ["read", "write"]:
+				print("Usage: watch add/del read/write <address>")
+
+			else:
+				addr = self.eval(args[2:])
+				write = {
+					"write": True,
+					"read": False
+				}[args[1]]
+				if args[0] == "add":
+					breakpoints.watch(write, addr, self.handle_watchpoint)
+				else:
+					breakpoints.unwatch(write, addr, self.handle_watchpoint)
 					
 		elif cmd == "phys":
 			if len(args) != 3:

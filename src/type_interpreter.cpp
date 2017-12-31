@@ -3,6 +3,7 @@
 #include "type_interpreter.h"
 #include "errors.h"
 #include "common.h"
+#include <vector>
 
 int Interpreter_clear(InterpreterObj *self) {
 	Py_CLEAR(self->physmem);
@@ -179,7 +180,7 @@ PyObject *Interpreter_removeBreakpoint(InterpreterObj *self, PyObject *arg) {
 	uint32_t addr = PyLong_AsUnsignedLong(arg);
 	if (PyErr_Occurred()) return NULL;
 	
-	auto &vec = self->object->breakpoints;
+	std::vector<uint32_t> &vec = self->object->breakpoints;
 	auto position = std::find(vec.begin(), vec.end(), addr);
 	if (position == vec.end()) {
 		KeyError("0x%x", addr);
@@ -208,8 +209,8 @@ PyObject *Interpreter_onWatchpoint(InterpreterObj *self, PyObject *args) {
 	
 	self->object->setWatchpointCB(
 		write != 0,
-		[callback] (uint32_t addr) -> bool {
-			PyObject *args = Py_BuildValue("(I)", addr);
+		[callback] (uint32_t addr, bool write) -> bool {
+			PyObject *args = Py_BuildValue("(IO)", addr, write ? Py_True : Py_False);
 			if (!args) return false;
 			
 			PyObject *result = PyObject_CallObject(callback, args);
@@ -239,6 +240,23 @@ PyObject *Interpreter_addWatchpoint(InterpreterObj *self, PyObject *args) {
 	else {
 		self->object->watchpointsRead.push_back(addr);
 	}
+	Py_RETURN_NONE;
+}
+
+PyObject *Interpreter_removeWatchpoint(InterpreterObj *self, PyObject *args) {
+	CHECK_INIT(self->object);
+	
+	int write;
+	uint32_t addr;
+	if (!PyArg_ParseTuple(args, "pI", &write, &addr)) return NULL;
+	
+	std::vector<uint32_t> &vec = write ? self->object->watchpointsWrite : self->object->watchpointsRead;
+	auto position = std::find(vec.begin(), vec.end(), addr);
+	if (position == vec.end()) {
+		KeyError("0x%x", addr);
+		return NULL;
+	}
+	vec.erase(position);
 	Py_RETURN_NONE;
 }
 
@@ -283,6 +301,7 @@ PyMethodDef Interpreter_methods[] = {
 	{"remove_breakpoint", (PyCFunction)Interpreter_removeBreakpoint, METH_O, NULL},
 	{"on_watchpoint", (PyCFunction)Interpreter_onWatchpoint, METH_VARARGS, NULL},
 	{"add_watchpoint", (PyCFunction)Interpreter_addWatchpoint, METH_VARARGS, NULL},
+	{"remove_watchpoint", (PyCFunction)Interpreter_removeWatchpoint, METH_VARARGS, NULL},
 	{"set_alarm", (PyCFunction)Interpreter_setAlarm, METH_VARARGS, NULL},
 	{NULL}
 };

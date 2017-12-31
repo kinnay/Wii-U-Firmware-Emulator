@@ -486,6 +486,8 @@ class ARMEmulator:
 		self.interpreter.on_coproc_read(self.coproc_handler.read)
 		self.interpreter.on_coproc_write(self.coproc_handler.write)
 		self.interpreter.on_breakpoint(self.breakpoints.handle)
+		self.interpreter.on_watchpoint(False, self.breakpoints.handle_watch)
+		self.interpreter.on_watchpoint(True, self.breakpoints.handle_watch)
 		
 		self.debugger = debug.ARMDebugger(self)
 

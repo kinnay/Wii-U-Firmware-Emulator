@@ -50,11 +50,11 @@ class Scheduler:
 class Emulator:
 	def __init__(self, filename):
 		self.scheduler = Scheduler()
+		self.shell = debug.DebugShell(self.scheduler)
 	
 		self.init_physmem()
 		self.init_hardware()
 		self.init_cpu()
-		self.init_debugger()
 		self.init_elffile(filename)
 		
 		#Fix these hacks
@@ -85,14 +85,6 @@ class Emulator:
 		for emu in self.ppcemu:
 			self.scheduler.add(emu, 1000)
 		self.scheduler.resume(self.armemu)
-		
-	def init_debugger(self):
-		self.shell = debug.DebugShell(self.scheduler)
-		self.armemu.interpreter.on_watchpoint(True, self.shell.handle_watchpoint)
-		self.armemu.interpreter.on_watchpoint(False, self.shell.handle_watchpoint)
-		for emu in self.ppcemu:
-			emu.interpreter.on_watchpoint(True, self.shell.handle_watchpoint)
-			emu.interpreter.on_watchpoint(False, self.shell.handle_watchpoint)
 		
 	def init_elffile(self, filename):
 		with open(filename, "rb") as f:
