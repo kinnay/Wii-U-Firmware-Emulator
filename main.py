@@ -51,7 +51,7 @@ class Emulator:
 	def __init__(self, filename):
 		self.scheduler = Scheduler()
 		self.shell = debug.DebugShell(self.scheduler)
-	
+
 		self.init_physmem()
 		self.init_hardware()
 		self.init_cpu()
@@ -82,8 +82,9 @@ class Emulator:
 		self.ppcemu = [ppcemu.PPCEmulator(self.physmem, self.hw, reservation, core) for core in range(3)]
 
 		self.scheduler.add(self.armemu, 1000)
-		for emu in self.ppcemu:
-			self.scheduler.add(emu, 1000)
+		self.scheduler.add(self.ppcemu[0], 500)
+		self.scheduler.add(self.ppcemu[1], 2000)
+		self.scheduler.add(self.ppcemu[2], 500)
 		self.scheduler.resume(self.armemu)
 		
 	def init_elffile(self, filename):
