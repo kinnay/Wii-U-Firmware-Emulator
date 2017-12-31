@@ -8,7 +8,8 @@ class SPRHandler:
 
 	pvr = 0x70010201
 
-	def __init__(self,  mmu, core_id):
+	def __init__(self,  core, mmu, core_id):
+		self.core = core
 		self.mmu = mmu
 		self.upir = core_id
 
@@ -60,7 +61,7 @@ class SPRHandler:
 		elif spr == 1011: return self.hid4
 		elif spr == 1017: return self.l2cr
 		elif spr == 1022: return self.thrm3
-		print("SPR READ %i" %spr)
+		print("SPR READ %i at %08X" %(spr, self.core.pc()))
 		return 0
 		
 	def write(self, spr, value):
@@ -101,7 +102,7 @@ class SPRHandler:
 		elif spr == 1017: self.l2cr = value
 		elif spr == 1022: self.thrm3 = value
 		else:
-			print("SPR WRITE %i %08X" %(spr, value))
+			print("SPR WRITE %i %08X at %08X" %(spr, value, self.core.pc()))
 			
 			
 class MSRHandler:
@@ -144,7 +145,7 @@ class PPCEmulator:
 		self.logger = log.PrintLogger("PPC")
 		self.breakpoints = debug.BreakpointHandler(self.interpreter)
 		self.breakpoints.add(0xFFF1AB34, self.handle_log)
-		self.spr_handler = SPRHandler(self.virtmem, core_id)
+		self.spr_handler = SPRHandler(self.core, self.virtmem, core_id)
 		self.msr_handler = MSRHandler(self.virtmem)
 		self.exc_handler = ExceptionHandler(self.core)
 
