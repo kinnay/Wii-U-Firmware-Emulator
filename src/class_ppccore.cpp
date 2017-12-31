@@ -39,6 +39,7 @@ bool PPCCore::setSpr(SPR spr, uint32_t value) {
 	else if (spr == DAR) dar = value;
 	else if (spr == SRR0) srr0 = value;
 	else if (spr == SRR1) srr1 = value;
+	else if (UGQR0 <= spr && spr <= UGQR7) gqrs[spr - UGQR0] = value;
 	else if (GQR0 <= spr && spr <= GQR7) gqrs[spr - GQR0] = value;
 	else {
 		if (!sprWriteCB) {
@@ -58,6 +59,7 @@ bool PPCCore::getSpr(SPR spr, uint32_t *value) {
 	else if (spr == DAR) *value = dar;
 	else if (spr == SRR0) *value = srr0;
 	else if (spr == SRR1) *value = srr1;
+	else if (UGQR0 <= spr && spr <= UGQR7) *value = gqrs[spr - UGQR0];
 	else if (GQR0 <= spr && spr <= GQR7) *value = gqrs[spr - GQR0];
 	else {
 		if (!sprReadCB) {
