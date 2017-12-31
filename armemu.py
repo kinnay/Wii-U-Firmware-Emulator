@@ -184,7 +184,8 @@ class UNDHandler:
 		self.file_logger = log.FileLogger("files.txt")
 
 	def handle(self):
-		self.log_syscall()
+		if "logsys" in sys.argv:
+			self.log_syscall()
 		self.core.trigger_exception(self.core.UNDEFINED_INSTRUCTION)
 		
 	def handle_breakpoint(self, pc):
