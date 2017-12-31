@@ -185,7 +185,7 @@ class UNDHandler:
 
 	def handle(self):
 		if "logsys" in sys.argv:
-			self.log_syscall()
+			self.log_syscall() #Slows down code a lot
 		self.core.trigger_exception(self.core.UNDEFINED_INSTRUCTION)
 		
 	def handle_breakpoint(self, pc):
@@ -469,6 +469,7 @@ class ARMEmulator:
 		self.core = pyemu.ARMCore()
 		self.physmem = physmem
 		self.virtmem = pyemu.ARMMMU(physmem, True)
+		self.virtmem.set_cache_enabled(True)
 		self.interpreter = pyemu.ARMInterpreter(self.core, physmem, self.virtmem, True)
 		self.interpreter.set_alarm(5000, hw.latte.update_timer)
 		self.interrupts = hw.latte.irq_arm
