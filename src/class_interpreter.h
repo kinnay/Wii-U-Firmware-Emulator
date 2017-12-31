@@ -77,6 +77,8 @@ class Interpreter {
 	std::vector<uint32_t> watchpointsRead;
 	std::vector<uint32_t> watchpointsWrite;
 	
+	void invalidateMMUCache();
+	
 	private:
 	IPhysicalMemory *physmem;
 	IVirtualMemory *virtmem;

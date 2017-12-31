@@ -10,7 +10,7 @@ void MMUCache::invalidate() {
 	memset(isValid, 0, sizeof(isValid));
 }
 
-void MMUCache::update(IVirtualMemory::Access type, uint32_t virtAddr, uint32_t physAddr, uint32_t mask) {
+void MMUCache::update(int type, uint32_t virtAddr, uint32_t physAddr, uint32_t mask) {
 	virtAddr &= ~mask;
 	cachedStart[type] = virtAddr;
 	cachedEnd[type] = virtAddr + mask;
@@ -19,7 +19,7 @@ void MMUCache::update(IVirtualMemory::Access type, uint32_t virtAddr, uint32_t p
 	isValid[type] = true;
 }
 
-bool MMUCache::translate(uint32_t *addr, uint32_t length, IVirtualMemory::Access type) {
+bool MMUCache::translate(uint32_t *addr, uint32_t length, int type) {
 	if (isValid[type]) {
 		if (cachedStart[type] <= *addr && *addr <= cachedEnd[type]) {
 			*addr = (*addr & addrMask[type]) | cachedPhys[type];

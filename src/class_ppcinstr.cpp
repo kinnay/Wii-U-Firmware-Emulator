@@ -711,6 +711,11 @@ bool PPCInstr_mtsr(PPCInterpreter *cpu, PPCInstruction instr) {
 	return cpu->core->setSr(instr.sr(), cpu->core->regs[instr.rS()]);
 }
 
+bool PPCInstr_tlbie(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->invalidateMMUCache();
+	return true;
+}
+
 bool PPCInstr_rfi(PPCInterpreter *cpu, PPCInstruction instr) {
 	if (!cpu->core->setMsr(cpu->core->srr1)) return false;
 	cpu->core->pc = cpu->core->srr0;
@@ -722,7 +727,6 @@ bool PPCInstr_rfi(PPCInterpreter *cpu, PPCInstruction instr) {
 bool PPCInstr_sync(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_isync(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_eieio(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
-bool PPCInstr_tlbie(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_dcbf(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_dcbi(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_dcbz(PPCInterpreter *cpu, PPCInstruction instr) { return true; }

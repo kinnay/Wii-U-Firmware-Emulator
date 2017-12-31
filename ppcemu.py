@@ -193,6 +193,7 @@ class PPCEmulator:
 		self.translator.add_range(0xFFE00000, 0x08000000, 0x00200000)
 		self.physmem = pyemu.PhysicalMirror(physmem, self.translator)
 		self.virtmem = pyemu.PPCMMU(self.physmem, True)
+		self.virtmem.set_cache_enabled(True)
 		self.virtmem.set_rpn_size(15) #This is so weird
 		self.interpreter = pyemu.PPCInterpreter(self.core, self.physmem, self.virtmem, True)
 		self.interrupts = hw.pi[core_id]

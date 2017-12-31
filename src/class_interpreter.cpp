@@ -33,6 +33,10 @@ void Interpreter::setAlarm(uint32_t alarm, AlarmCB callback) {
 	alarmCB = callback;
 }
 
+void Interpreter::invalidateMMUCache() {
+	virtmem->invalidateCache();
+}
+
 void Interpreter::handleMemoryError(uint32_t addr, bool isWrite, bool isCode) {
 	if (isCode) {
 		if (fetchErrorCB) fetchErrorCB(addr);

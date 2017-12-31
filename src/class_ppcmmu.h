@@ -25,10 +25,10 @@ class PPCMMU : public IVirtualMemory {
 	
 	private:
 	bool read32(uint32_t addr, uint32_t *value);
-	bool translateBAT(uint32_t *addr, uint32_t *batu, uint32_t *batl, bool write);
+	bool translateBAT(uint32_t *addr, uint32_t *batu, uint32_t *batl, Access type);
 	bool searchPageTable(
 		uint32_t *addr, uint32_t vsid, uint32_t pageIndex,
-		uint32_t hash, bool secondary, int key, bool write
+		uint32_t hash, bool secondary, int key, Access type
 	);
 	
 	IPhysicalMemory *physmem;

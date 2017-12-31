@@ -12,13 +12,17 @@ PPCMMU::PPCMMU(IPhysicalMemory *physmem, bool bigEndian)
 
 void PPCMMU::setDataTranslation(bool enabled) { dataTranslation = enabled; }
 void PPCMMU::setInstructionTranslation(bool enabled) { instrTranslation = enabled; }
-void PPCMMU::setSupervisorMode(bool enabled) { supervisorMode = enabled; }
+void PPCMMU::setSupervisorMode(bool enabled) {
+	supervisorMode = enabled;
+	cache.invalidate();
+}
 
 void PPCMMU::setRpnSize(int bits) {
 	pageIndexShift = 32 - bits;
 	pageIndexMask = (1 << (28 - pageIndexShift)) - 1;
 	byteOffsetMask = (1 << pageIndexShift) - 1;
 	apiShift = 22 - pageIndexShift;
+	cache.invalidate();
 }
 
 bool PPCMMU::read32(uint32_t addr, uint32_t *value) {
@@ -30,11 +34,17 @@ bool PPCMMU::read32(uint32_t addr, uint32_t *value) {
 bool PPCMMU::translate(uint32_t *addr, uint32_t length, Access type) {
 	if (type == Instruction) {
 		if (!instrTranslation) return true;
-		if (translateBAT(addr, ibatu, ibatl, false)) return true;
+		if (cacheEnabled) {
+			if (cache.translate(addr, length, type)) return true;
+		}
+		if (translateBAT(addr, ibatu, ibatl, type)) return true;
 	}
 	else {
 		if (!dataTranslation) return true;
-		if (translateBAT(addr, dbatu, dbatl, type == DataWrite)) return true;
+		if (cacheEnabled) {
+			if (cache.translate(addr, length, type)) return true;
+		}
+		if (translateBAT(addr, dbatu, dbatl, type)) return true;
 	}
 	
 	uint32_t segment = sr[*addr >> 28];
@@ -52,15 +62,16 @@ bool PPCMMU::translate(uint32_t *addr, uint32_t length, Access type) {
 		else key = (segment >> 29) & 1; //Kp
 		
 		uint32_t primaryHash = (vsid & 0x7FFFF) ^ pageIndex;
-		if (searchPageTable(addr, vsid, pageIndex, primaryHash, false, key, type == DataWrite)) return true;
-		if (searchPageTable(addr, vsid, pageIndex, ~primaryHash, true, key, type == DataWrite)) return true;
+		if (searchPageTable(addr, vsid, pageIndex, primaryHash, false, key, type)) return true;
+		if (searchPageTable(addr, vsid, pageIndex, ~primaryHash, true, key, type)) return true;
 	}
 	
 	ValueError("Illegal memory access: addr=0x%08x length=0x%08x", *addr, length);
 	return false;
 }
 
-bool PPCMMU::translateBAT(uint32_t *addr, uint32_t *batu, uint32_t *batl, bool write) {
+bool PPCMMU::translateBAT(uint32_t *addr, uint32_t *batu, uint32_t *batl, Access type) {
+	bool write = type == DataWrite;
 	for (int i = 0; i < 8; i++) {
 		//Check read/write protection
 		int pp = batl[i] & 3;
@@ -80,7 +91,8 @@ bool PPCMMU::translateBAT(uint32_t *addr, uint32_t *batu, uint32_t *batl, bool w
 		//Translate address
 		uint32_t brpn = batl[i] >> 17;
 		addrBlock = (addrBlock & ~addrMask) | (brpn & addrMask);
-		*addr = (*addr & 0x3FFFF) | (addrBlock << 17);
+		cache.update(type, *addr, addrBlock << 17, 0x1FFFF);
+		*addr = (*addr & 0x1FFFF) | (addrBlock << 17);
 		return true;
 	}
 	return false;
@@ -88,8 +100,9 @@ bool PPCMMU::translateBAT(uint32_t *addr, uint32_t *batu, uint32_t *batl, bool w
 
 bool PPCMMU::searchPageTable(
 	uint32_t *addr, uint32_t vsid, uint32_t pageIndex,
-	uint32_t hash, bool secondary, int key, bool write
+	uint32_t hash, bool secondary, int key, Access type
 ) {
+	bool write = type == DataWrite;
 	uint32_t pageTable = sdr1 & 0xFFFF0000;
 	uint32_t pageMask = sdr1 & 0x1FF;
 	uint32_t maskedHash = hash & ((pageMask << 10) | 0x3FF);
@@ -114,6 +127,7 @@ bool PPCMMU::searchPageTable(
 		if (write && (pp == 3 || (key && pp == 1))) continue;
 		
 		//Translate address
+		cache.update(type, *addr, pteLo & 0xFFFFF000, byteOffsetMask);
 		*addr = (pteLo & 0xFFFFF000) | (*addr & byteOffsetMask);
 		return true;
 	}
