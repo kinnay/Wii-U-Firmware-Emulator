@@ -739,14 +739,22 @@ bool PPCInstr_rfi(PPCInterpreter *cpu, PPCInstruction instr) {
 	return true;
 }
 
-/********** IGNORED INSTRUCTIONS **********/
+/********** CACHE AND SYNCHRONIZATION INSTRUCTIONS **********/
 
 bool PPCInstr_sync(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_isync(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_eieio(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_dcbf(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_dcbi(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
-bool PPCInstr_dcbz(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
+bool PPCInstr_dcbz(PPCInterpreter *cpu, PPCInstruction instr) {
+	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
+	uint32_t addr = (base + cpu->core->regs[instr.rB()]) & ~0x1F;
+	for (int i = 0; i < 4; i++) {
+		if (!cpu->write<uint64_t>(addr, 0)) return false;
+		addr += 8;
+	}
+	return true;
+}
 bool PPCInstr_dcbz_l(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_dcbst(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_icbi(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
