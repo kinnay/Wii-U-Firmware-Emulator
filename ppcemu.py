@@ -198,7 +198,7 @@ class PPCEmulator:
 		self.interpreter = pyemu.PPCInterpreter(self.core, self.physmem, self.virtmem, True)
 		self.interrupts = hw.pi[core_id]
 
-		self.logger = log.PrintLogger("PPC")
+		self.logger = log.ConsoleLogger("PPC")
 		self.breakpoints = debug.BreakpointHandler(self.interpreter)
 		self.breakpoints.add(0xFFF1AB34, self.handle_log)
 		self.spr_handler = SPRHandler(self.core, self.virtmem, self.breakpoints, core_id)
