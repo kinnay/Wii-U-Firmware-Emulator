@@ -364,6 +364,13 @@ bool PPCInstr_extsb(PPCInterpreter *cpu, PPCInstruction instr) {
 	return true;
 }
 
+bool PPCInstr_extsh(PPCInterpreter *cpu, PPCInstruction instr) {
+	uint32_t result = (int16_t)cpu->core->regs[instr.rS()];
+	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr.rA()] = result;
+	return true;
+}
+
 bool PPCInstr_cntlzw(PPCInterpreter *cpu, PPCInstruction instr) {
 	uint32_t result = cntlzw(cpu->core->regs[instr.rS()]);
 	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
@@ -868,6 +875,7 @@ PPCInstrCallback PPCInstruction::decode() {
 				case 792: return PPCInstr_sraw;
 				case 824: return PPCInstr_srawi;
 				case 854: return PPCInstr_eieio;
+				case 922: return PPCInstr_extsh;
 				case 954: return PPCInstr_extsb;
 				case 982: return PPCInstr_icbi;
 				case 1014: return PPCInstr_dcbz;
