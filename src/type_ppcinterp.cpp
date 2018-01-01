@@ -82,32 +82,6 @@ int PPCInterp_init(PPCInterpObj *self, PyObject *args, PyObject *kwargs) {
 	return 0;
 }
 
-PyObject *PPCInterp_run(PPCInterpObj *self, PyObject *args) {
-	CHECK_INIT(self->object);
-	
-	int steps = 0;
-	if (!PyArg_ParseTuple(args, "|i", &steps)) return NULL;
-	
-	if (!self->object->run(steps)) {
-		return NULL;
-	}
-	Py_RETURN_NONE;
-}
-
-PyObject *PPCInterp_step(PPCInterpObj *self, PyObject *args) {
-	CHECK_INIT(self->object);
-	if (!self->object->step()) {
-		return NULL;
-	}
-	Py_RETURN_NONE;
-}
-
-PyMethodDef PPCInterp_methods[] = {
-	{"run", (PyCFunction)PPCInterp_run, METH_VARARGS, NULL},
-	{"step", (PyCFunction)PPCInterp_step, METH_NOARGS, NULL},
-	{NULL}
-};
-
 PyTypeObject PPCInterpType = {
 	PyVarObject_HEAD_INIT(NULL, 0)
 	"pyemu.PPCInterpreter", 
@@ -136,7 +110,7 @@ PyTypeObject PPCInterpType = {
 	0, //weaklistoffset
 	0, //iter
 	0, //iternext
-	PPCInterp_methods, //methods
+	0, //methods
 	0, //members
 	0, //getset
 	&InterpreterType, //base

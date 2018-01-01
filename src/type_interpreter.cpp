@@ -64,9 +64,8 @@ PyObject *Interpreter_run(InterpreterObj *self, PyObject *args) {
 
 PyObject *Interpreter_step(InterpreterObj *self, PyObject *args) {
 	CHECK_INIT(self->object);
-	if (!self->object->step()) {
-		return NULL;
-	}
+	self->object->step();
+	if (PyErr_Occurred()) return NULL;
 	Py_RETURN_NONE;
 }
 
