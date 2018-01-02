@@ -109,4 +109,6 @@ class PPCCore {
 	MSRWriteCB msrWriteCB;
 	SRReadCB srReadCB;
 	SRWriteCB srWriteCB;
+	
+	bool decrementerPending;
 };

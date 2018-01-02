@@ -741,8 +741,8 @@ bool PPCInstr_tlbie(PPCInterpreter *cpu, PPCInstruction instr) {
 }
 
 bool PPCInstr_rfi(PPCInterpreter *cpu, PPCInstruction instr) {
-	if (!cpu->core->setMsr(cpu->core->srr1)) return false;
 	cpu->core->pc = cpu->core->srr0;
+	if (!cpu->core->setMsr(cpu->core->srr1)) return false;
 	return true;
 }
 

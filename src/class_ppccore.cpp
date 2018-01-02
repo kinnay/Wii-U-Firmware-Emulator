@@ -5,7 +5,7 @@
 
 PPCCore::PPCCore(PPCLockMgr *lockMgr)
 	: lockMgr(lockMgr), sprReadCB(0), sprWriteCB(0), msrWriteCB(0),
-	  srReadCB(0), srWriteCB(0)
+	  srReadCB(0), srWriteCB(0), decrementerPending(false)
 {
 	for (int i = 0; i < 8; i++) {
 		gqrs[i] = 0;
@@ -13,8 +13,12 @@ PPCCore::PPCCore(PPCLockMgr *lockMgr)
 }
 
 void PPCCore::triggerException(ExceptionType type) {
-	if (!(msr & 0x8000) && (type == ExternalInterrupt || type == Decrementer)) {
-		return;
+	if (!(msr & 0x8000)) {
+		if (type == ExternalInterrupt) return;
+		if (type == Decrementer) {
+			decrementerPending = true;
+			return;
+		}
 	}
 	
 	srr0 = pc;
@@ -75,6 +79,11 @@ bool PPCCore::setMsr(uint32_t value) {
 	msr = value;
 	if (msrWriteCB) {
 		if (!msrWriteCB(value)) return false;
+	}
+	
+	if ((msr & 0x8000) && decrementerPending) {
+		decrementerPending = false;
+		triggerException(Decrementer);
 	}
 	return true;
 }
