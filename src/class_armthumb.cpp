@@ -120,6 +120,7 @@ bool Thumb_DataProcessing(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	else if (opcode == 1) result = destval ^ sourceval; //EOR
 	else if (opcode == 2) result = destval << sourceval; //LSL
 	else if (opcode == 3) result = destval >> sourceval; //LSR
+	else if (opcode == 4) result = (int32_t)destval >> sourceval; //ASR
 	else if (opcode == 5) result = AddWithCarry(cpu->core, destval, sourceval); //ADC
 	else if (opcode == 6) result = SubWithCarry(cpu->core, destval, sourceval); //SBC
 	else if (opcode == 7) { //ROR
