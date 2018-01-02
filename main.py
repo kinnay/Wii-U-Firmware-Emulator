@@ -74,6 +74,7 @@ class Emulator:
 		self.physmem.add_special(0xD000000, 0x1A0000, self.hw.read, self.hw.write)
 		self.physmem.add_special(0xD800000, 0x1A0000, self.hw.read, self.hw.write)
 		self.physmem.add_special(0xC000000, 0x400000, self.hw.read, self.hw.write)
+		self.physmem.add_special(0xD0000000, 4, self.hw.read, self.hw.write) #Not listed on wiiubrew?
 		
 	def init_cpu(self):
 		reservation = pyemu.PPCLockMgr()

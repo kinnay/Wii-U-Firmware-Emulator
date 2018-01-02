@@ -2092,6 +2092,59 @@ class PIController:
 			self.trigger_irq(26 + self.index * 2)
 		if self.irq.check_interrupts():
 			self.trigger_irq(24)
+			
+			
+TCL_RLC_MICROCODE_CTRL = 0xC203F2C
+TCL_RLC_MICROCODE_DATA = 0xC203F30
+TCL_CPRB_MICROCODE1_CTRL = 0xC20C150
+TCL_CPRB_MICROCODE1_DATA = 0xC20C154
+TCL_CPRB_MICROCODE2_CTRL = 0xC20C15C
+TCL_CPRB_MICROCODE2_DATA = 0xC20C160
+			
+TCL_START = 0xC200000
+TCL_END = 0xC300000
+
+class TCLController:
+	def __init__(self, scheduler):
+		self.scheduler = scheduler
+		self.rlc_microcode = [0] * 0x400
+		self.rlc_microcode_pos = 0
+		self.cprb_microcode1 = [0] * 0x350
+		self.cprb_microcode1_pos = 0
+		self.cprb_microcode2 = [0] * 0x550
+		self.cprb_microcode2_pos = 0
+		
+	def read(self, addr):
+		if addr == TCL_RLC_MICROCODE_DATA:
+			value = self.rlc_microcode[self.rlc_microcode_pos]
+			self.rlc_microcode_pos += 1
+			return value
+		elif addr == TCL_CPRB_MICROCODE1_DATA:
+			value = self.cprb_microcode1[self.cprb_microcode1_pos]
+			self.cprb_microcode1_pos += 1
+			return value
+		elif addr == TCL_CPRB_MICROCODE2_DATA:
+			value = self.cprb_microcode2[self.cprb_microcode2_pos]
+			self.cprb_microcode2_pos += 1
+			return value
+		print("TCL READ 0x%X at %08X" %(addr, self.scheduler.pc()))
+		return 0
+		
+	def write(self, addr, value):
+		if addr == TCL_RLC_MICROCODE_CTRL: self.rlc_microcode_pos = value
+		elif addr == TCL_RLC_MICROCODE_DATA:
+			self.rlc_microcode[self.rlc_microcode_pos] = value
+			self.rlc_microcode_pos += 1
+		elif addr == TCL_CPRB_MICROCODE1_CTRL: self.cprb_microcode1_pos = value
+		elif addr == TCL_CPRB_MICROCODE1_DATA:
+			self.cprb_microcode1[self.cprb_microcode1_pos] = value
+			self.cprb_microcode1_pos += 1
+		elif addr == TCL_CPRB_MICROCODE2_CTRL: self.cprb_microcode2_pos = value
+		elif addr == TCL_CPRB_MICROCODE2_DATA:
+			self.cprb_microcode2[self.cprb_microcode2_pos] = value
+			self.cprb_microcode2_pos += 1
+		else:
+			print("TCL WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 
 			
 class HardwareController:
@@ -2099,6 +2152,7 @@ class HardwareController:
 		self.latte = LatteController(scheduler)
 
 		self.pi = [PIController(scheduler, self.latte.ipc[i], self.latte.irq_ppc[i], i) for i in range(3)]
+		self.tcl = TCLController(scheduler)
 		
 		armirq = self.latte.irq_arm
 		self.ahmn = AHMNController(scheduler)
@@ -2139,6 +2193,7 @@ class HardwareController:
 		elif PI_CPU0_START <= addr < PI_CPU0_END: value = self.pi[0].read(addr - PI_CPU0_START)
 		elif PI_CPU1_START <= addr < PI_CPU1_END: value = self.pi[1].read(addr - PI_CPU1_START)
 		elif PI_CPU2_START <= addr < PI_CPU2_END: value = self.pi[2].read(addr - PI_CPU2_START)
+		elif TCL_START <= addr < TCL_END: value = self.tcl.read(addr)
 		elif AHMN_START <= addr < AHMN_END: value = self.ahmn.read(addr)
 		elif EXI_START <= addr < EXI_END: value = self.exi.read(addr)
 		elif DI2SATA_START <= addr < DI2SATA_END: value = self.di2sata.read(addr)
@@ -2181,6 +2236,7 @@ class HardwareController:
 		elif PI_CPU0_START <= addr < PI_CPU0_END: self.pi[0].write(addr - PI_CPU0_START, value)
 		elif PI_CPU1_START <= addr < PI_CPU1_END: self.pi[1].write(addr - PI_CPU1_START, value)
 		elif PI_CPU2_START <= addr < PI_CPU2_END: self.pi[2].write(addr - PI_CPU2_START, value)
+		elif TCL_START <= addr < TCL_END: self.tcl.write(addr, value)
 		elif AHMN_START <= addr < AHMN_END: self.ahmn.write(addr, value)
 		elif MEM_START <= addr < MEM_END: self.mem.write(addr, value)
 		elif EXI_START <= addr < EXI_END: self.exi.write(addr, value)
