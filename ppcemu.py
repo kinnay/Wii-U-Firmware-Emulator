@@ -22,6 +22,8 @@ class SPRHandler:
 		self.sprg3 = 0
 		self.hid2 = 0
 		self.wpar = 0
+		self.udmau = 0
+		self.udmal = 0
 		self.hid5 = 0
 		self.scr = 0
 		self.car = 0
@@ -68,6 +70,7 @@ class SPRHandler:
 		elif 568 <= spr <= 575:
 			if spr % 2: return self.mmu.get_dbatl((spr - 568) // 2 + 4)
 			else: return self.mmu.get_dbatu((spr - 568) // 2 + 4)
+		elif spr == 904: return self.hid2
 		elif spr == 905: return self.wpar
 		elif spr == 920: return self.hid2
 		elif spr == 921: return self.wpar
@@ -110,6 +113,8 @@ class SPRHandler:
 		elif 568 <= spr <= 575:
 			if spr % 2: self.mmu.set_dbatl((spr - 568) // 2 + 4, value)
 			else: self.mmu.set_dbatu((spr - 568) // 2 + 4, value)
+		elif spr == 906: self.udmau = value
+		elif spr == 907: self.udmal = value
 		elif spr == 920: self.hid2 = value
 		elif spr == 921: self.wpar = value
 		elif spr == 944: self.hid5 = value
