@@ -106,7 +106,7 @@ class MEMController:
 		elif addr == MEM_BLOCK_MEM2_CFG: return self.mem2_config
 
 		print("MEM READ 0x%X at %08X" %(addr, self.scheduler.pc()))
-		value = 0
+		return 0
 
 	def write(self, addr, value):
 		if addr == MEM_D8B4200: self.d8b4200 = value
