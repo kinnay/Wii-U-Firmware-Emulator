@@ -433,7 +433,6 @@ bool PPCCoreType_Init() {
 	
 	PyDict_SetItemString(dict, "r0", PyLong_FromLong(0));
 	PyDict_SetItemString(dict, "r1", PyLong_FromLong(1));
-	PyDict_SetItemString(dict, "SP", PyLong_FromLong(1));
 	PyDict_SetItemString(dict, "r2", PyLong_FromLong(2));
 	PyDict_SetItemString(dict, "r3", PyLong_FromLong(3));
 	PyDict_SetItemString(dict, "r4", PyLong_FromLong(4));
