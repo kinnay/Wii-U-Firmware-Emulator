@@ -34,8 +34,22 @@ PyObject *IVirtMem_translate(IVirtMemObj *self, PyObject *args) {
 	return PyLong_FromUnsignedLong(addr);
 }
 
+PyObject *IVirtMem_setCacheEnabled(IVirtMemObj *self, PyObject *arg) {
+	CHECK_INIT(self->object);
+	self->object->setCacheEnabled(PyObject_IsTrue(arg) != 0);
+	Py_RETURN_NONE;
+}
+
+PyObject *IVirtMem_invalidateCache(IVirtMemObj *self, PyObject *arg) {
+	CHECK_INIT(self->object);
+	self->object->invalidateCache();
+	Py_RETURN_NONE;
+}
+
 PyMethodDef IVirtMem_methods[] = {
 	{"translate", (PyCFunction)IVirtMem_translate, METH_VARARGS, NULL},
+	{"set_cache_enabled", (PyCFunction)IVirtMem_setCacheEnabled, METH_O, NULL},
+	{"invalidate_cache", (PyCFunction)IVirtMem_invalidateCache, METH_NOARGS, NULL},
 	{NULL}
 };
 

@@ -78,12 +78,6 @@ PyObject *PPCMMU_setSupervisor(PPCMMUObj *self, PyObject *arg) {
 	Py_RETURN_NONE;
 }
 
-PyObject *PPCMMU_setCacheEnabled(PPCMMUObj *self, PyObject *arg) {
-	CHECK_INIT(self->object);
-	self->object->setCacheEnabled(PyObject_IsTrue(arg) != 0);
-	Py_RETURN_NONE;
-}
-
 PyObject *PPCMMU_setRpnSize(PPCMMUObj *self, PyObject *arg) {
 	CHECK_INIT(self->object);
 
@@ -264,7 +258,6 @@ PyMethodDef PPCMMU_methods[] = {
 	{"set_data_translation", (PyCFunction)PPCMMU_setDataTranslation, METH_O, NULL},
 	{"set_instruction_translation", (PyCFunction)PPCMMU_setInstructionTranslation, METH_O, NULL},
 	{"set_supervisor", (PyCFunction)PPCMMU_setSupervisor, METH_O, NULL},
-	{"set_cache_enabled", (PyCFunction)PPCMMU_setCacheEnabled, METH_O, NULL},
 	{"set_rpn_size", (PyCFunction)PPCMMU_setRpnSize, METH_O, NULL},
 	{"set_dbatu", (PyCFunction)PPCMMU_setDbatu, METH_VARARGS, NULL},
 	{"set_dbatl", (PyCFunction)PPCMMU_setDbatl, METH_VARARGS, NULL},

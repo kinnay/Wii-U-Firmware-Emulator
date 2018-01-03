@@ -76,23 +76,9 @@ PyObject *ARMMMU_setEnabled(ARMMMUObj *self, PyObject *arg) {
 	Py_RETURN_NONE;
 }
 
-PyObject *ARMMMU_setCacheEnabled(ARMMMUObj *self, PyObject *arg) {
-	CHECK_INIT(self->object);
-	self->object->setCacheEnabled(PyObject_IsTrue(arg) != 0);
-	Py_RETURN_NONE;
-}
-
-PyObject *ARMMMU_invalidateCache(ARMMMUObj *self, PyObject *arg) {
-	CHECK_INIT(self->object);
-	self->object->invalidateCache();
-	Py_RETURN_NONE;
-}
-
 PyMethodDef ARMMMU_methods[] = {
 	{"set_translation_table_base", (PyCFunction)ARMMMU_setTranslationTableBase, METH_O, NULL},
 	{"set_enabled", (PyCFunction)ARMMMU_setEnabled, METH_O, NULL},
-	{"set_cache_enabled", (PyCFunction)ARMMMU_setCacheEnabled, METH_O, NULL},
-	{"invalidate_cache", (PyCFunction)ARMMMU_invalidateCache, METH_NOARGS, NULL},
 	{NULL}
 };
 
