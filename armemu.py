@@ -493,12 +493,17 @@ class ARMEmulator:
 		
 		self.debugger = debug.ARMDebugger(self)
 
+		self.breakpoints.add(0x5033E02, self.hack_log_level)
 		self.breakpoints.add(0x5055324, self.handle_syslog)
 		self.logger = log.FileLogger("log.txt")
 		
 	def check_interrupts(self):
 		if self.interrupts.check_interrupts():
 			self.core.trigger_exception(self.core.IRQ)
+		
+	def hack_log_level(self, addr): #For COS log
+		if "logall" in sys.argv:
+			self.core.setreg(3, self.core.reg(3) | 0xE00)
 		
 	def handle_syslog(self, addr):
 		addr, length = self.core.reg(1), self.core.reg(2)
