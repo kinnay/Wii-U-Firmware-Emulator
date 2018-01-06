@@ -2092,14 +2092,27 @@ class PIController:
 			self.trigger_irq(26 + self.index * 2)
 		if self.irq.check_interrupts():
 			self.trigger_irq(24)
-			
-			
+
+
 TCL_RLC_MICROCODE_CTRL = 0xC203F2C
 TCL_RLC_MICROCODE_DATA = 0xC203F30
-TCL_CPRB_MICROCODE1_CTRL = 0xC20C150
-TCL_CPRB_MICROCODE1_DATA = 0xC20C154
-TCL_CPRB_MICROCODE2_CTRL = 0xC20C15C
-TCL_CPRB_MICROCODE2_DATA = 0xC20C160
+TCL_CP_RESET = 0xC208020
+TCL_CP_EOP_EVENT = 0xC208400
+TCL_CP_EOP_ADDR = 0xC208408
+TCL_CP_STAT = 0xC208680
+TCL_CP_BUSY_STAT = 0xC20867C
+TCL_CP_ME_HEADER = 0xC208684
+TCL_CP_PFP_HEADER = 0xC208688
+TCL_CP_RB_RPTR = 0xC208700
+TCL_CP_IB1 = 0xC208730
+TCL_CP_IB1_SIZE = 0xC208738
+TCL_CP_IB2 = 0xC20873C
+TCL_CP_IB2_SIZE = 0xC208744
+TCL_CP_RB_BASE = 0xC20C100
+TCL_CP_MICROCODE1_CTRL = 0xC20C150
+TCL_CP_MICROCODE1_DATA = 0xC20C154
+TCL_CP_MICROCODE2_CTRL = 0xC20C15C
+TCL_CP_MICROCODE2_DATA = 0xC20C160
 			
 TCL_START = 0xC200000
 TCL_END = 0xC300000
@@ -2109,23 +2122,23 @@ class TCLController:
 		self.scheduler = scheduler
 		self.rlc_microcode = [0] * 0x400
 		self.rlc_microcode_pos = 0
-		self.cprb_microcode1 = [0] * 0x350
-		self.cprb_microcode1_pos = 0
-		self.cprb_microcode2 = [0] * 0x550
-		self.cprb_microcode2_pos = 0
+		self.cp_microcode1 = [0] * 0x350
+		self.cp_microcode1_pos = 0
+		self.cp_microcode2 = [0] * 0x550
+		self.cp_microcode2_pos = 0
 		
 	def read(self, addr):
 		if addr == TCL_RLC_MICROCODE_DATA:
 			value = self.rlc_microcode[self.rlc_microcode_pos]
 			self.rlc_microcode_pos += 1
 			return value
-		elif addr == TCL_CPRB_MICROCODE1_DATA:
-			value = self.cprb_microcode1[self.cprb_microcode1_pos]
-			self.cprb_microcode1_pos += 1
+		elif addr == TCL_CP_MICROCODE1_DATA:
+			value = self.cp_microcode1[self.cp_microcode1_pos]
+			self.cp_microcode1_pos += 1
 			return value
-		elif addr == TCL_CPRB_MICROCODE2_DATA:
-			value = self.cprb_microcode2[self.cprb_microcode2_pos]
-			self.cprb_microcode2_pos += 1
+		elif addr == TCL_CP_MICROCODE2_DATA:
+			value = self.cp_microcode2[self.cp_microcode2_pos]
+			self.cp_microcode2_pos += 1
 			return value
 		print("TCL READ 0x%X at %08X" %(addr, self.scheduler.pc()))
 		return 0
@@ -2135,14 +2148,15 @@ class TCLController:
 		elif addr == TCL_RLC_MICROCODE_DATA:
 			self.rlc_microcode[self.rlc_microcode_pos] = value
 			self.rlc_microcode_pos += 1
-		elif addr == TCL_CPRB_MICROCODE1_CTRL: self.cprb_microcode1_pos = value
-		elif addr == TCL_CPRB_MICROCODE1_DATA:
-			self.cprb_microcode1[self.cprb_microcode1_pos] = value
-			self.cprb_microcode1_pos += 1
-		elif addr == TCL_CPRB_MICROCODE2_CTRL: self.cprb_microcode2_pos = value
-		elif addr == TCL_CPRB_MICROCODE2_DATA:
-			self.cprb_microcode2[self.cprb_microcode2_pos] = value
-			self.cprb_microcode2_pos += 1
+		elif addr == TCL_CP_RESET: pass
+		elif addr == TCL_CP_MICROCODE1_CTRL: self.cp_microcode1_pos = value
+		elif addr == TCL_CP_MICROCODE1_DATA:
+			self.cp_microcode1[self.cp_microcode1_pos] = value
+			self.cp_microcode1_pos += 1
+		elif addr == TCL_CP_MICROCODE2_CTRL: self.cp_microcode2_pos = value
+		elif addr == TCL_CP_MICROCODE2_DATA:
+			self.cp_microcode2[self.cp_microcode2_pos] = value
+			self.cp_microcode2_pos += 1
 		else:
 			print("TCL WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 
