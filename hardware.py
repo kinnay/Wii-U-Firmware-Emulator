@@ -2094,21 +2094,27 @@ class PIController:
 			self.trigger_irq(24)
 
 
+#These are ignored for now:
+#	TCL_CP_EOP_EVENT = 0xC208400
+#	TCL_CP_EOP_ADDR = 0xC208408
+#	TCL_CP_RINGBUF_STATS = 0xC208544
+#	TCL_CP_STAT = 0xC208680
+#	TCL_CP_BUSY_STAT = 0xC20867C
+#	TCL_CP_ME_HEADER = 0xC208684
+#	TCL_CP_PFP_HEADER = 0xC208688
+#	TCL_CP_RB_RPTR = 0xC208700
+#	TCL_CP_IB1 = 0xC208730
+#	TCL_CP_IB1_SIZE = 0xC208738
+#	TCL_CP_IB2 = 0xC20873C
+#	TCL_CP_IB2_SIZE = 0xC208744
+#	TCL_CP_RB_BASE = 0xC20C100
+
 TCL_RLC_MICROCODE_CTRL = 0xC203F2C
 TCL_RLC_MICROCODE_DATA = 0xC203F30
 TCL_CP_RESET = 0xC208020
-TCL_CP_EOP_EVENT = 0xC208400
-TCL_CP_EOP_ADDR = 0xC208408
-TCL_CP_STAT = 0xC208680
-TCL_CP_BUSY_STAT = 0xC20867C
-TCL_CP_ME_HEADER = 0xC208684
-TCL_CP_PFP_HEADER = 0xC208688
-TCL_CP_RB_RPTR = 0xC208700
-TCL_CP_IB1 = 0xC208730
-TCL_CP_IB1_SIZE = 0xC208738
-TCL_CP_IB2 = 0xC20873C
-TCL_CP_IB2_SIZE = 0xC208744
-TCL_CP_RB_BASE = 0xC20C100
+TCL_FLUSH = 0xC208500
+TCL_CP_READ_POS_PTR = 0xC20C10C
+TCL_CP_WRITE_POS = 0xC20C114
 TCL_CP_MICROCODE1_CTRL = 0xC20C150
 TCL_CP_MICROCODE1_DATA = 0xC20C154
 TCL_CP_MICROCODE2_CTRL = 0xC20C15C
@@ -2118,10 +2124,14 @@ TCL_START = 0xC200000
 TCL_END = 0xC300000
 
 class TCLController:
-	def __init__(self, scheduler):
+	def __init__(self, scheduler, physmem):
 		self.scheduler = scheduler
+		self.physmem = physmem
+
 		self.rlc_microcode = [0] * 0x400
 		self.rlc_microcode_pos = 0
+		self.cp_read_pos_ptr = 0
+		self.cp_write_pos = 0
 		self.cp_microcode1 = [0] * 0x350
 		self.cp_microcode1_pos = 0
 		self.cp_microcode2 = [0] * 0x550
@@ -2132,6 +2142,9 @@ class TCLController:
 			value = self.rlc_microcode[self.rlc_microcode_pos]
 			self.rlc_microcode_pos += 1
 			return value
+		elif addr == TCL_FLUSH:
+			self.physmem.write(self.cp_read_pos_ptr, struct.pack(">H", self.cp_write_pos))
+			return 0
 		elif addr == TCL_CP_MICROCODE1_DATA:
 			value = self.cp_microcode1[self.cp_microcode1_pos]
 			self.cp_microcode1_pos += 1
@@ -2149,6 +2162,8 @@ class TCLController:
 			self.rlc_microcode[self.rlc_microcode_pos] = value
 			self.rlc_microcode_pos += 1
 		elif addr == TCL_CP_RESET: pass
+		elif addr == TCL_CP_READ_POS_PTR: self.cp_read_pos_ptr = value
+		elif addr == TCL_CP_WRITE_POS: self.cp_write_pos = value
 		elif addr == TCL_CP_MICROCODE1_CTRL: self.cp_microcode1_pos = value
 		elif addr == TCL_CP_MICROCODE1_DATA:
 			self.cp_microcode1[self.cp_microcode1_pos] = value
@@ -2166,7 +2181,7 @@ class HardwareController:
 		self.latte = LatteController(scheduler)
 
 		self.pi = [PIController(scheduler, self.latte.ipc[i], self.latte.irq_ppc[i], i) for i in range(3)]
-		self.tcl = TCLController(scheduler)
+		self.tcl = TCLController(scheduler, physmem)
 		
 		armirq = self.latte.irq_arm
 		self.ahmn = AHMNController(scheduler)
