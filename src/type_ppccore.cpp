@@ -488,6 +488,7 @@ bool PPCCoreType_Init() {
 	PyDict_SetItemString(dict, "DAR", PyLong_FromLong(PPCCore::DAR));
 	PyDict_SetItemString(dict, "SRR0", PyLong_FromLong(PPCCore::SRR0));
 	PyDict_SetItemString(dict, "SRR1", PyLong_FromLong(PPCCore::SRR1));
+	PyDict_SetItemString(dict, "UPIR", PyLong_FromLong(PPCCore::UPIR));
 	
 	PyDict_SetItemString(dict, "DSI", PyLong_FromLong(PPCCore::DSI));
 	PyDict_SetItemString(dict, "ISI", PyLong_FromLong(PPCCore::ISI));

@@ -27,6 +27,10 @@ class PPCCore {
 		SRR1 = 27,
 		UTBL = 268,
 		UTBU = 269,
+		SPRG0 = 272,
+		SPRG1 = 273,
+		SPRG2 = 274,
+		SPRG3 = 275,
 		TBL = 284,
 		TBU = 285,
 		UGQR0 = 896,
@@ -45,6 +49,8 @@ class PPCCore {
 		GQR5 = 917,
 		GQR6 = 918,
 		GQR7 = 919,
+		UPIR = 1007,
+		THRM3 = 1022
 	};
 	
 	enum Status : uint32_t {
@@ -92,6 +98,12 @@ class PPCCore {
 	uint32_t dar;
 	
 	uint64_t tb;
+	uint32_t upir;
+	uint32_t sprg0;
+	uint32_t sprg1;
+	uint32_t sprg2;
+	uint32_t sprg3;
+	uint32_t thrm3;
 	
 	PPCCore(PPCLockMgr *lockMgr);
 	

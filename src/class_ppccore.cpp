@@ -39,6 +39,12 @@ bool PPCCore::setSpr(SPR spr, uint32_t value) {
 	if (spr == LR) lr = value;
 	else if (spr == CTR) ctr = value;
 	else if (spr == XER) xer = value;
+	else if (spr == SPRG0) sprg0 = value;
+	else if (spr == SPRG1) sprg1 = value;
+	else if (spr == SPRG2) sprg2 = value;
+	else if (spr == SPRG3) sprg3 = value;
+	else if (spr == UPIR) upir = value;
+	else if (spr == THRM3) thrm3 = value;
 	else if (spr == TBL) tb = (tb & 0xFFFFFFFF00000000) | value;
 	else if (spr == TBU) tb = (tb & 0x00000000FFFFFFFF) | ((uint64_t)value << 32);
 	else if (spr == DSISR) dsisr = value;
@@ -61,6 +67,12 @@ bool PPCCore::getSpr(SPR spr, uint32_t *value) {
 	if (spr == LR) *value = lr;
 	else if (spr == CTR) *value = ctr;
 	else if (spr == XER) *value = xer;
+	else if (spr == SPRG0) *value = sprg0;
+	else if (spr == SPRG1) *value = sprg1;
+	else if (spr == SPRG2) *value = sprg2;
+	else if (spr == SPRG3) *value = sprg3;
+	else if (spr == UPIR) *value = upir;
+	else if (spr == THRM3) *value = thrm3;
 	else if (spr == UTBL) *value = (uint32_t)tb;
 	else if (spr == UTBU) *value = tb >> 32;
 	else if (spr == DSISR) *value = dsisr;

@@ -3,22 +3,16 @@ import pyemu
 import debug
 import log
 
-
 class SPRHandler:
 
 	pvr = 0x70010201
 
-	def __init__(self, core, mmu, breakpoints, core_id):
+	def __init__(self, core, mmu, breakpoints):
 		self.core = core
 		self.mmu = mmu
 		self.breakpoints = breakpoints
-		self.upir = core_id
 
 		self.dec = 0xFFFFFFFF
-		self.sprg0 = 0
-		self.sprg1 = 0
-		self.sprg2 = 0
-		self.sprg3 = 0
 		self.hid2 = 0
 		self.wpar = 0
 		self.udmau = 0
@@ -47,14 +41,9 @@ class SPRHandler:
 		self.hid4 = 0
 		self.dabr = 0
 		self.l2cr = 0
-		self.thrm3 = 0
 
 	def read(self, spr):
-		if spr == 272: return self.sprg0
-		elif spr == 273: return self.sprg1
-		elif spr == 274: return self.sprg2
-		elif spr == 275: return self.sprg3
-		elif spr == 287: return self.pvr
+		if spr == 287: return self.pvr
 		elif 528 <= spr <= 535:
 			if spr % 2: return self.mmu.get_ibatl((spr - 528) // 2)
 			else: return self.mmu.get_ibatu((spr - 528) // 2)
@@ -80,22 +69,16 @@ class SPRHandler:
 		elif spr == 944: return self.hid5
 		elif spr == 947: return self.scr
 		elif spr == 948: return self.car
-		elif spr == 1007: return self.upir
 		elif spr == 1008: return self.hid0
 		elif spr == 1009: return self.hid1
 		elif spr == 1011: return self.hid4
 		elif spr == 1017: return self.l2cr
-		elif spr == 1022: return self.thrm3
 		print("SPR READ %i at %08X" %(spr, self.core.pc()))
 		return 0
 		
 	def write(self, spr, value):
 		if spr == 22: self.dec = value
 		elif spr == 25: self.mmu.set_sdr1(value)
-		elif spr == 272: self.sprg0 = value
-		elif spr == 273: self.sprg1 = value
-		elif spr == 274: self.sprg2 = value
-		elif spr == 275: self.sprg3 = value
 		elif 528 <= spr <= 535:
 			if spr % 2: self.mmu.set_ibatl((spr - 528) // 2, value)
 			else: self.mmu.set_ibatu((spr - 528) // 2, value)
@@ -147,7 +130,6 @@ class SPRHandler:
 			if value & 1: self.breakpoints.watch(False, value & ~7, self.handle_dabr)
 			if value & 2: self.breakpoints.watch(True, value & ~7, self.handle_dabr)
 		elif spr == 1017: self.l2cr = value
-		elif spr == 1022: self.thrm3 = value
 		else:
 			print("SPR WRITE %i %08X at %08X" %(spr, value, self.core.pc()))
 			
@@ -188,6 +170,7 @@ class ExceptionHandler:
 class PPCEmulator:
 	def __init__(self, physmem, hw, reservation, core_id):
 		self.core = pyemu.PPCCore(reservation)
+		self.core.setspr(self.core.UPIR, core_id)
 		self.translator = pyemu.VirtualMemory()
 		self.translator.add_range(0x00000000, 0x00000000, 0xFFE00000)
 		self.translator.add_range(0xFFE00000, 0x08000000, 0x00200000)
@@ -201,7 +184,7 @@ class PPCEmulator:
 		self.logger = log.ConsoleLogger("PPC")
 		self.breakpoints = debug.BreakpointHandler(self.interpreter)
 		self.breakpoints.add(0xFFF1AB34, self.handle_log)
-		self.spr_handler = SPRHandler(self.core, self.virtmem, self.breakpoints, core_id)
+		self.spr_handler = SPRHandler(self.core, self.virtmem, self.breakpoints)
 		self.msr_handler = MSRHandler(self.virtmem)
 		self.exc_handler = ExceptionHandler(self.core)
 
