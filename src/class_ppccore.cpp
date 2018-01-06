@@ -36,9 +36,11 @@ void PPCCore::triggerException(ExceptionType type) {
 }
 
 bool PPCCore::setSpr(SPR spr, uint32_t value) {
-	if (spr == XER) xer = value;
-	else if (spr == LR) lr = value;
+	if (spr == LR) lr = value;
 	else if (spr == CTR) ctr = value;
+	else if (spr == XER) xer = value;
+	else if (spr == TBL) tb = (tb & 0xFFFFFFFF00000000) | value;
+	else if (spr == TBU) tb = (tb & 0x00000000FFFFFFFF) | ((uint64_t)value << 32);
 	else if (spr == DSISR) dsisr = value;
 	else if (spr == DAR) dar = value;
 	else if (spr == SRR0) srr0 = value;
@@ -56,9 +58,11 @@ bool PPCCore::setSpr(SPR spr, uint32_t value) {
 }
 
 bool PPCCore::getSpr(SPR spr, uint32_t *value) {
-	if (spr == XER) *value = xer;
-	else if (spr == LR) *value = lr;
+	if (spr == LR) *value = lr;
 	else if (spr == CTR) *value = ctr;
+	else if (spr == XER) *value = xer;
+	else if (spr == UTBL) *value = (uint32_t)tb;
+	else if (spr == UTBU) *value = tb >> 32;
 	else if (spr == DSISR) *value = dsisr;
 	else if (spr == DAR) *value = dar;
 	else if (spr == SRR0) *value = srr0;

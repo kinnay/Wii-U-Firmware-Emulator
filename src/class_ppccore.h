@@ -25,6 +25,10 @@ class PPCCore {
 		DAR = 19,
 		SRR0 = 26,
 		SRR1 = 27,
+		UTBL = 268,
+		UTBU = 269,
+		TBL = 284,
+		TBU = 285,
 		UGQR0 = 896,
 		UGQR1 = 897,
 		UGQR2 = 898,
@@ -86,6 +90,8 @@ class PPCCore {
 	uint32_t srr1;
 	uint32_t dsisr;
 	uint32_t dar;
+	
+	uint64_t tb;
 	
 	PPCCore(PPCLockMgr *lockMgr);
 	

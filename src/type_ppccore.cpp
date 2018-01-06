@@ -180,6 +180,21 @@ PyObject *PPCCore_setMsr(PPCCoreObj *self, PyObject *arg) {
 	Py_RETURN_NONE;
 }
 
+PyObject *PPCCore_getTb(PPCCoreObj *self, PyObject *args) {
+	CHECK_INIT(self->object);
+	return PyLong_FromUnsignedLongLong(self->object->tb);
+}
+
+PyObject *PPCCore_setTb(PPCCoreObj *self, PyObject *arg) {
+	CHECK_INIT(self->object);
+	
+	uint64_t value = PyLong_AsUnsignedLongLong(arg);
+	if (PyErr_Occurred()) return NULL;
+	
+	self->object->tb = value;
+	Py_RETURN_NONE;
+}
+
 PyObject *PPCCore_triggerException(PPCCoreObj *self, PyObject *arg) {
 	CHECK_INIT(self->object);
 	
@@ -368,6 +383,8 @@ PyMethodDef PPCCore_methods[] = {
 	{"setcr", (PyCFunction)PPCCore_setCr, METH_O, NULL},
 	{"msr", (PyCFunction)PPCCore_getMsr, METH_NOARGS, NULL},
 	{"setmsr", (PyCFunction)PPCCore_setMsr, METH_O, NULL},
+	{"tb", (PyCFunction)PPCCore_getTb, METH_NOARGS, NULL},
+	{"settb", (PyCFunction)PPCCore_setTb, METH_O, NULL},
 	{"trigger_exception", (PyCFunction)PPCCore_triggerException, METH_O, NULL},
 	{"on_spr_read", (PyCFunction)PPCCore_onSprRead, METH_O, NULL},
 	{"on_spr_write", (PyCFunction)PPCCore_onSprWrite, METH_O, NULL},

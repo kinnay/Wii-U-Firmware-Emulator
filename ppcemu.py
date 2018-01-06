@@ -15,7 +15,6 @@ class SPRHandler:
 		self.upir = core_id
 
 		self.dec = 0xFFFFFFFF
-		self.tb = 0
 		self.sprg0 = 0
 		self.sprg1 = 0
 		self.sprg2 = 0
@@ -51,9 +50,7 @@ class SPRHandler:
 		self.thrm3 = 0
 
 	def read(self, spr):
-		if spr == 268: return self.tb & 0xFFFFFFFF
-		elif spr == 269: return self.tb >> 32
-		elif spr == 272: return self.sprg0
+		if spr == 272: return self.sprg0
 		elif spr == 273: return self.sprg1
 		elif spr == 274: return self.sprg2
 		elif spr == 275: return self.sprg3
@@ -99,8 +96,6 @@ class SPRHandler:
 		elif spr == 273: self.sprg1 = value
 		elif spr == 274: self.sprg2 = value
 		elif spr == 275: self.sprg3 = value
-		elif spr == 284: self.tb = (self.tb & 0xFFFFFFFF00000000) | value
-		elif spr == 285: self.tb = (self.tb & 0xFFFFFFFF) | (value << 32)
 		elif 528 <= spr <= 535:
 			if spr % 2: self.mmu.set_ibatl((spr - 528) // 2, value)
 			else: self.mmu.set_ibatu((spr - 528) // 2, value)
@@ -234,7 +229,7 @@ class PPCEmulator:
 		self.logger.write(data)
 		
 	def update_timer(self):
-		self.spr_handler.tb = (self.spr_handler.tb + 400) & 0xFFFFFFFFFFFFFFFF
+		self.core.settb((self.core.tb() + 400) & (0xFFFFFFFFFFFFFFFF))
 		
 		self.spr_handler.dec -= 400
 		if self.spr_handler.dec < 0:
