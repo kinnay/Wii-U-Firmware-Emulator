@@ -24,6 +24,10 @@ PyObject *IPhysMem_read(IPhysMemObj *self, PyObject *args) {
 	int length;
 	if (!PyArg_ParseTuple(args, "Ii", &addr, &length)) return NULL;
 	
+	if (!length) {
+		return PyBytes_FromStringAndSize(NULL, 0);
+	}
+	
 	char *buffer = new char[length];
 	if (!buffer) {
 		PyErr_NoMemory();
@@ -48,7 +52,9 @@ PyObject *IPhysMem_write(IPhysMemObj *self, PyObject *args) {
 	void *data;
 	int length;
 	if (!PyArg_ParseTuple(args, "Iy#", &addr, &data, &length)) return NULL;
-	if (self->object->write(addr, data, length) < 0) return NULL;
+	if (length) {
+		if (self->object->write(addr, data, length) < 0) return NULL;
+	}
 	Py_RETURN_NONE;
 }
 

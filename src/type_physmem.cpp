@@ -52,18 +52,31 @@ int PhysMem_init(PhysMemObj *self, PyObject *args, PyObject *kwargs) {
 PyObject *PhysMem_addRange(PhysMemObj *self, PyObject *args) {
 	CHECK_INIT(self->object);
 
-	uint32_t start, length;
-	if (!PyArg_ParseTuple(args, "II", &start, &length)) return NULL;
-	if (!self->object->addRange(start, length)) return NULL;
+	uint32_t start;
+	uint64_t end;
+	if (!PyArg_ParseTuple(args, "IL", &start, &end)) return NULL;
+	
+	if (end > 0x100000000 || start >= end) {
+		ValueError("Invalid memory range");
+		return NULL;
+	}
+
+	if (!self->object->addRange(start, (uint32_t)end - 1)) return NULL;
 	Py_RETURN_NONE;
 }
 
 PyObject *PhysMem_addSpecial(PhysMemObj *self, PyObject *args) {
 	CHECK_INIT(self->object);
 	
-	uint32_t start, length;
+	uint32_t start;
+	uint64_t end;
 	PyObject *readCB, *writeCB;
-	if (!PyArg_ParseTuple(args, "IIOO", &start, &length, &readCB, &writeCB)) {
+	if (!PyArg_ParseTuple(args, "ILOO", &start, &end, &readCB, &writeCB)) {
+		return NULL;
+	}
+	
+	if (end > 0x100000000 || start >= end) {
+		ValueError("Invalid memory range");
 		return NULL;
 	}
 	
@@ -72,7 +85,7 @@ PyObject *PhysMem_addSpecial(PhysMemObj *self, PyObject *args) {
 		return NULL;
 	}
 	
-	if (!self->object->addSpecial(start, length,
+	if (!self->object->addSpecial(start, (uint32_t)end - 1,
 		[readCB] (uint32_t addr, void *data, uint32_t length) -> bool {
 			PyObject *args = Py_BuildValue("(II)", addr, length);
 			if (!args) return false;

@@ -36,10 +36,16 @@ int VirtMem_init(VirtMemObj *self, PyObject *args, PyObject *kwargs) {
 PyObject *VirtMem_addRange(VirtMemObj *self, PyObject *args) {
 	CHECK_INIT(self->object);
 	
-	uint32_t virt, phys, length;
-	if (!PyArg_ParseTuple(args, "III", &virt, &phys, &length)) return NULL;
-	if (!self->object->addRange(virt, phys, length)) return NULL;
+	uint32_t virt, phys;
+	uint64_t end; //May be 0x100000000
+	if (!PyArg_ParseTuple(args, "ILI", &virt, &end, &phys)) return NULL;
 	
+	if (end > 0x100000000 || virt >= end) {
+		ValueError("Invalid memory range");
+		return NULL;
+	}
+	
+	if (!self->object->addRange(virt, (uint32_t)end - 1, phys)) return NULL;
 	Py_RETURN_NONE;
 }
 

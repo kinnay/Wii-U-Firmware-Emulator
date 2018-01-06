@@ -1,11 +1,11 @@
 
 #include "class_physmem.h"
-#include "range.h"
+#include "class_range.h"
 #include "errors.h"
 #include <cstdint>
 
-SpecialRange::SpecialRange(uint32_t start, uint32_t length, ReadCB readCB, WriteCB writeCB)
-	: Range(start, length), readCB(readCB), writeCB(writeCB) {}
+SpecialRange::SpecialRange(uint32_t start, uint32_t end, ReadCB readCB, WriteCB writeCB)
+	: Range(start, end), readCB(readCB), writeCB(writeCB) {}
 
 PhysicalMemory::~PhysicalMemory() {
 	for (Range *r : ranges) {
@@ -21,35 +21,35 @@ PhysicalMemory::~PhysicalMemory() {
 	}
 }
 
-bool PhysicalMemory::checkOverlap(uint32_t start, uint32_t length) {
+bool PhysicalMemory::checkOverlap(uint32_t start, uint32_t end) {
 	for (Range *r : ranges) {
-		if (r->collides(start, length)) {
+		if (r->collides(start, end)) {
 			ValueError("Memory range (0x%08x, 0x%08x) overlaps existing range (0x%08x, 0x%08x)",
-				start, length, r->start, r->length);
+				start, end, r->start, r->end);
 			return false;
 		}
 	}
 	
 	for (Range *r : specialRanges) {
-		if (r->collides(start, length)) {
+		if (r->collides(start, end)) {
 			ValueError("Memory range (0x%08x, 0x%08x) overlaps special range (0x%08x, 0x%08x)",
-				start, length, r->start, r->length);
+				start, end, r->start, r->end);
 			return false;
 		}
 	}
 	return true;
 }
 
-bool PhysicalMemory::addRange(uint32_t start, uint32_t length) {
-	if (!checkOverlap(start, length)) return false;
+bool PhysicalMemory::addRange(uint32_t start, uint32_t end) {
+	if (!checkOverlap(start, end)) return false;
 	
-	Range *range = new Range(start, length);
+	Range *range = new Range(start, end);
 	if (!range) {
 		MemoryError("Couldn't allocate range object");
 		return false;
 	}
 	
-	void *buffer = new char[length];
+	void *buffer = new char[end - start + 1];
 	if (!buffer) {
 		MemoryError("Couldn't allocate memory buffer");
 		delete range;
@@ -61,10 +61,10 @@ bool PhysicalMemory::addRange(uint32_t start, uint32_t length) {
 	return true;
 }
 
-bool PhysicalMemory::addSpecial(uint32_t start, uint32_t length, ReadCB readCB, WriteCB writeCB) {
-	if (!checkOverlap(start, length)) return false;
+bool PhysicalMemory::addSpecial(uint32_t start, uint32_t end, ReadCB readCB, WriteCB writeCB) {
+	if (!checkOverlap(start, end)) return false;
 	
-	SpecialRange *range = new SpecialRange(start, length, readCB, writeCB);
+	SpecialRange *range = new SpecialRange(start, end, readCB, writeCB);
 	
 	if (!range) {
 		MemoryError("Couldn't allocate range object");
@@ -76,9 +76,11 @@ bool PhysicalMemory::addSpecial(uint32_t start, uint32_t length, ReadCB readCB, 
 }
 
 int PhysicalMemory::read(uint32_t addr, void *data, uint32_t length) {
+	uint32_t end = addr + length - 1;
+	
 	int i = 0;
 	for (Range *r : ranges) {
-		if (r->contains(addr, length)) {
+		if (r->contains(addr, end)) {
 			void *buffer = buffers[i];
 			memcpy(data, (char *)buffer + addr - r->start, length);
 			return 0;
@@ -87,7 +89,7 @@ int PhysicalMemory::read(uint32_t addr, void *data, uint32_t length) {
 	}
 	
 	for (SpecialRange *r : specialRanges) {
-		if (r->contains(addr, length)) {
+		if (r->contains(addr, end)) {
 			return r->readCB(addr, data, length) ? 0 : -1;
 		}
 	}
@@ -97,9 +99,11 @@ int PhysicalMemory::read(uint32_t addr, void *data, uint32_t length) {
 }
 
 int PhysicalMemory::write(uint32_t addr, const void *data, uint32_t length) {
+	uint32_t end = addr + length - 1;
+	
 	int i = 0;
 	for (Range *r : ranges) {
-		if (r->contains(addr, length)) {
+		if (r->contains(addr, end)) {
 			void *buffer = buffers[i];
 			memcpy((char *)buffer + addr - r->start, data, length);
 			return 0;
@@ -108,7 +112,7 @@ int PhysicalMemory::write(uint32_t addr, const void *data, uint32_t length) {
 	}
 	
 	for (SpecialRange *r : specialRanges) {
-		if (r->contains(addr, length)) {
+		if (r->contains(addr, end)) {
 			return r->writeCB(addr, data, length) ? 0 : -1;
 		}
 	}
@@ -128,9 +132,11 @@ int PhysicalMemory::write(uint32_t addr, uint64_t value) { return writeTmpl<uint
 
 template <class T>
 int PhysicalMemory::readTmpl(uint32_t addr, T *value) {
+	uint32_t end = addr + sizeof(T) - 1;
+	
 	int i = 0;
 	for (Range *r : ranges) {
-		if (r->contains(addr, sizeof(T))) {
+		if (r->contains(addr, end)) {
 			void *buffer = buffers[i];
 			*value = *(T *)((char *)buffer + addr - r->start);
 			return 0;
@@ -139,7 +145,7 @@ int PhysicalMemory::readTmpl(uint32_t addr, T *value) {
 	}
 	
 	for (SpecialRange *r : specialRanges) {
-		if (r->contains(addr, sizeof(T))) {
+		if (r->contains(addr, end)) {
 			return r->readCB(addr, value, sizeof(T)) ? 0 : -1;
 		}
 	}
@@ -150,9 +156,11 @@ int PhysicalMemory::readTmpl(uint32_t addr, T *value) {
 
 template <class T>
 int PhysicalMemory::writeTmpl(uint32_t addr, T value) {
+	uint32_t end = addr + sizeof(T) - 1;
+	
 	int i = 0;
 	for (Range *r : ranges) {
-		if (r->contains(addr, sizeof(T))) {
+		if (r->contains(addr, end)) {
 			void *buffer = buffers[i];
 			*(T *)((char *)buffer + addr - r->start) = value;
 			return 0;
@@ -161,7 +169,7 @@ int PhysicalMemory::writeTmpl(uint32_t addr, T value) {
 	}
 	
 	for (SpecialRange *r : specialRanges) {
-		if (r->contains(addr, sizeof(T))) {
+		if (r->contains(addr, end)) {
 			return r->writeCB(addr, &value, sizeof(T)) ? 0 : -1;
 		}
 	}

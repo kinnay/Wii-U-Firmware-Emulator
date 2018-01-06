@@ -63,18 +63,18 @@ class Emulator:
 		
 	def init_physmem(self):
 		self.physmem = pyemu.PhysicalMemory()
-		self.physmem.add_range(0x10000000, 0x18000000) #IOSU processes and ram disk
-		self.physmem.add_range(0x08000000, 0x002E0000) #MEM0
-		self.physmem.add_range(0xFFF00000, 0x000FF000) #Kernel stuff
-		self.physmem.add_range(0x30000000, 0x02800000) #Root and loader
+		self.physmem.add_range(0x10000000, 0x28000000) #IOSU processes and ram disk
+		self.physmem.add_range(0x08000000, 0x082E0000) #MEM0
+		self.physmem.add_range(0xFFF00000, 0xFFFFF000) #Kernel stuff
+		self.physmem.add_range(0x30000000, 0x32800000) #Root and loader
 		self.physmem.add_range(0x00000000, 0x02000000) #MEM1
 
 	def init_hardware(self):
 		self.hw = hardware.HardwareController(self.scheduler, self.physmem)
-		self.physmem.add_special(0xD000000, 0x1A0000, self.hw.read, self.hw.write)
-		self.physmem.add_special(0xD800000, 0x1A0000, self.hw.read, self.hw.write)
-		self.physmem.add_special(0xC000000, 0x400000, self.hw.read, self.hw.write)
-		self.physmem.add_special(0xD0000000, 4, self.hw.read, self.hw.write) #Not listed on wiiubrew?
+		self.physmem.add_special(0xD000000, 0xD1A0000, self.hw.read, self.hw.write)
+		self.physmem.add_special(0xD800000, 0xD9A0000, self.hw.read, self.hw.write)
+		self.physmem.add_special(0xC000000, 0xC400000, self.hw.read, self.hw.write)
+		self.physmem.add_special(0xD0000000, 0xD0000004, self.hw.read, self.hw.write) #Used by tcl.rpl
 		
 	def init_cpu(self):
 		reservation = pyemu.PPCLockMgr()
