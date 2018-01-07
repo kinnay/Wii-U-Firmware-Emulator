@@ -2119,6 +2119,8 @@ TCL_CP_MICROCODE1_CTRL = 0xC20C150
 TCL_CP_MICROCODE1_DATA = 0xC20C154
 TCL_CP_MICROCODE2_CTRL = 0xC20C15C
 TCL_CP_MICROCODE2_DATA = 0xC20C160
+TCL_DRMDMA_READ_POS = 0xC20D008
+TCL_DRMDMA_WRITE_POS = 0xC20D00C
 			
 TCL_START = 0xC200000
 TCL_END = 0xC300000
@@ -2137,8 +2139,8 @@ class TCLController:
 		self.cp_microcode1_pos = 0
 		self.cp_microcode2 = [0] * 0x550
 		self.cp_microcode2_pos = 0
-		
-		self.curpos = 0
+		self.drmdma_read_pos = 0
+		self.drmdma_write_pos = 0
 		
 	def read(self, addr):
 		if addr == TCL_RLC_MICROCODE_DATA:
@@ -2146,9 +2148,9 @@ class TCLController:
 			self.rlc_microcode_pos += 1
 			return value
 		elif addr == TCL_FLUSH:
-			#Process command buffer here?
-			self.curpos = self.cp_write_pos
+			#Process command buffers here?
 			self.physmem.write(self.cp_read_pos_ptr, struct.pack(">H", self.cp_write_pos))
+			self.drmdma_read_pos = self.drmdma_write_pos
 			return 0
 		elif addr == TCL_CP_MICROCODE1_DATA:
 			value = self.cp_microcode1[self.cp_microcode1_pos]
@@ -2158,6 +2160,7 @@ class TCLController:
 			value = self.cp_microcode2[self.cp_microcode2_pos]
 			self.cp_microcode2_pos += 1
 			return value
+		elif addr == TCL_DRMDMA_READ_POS: return self.drmdma_read_pos
 		print("TCL READ 0x%X at %08X" %(addr, self.scheduler.pc()))
 		return 0
 		
@@ -2178,6 +2181,7 @@ class TCLController:
 		elif addr == TCL_CP_MICROCODE2_DATA:
 			self.cp_microcode2[self.cp_microcode2_pos] = value
 			self.cp_microcode2_pos += 1
+		elif addr == TCL_DRMDMA_WRITE_POS: self.drmdma_write_pos = value
 		else:
 			print("TCL WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 
