@@ -2107,12 +2107,12 @@ class PIController:
 #	TCL_CP_IB1_SIZE = 0xC208738
 #	TCL_CP_IB2 = 0xC20873C
 #	TCL_CP_IB2_SIZE = 0xC208744
-#	TCL_CP_RB_BASE = 0xC20C100
 
 TCL_RLC_MICROCODE_CTRL = 0xC203F2C
 TCL_RLC_MICROCODE_DATA = 0xC203F30
 TCL_CP_RESET = 0xC208020
 TCL_FLUSH = 0xC208500
+TCL_CP_RB_BASE = 0xC20C100
 TCL_CP_READ_POS_PTR = 0xC20C10C
 TCL_CP_WRITE_POS = 0xC20C114
 TCL_CP_MICROCODE1_CTRL = 0xC20C150
@@ -2130,6 +2130,7 @@ class TCLController:
 
 		self.rlc_microcode = [0] * 0x400
 		self.rlc_microcode_pos = 0
+		self.cp_ringbuf_base = 0
 		self.cp_read_pos_ptr = 0
 		self.cp_write_pos = 0
 		self.cp_microcode1 = [0] * 0x350
@@ -2137,12 +2138,16 @@ class TCLController:
 		self.cp_microcode2 = [0] * 0x550
 		self.cp_microcode2_pos = 0
 		
+		self.curpos = 0
+		
 	def read(self, addr):
 		if addr == TCL_RLC_MICROCODE_DATA:
 			value = self.rlc_microcode[self.rlc_microcode_pos]
 			self.rlc_microcode_pos += 1
 			return value
 		elif addr == TCL_FLUSH:
+			print("TCL CP:", self.physmem.read(self.cp_ringbuf_base + self.curpos * 4, (self.cp_write_pos - self.curpos) * 4).hex())
+			self.curpos = self.cp_write_pos
 			self.physmem.write(self.cp_read_pos_ptr, struct.pack(">H", self.cp_write_pos))
 			return 0
 		elif addr == TCL_CP_MICROCODE1_DATA:
@@ -2162,6 +2167,7 @@ class TCLController:
 			self.rlc_microcode[self.rlc_microcode_pos] = value
 			self.rlc_microcode_pos += 1
 		elif addr == TCL_CP_RESET: pass
+		elif addr == TCL_CP_RB_BASE: self.cp_ringbuf_base = value << 8
 		elif addr == TCL_CP_READ_POS_PTR: self.cp_read_pos_ptr = value
 		elif addr == TCL_CP_WRITE_POS: self.cp_write_pos = value
 		elif addr == TCL_CP_MICROCODE1_CTRL: self.cp_microcode1_pos = value

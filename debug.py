@@ -1,6 +1,7 @@
 
 import pyemu
 import log
+import time
 
 
 class BreakpointHandler:
@@ -42,16 +43,95 @@ class BreakpointHandler:
 		for callback in callbacks[addr]:
 			callback(addr, write)
 
+			
+class ArgParser:
+
+	#States
+	NEXT = 0
+	SIMPLE = 1
+	STRING = 2
+	ESCAPE = 3
+
+	def __init__(self):
+		self.args = []
+		self.argtext = ""
+		self.strchar = None #" or '
+		
+	def parse(self, data):
+		self.state = self.NEXT
+		for char in data:
+			self.process(char)
+		if self.argtext:
+			self.args.append(self.argtext)
+			self.argtext = ""
+			
+	def process(self, char):
+		if self.state == self.NEXT:
+			if char != " ":
+				if char in ['"', "'"]:
+					self.state = self.STRING
+					self.argtext = ""
+					self.strchar = char
+				else:
+					self.state = self.SIMPLE
+					self.argtext = char
+					
+		elif self.state == self.SIMPLE:
+			if char == " ":
+				self.state = self.NEXT
+				self.args.append(self.argtext)
+				self.argtext = ""
+			else:
+				self.argtext += char
+				
+		elif self.state == self.STRING:
+			if char == self.strchar:
+				self.state = self.NEXT
+				self.args.append(self.argtext)
+				self.argtext = ""
+			elif char == "\\":
+				self.state = self.ESCAPE
+			else:
+				self.argtext += char
+				
+		elif self.state == self.ESCAPE:
+			if char in ['"', "'", "\\"]:
+				self.argtext += char
+			else:
+				self.argtext += "\\" + char
+			self.state = self.STRING
+			
+			
+class Command:
+	def __init__(self, min_args, max_args, func, usage):
+		self.min_args = min_args
+		self.max_args = max_args
+		self.func = func
+		self.usage = usage
+		
+	def call(self, emulator, args):
+		if not self.min_args <= len(args) <= self.max_args:
+			self.print_usage()
+		else:
+			self.func(emulator, *args)
+				
+	def print_usage(self):
+		print("Usage: %s" %self.usage)
+			
 
 printables = "\0\n\t\"\\ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" \
 	"1234567890!@#$%^&*()-_=+[]{}|;:'/?.,<>`~"
 def is_printable(data):
 	return all(chr(char) in printables for char in data)
 	
-	
+
 class ARMDebugger:
 	def __init__(self, emulator):
 		self.core = emulator.core
+		
+		self.commands = {
+			"state": Command(0, 0, self.state, "state")
+		}
 	
 	def name(self): return "ARM"
 	def pc(self): return self.core.reg(pyemu.ARMCore.PC)
@@ -72,8 +152,11 @@ class ARMDebugger:
 			"PC": vars["R15"]
 		})
 		return vars
+	
+	def eval(self, source):
+		return eval(source, self.get_context())
 			
-	def print_state(self):
+	def state(self, current):
 		core = self.core
 		print("R0 = %08X R1 = %08X R2 = %08X R3 = %08X R4 = %08X" %(core.reg(0), core.reg(1), core.reg(2), core.reg(3), core.reg(4)))
 		print("R5 = %08X R6 = %08X R7 = %08X R8 = %08X R9 = %08X" %(core.reg(5), core.reg(6), core.reg(7), core.reg(8), core.reg(9)))
@@ -86,12 +169,16 @@ class PPCDebugger:
 		self.core = emulator.core
 		self.core_id = core_id
 		
+		self.commands = {
+			"state": Command(0, 0, self.state, "state"),
+			"getspr": Command(1, 1, self.getspr, "getspr <spr>"),
+			"setspr": Command(2, 2, self.setspr, "setspr <spr> <value>"),
+			"setpc": Command(1, 1, self.setpc, "setpc <value>")
+		}
+		
 	def name(self): return "PPC%i" %self.core_id
 	def pc(self): return self.core.pc()
 	def lr(self): return self.core.spr(pyemu.PPCCore.LR)
-	
-	def set_option(self, option, value):
-		print("Invalid option")
 		
 	def get_context(self):
 		core = self.core
@@ -104,7 +191,10 @@ class PPCDebugger:
 		})
 		return vars
 		
-	def print_state(self):
+	def eval(self, source):
+		return eval(source, self.get_context())
+		
+	def state(self, current):
 		core = self.core
 		print("r0 = %08X r1 = %08X r2 = %08X r3 = %08X r4 = %08X" %(core.reg(0), core.reg(1), core.reg(2), core.reg(3), core.reg(4)))
 		print("r5 = %08X r6 = %08X r7 = %08X r8 = %08X r9 = %08X" %(core.reg(5), core.reg(6), core.reg(7), core.reg(8), core.reg(9)))
@@ -115,163 +205,169 @@ class PPCDebugger:
 		print("r30= %08X r31= %08X pc = %08X lr = %08X ctr= %08X" %(core.reg(30), core.reg(31), core.pc(), core.spr(core.LR), core.spr(core.CTR)))
 		print("cr = %08X" %(core.cr()))
 		
+	def getspr(self, current, spr):
+		value = self.core.spr(int(spr))
+		print("%08X (%i)" %(value, value))
+		
+	def setspr(self, current, spr, value):
+		self.core.setspr(int(spr), self.eval(value))
+
+	def setpc(self, current, value):
+		self.core.setpc(self.eval(value))
+		
 		
 class DebugShell:
 	def __init__(self, scheduler):
 		self.scheduler = scheduler
 		self.current_override = None
-
-	def get_current(self):
+		self.input_interrupt = False
+		
+		self.commands = {
+			"help": Command(0, 1, self.help, "help (<command>)"),
+			"select": Command(1, 1, self.select, "select <index>"),
+			"break": Command(2, 2, self.breakp, "break add/del <address>"),
+			"watch": Command(3, 3, self.watch, "watch add/del read/write <address>"),
+			"read": Command(3, 3, self.read, "read phys/virt <address> <length>"),
+			"translate": Command(1, 2, self.translate, "translate <address> (type)"),
+			"getreg": Command(1, 1, self.getreg, "getreg <reg>"),
+			"setreg": Command(2, 2, self.setreg, "setreg <reg> <value>"),
+			"step": Command(0, 0, self.step, "step"),
+			"eval": Command(1, 1, self.evalcmd, "eval <expr>")
+		}
+		
+	def current(self):
 		if self.current_override:
 			return self.current_override
 		return self.scheduler.current
-
+		
 	def handle_breakpoint(self, addr):
 		self.current_override = None
-		name = self.get_current().debugger.name()
+		name = self.current().debugger.name()
 		print("%s: Breakpoint hit at %08X\n" %(name, addr))
 		self.show(True)
 			
 	def handle_watchpoint(self, addr, write):
 		self.current_override = None
-		debugger = self.get_current().debugger
+		debugger = self.current().debugger
 		type = "write" if write else "read"
 		print("%s: Watchpoint %08X (%s) hit at %08X\n" %(debugger.name(), addr, type, debugger.pc()))
 		self.show(True)
 		
 	def show(self, is_break):
+		#Catching KeyboardInterrupts is quite messy
 		while True:
-			debugger = self.get_current().debugger
-			command = input("%s:%08X> " %(debugger.name(), debugger.pc()))
+			debugger = self.current().debugger
+
 			try:
-				result = self.execute_command(*command.split(" "))
-				if result:
-					self.current_override = None
-					if not is_break:
-						self.scheduler.run()
-					return
-			except Exception:
-				import traceback
-				traceback.print_exc()
-			
-	def execute_command(self, cmd, *args):
-		current = self.get_current()
-		physmem = current.physmem
-		virtmem = current.virtmem
-		breakpoints = current.breakpoints
-		interpreter = current.interpreter
-		debugger = current.debugger
-		core = current.core
-	
-		if cmd == "select":
-			if len(args) != 1:
-				print("Usage: core <index>")
-			else:
-				index = int(args[0])
-				self.current_override = self.scheduler.emulators[index]
-	
-		elif cmd == "break":
-			if len(args) < 2:
-				print("Usage: break add/del <address>")
-			else:
-				addr = self.eval(args[1:])
-				if args[0] == "add":
-					breakpoints.add(addr, self.handle_breakpoint)
-				elif args[0] == "del":
-					breakpoints.remove(addr, self.handle_breakpoint)
-				else:
-					print("Usage: break add/del <address>")
-					
-		elif cmd == "watch":
-			if len(args) < 3:
-				print("Usage: watch add/del read/write <address>")
+				try: inp = input("%s:%08X> " %(debugger.name(),  debugger.pc()))
+				except EOFError: #Apparently this is a Windows problem
+					time.sleep(1) #Wait for keyboard interrupt
+			except KeyboardInterrupt:
+				self.input_interrupt = True
+				raise #Exit
 
-			elif args[0] not in ["add", "del"] or args[1] not in ["read", "write"]:
-				print("Usage: watch add/del read/write <address>")
+			try:
+				parser = ArgParser()
+				parser.parse(inp)
+				if parser.args:
+					cmd, args = parser.args[0], parser.args[1:]
+					if cmd == "run":
+						if not is_break:
+							self.scheduler.run()
+						return
+					else:
+						self.execute_command(cmd, args)
 
-			else:
-				addr = self.eval(args[2:])
-				write = {
-					"write": True,
-					"read": False
-				}[args[1]]
-				if args[0] == "add":
-					breakpoints.watch(write, addr, self.handle_watchpoint)
-				else:
-					breakpoints.unwatch(write, addr, self.handle_watchpoint)
-					
-		elif cmd == "phys":
-			if len(args) != 3:
-				print("Usage: phys read <address> <length>")
-			else:
-				if args[0] == "read":
-					addr = self.eval([args[1]])
-					length = self.eval([args[2]])
-					data = physmem.read(addr, length)
-					print(data.hex())
-					if is_printable(data):
-						print(data.decode("ascii"))
-				else:
-					print("Usage: phys read <address> <length>")
-					
-		elif cmd == "virt":
-			if len(args) != 3:
-				print("Usage: virt read <address> <length>")
-			else:
-				if args[0] == "read":
-					addr = virtmem.translate(self.eval([args[1]]))
-					length = self.eval([args[2]])
-					data = physmem.read(addr, length)
-					print(data.hex())
-					if is_printable(data):
-						print(data.decode("ascii"))
-				else:
-					print("Usage: virt read <address> <length>")
-					
-		elif cmd == "translate":
-			if not args:
-				print("Usage: translate <addr> (type)")
-			else:				
-				access = pyemu.IVirtualMemory.DATA_READ
-				if len(args) == 2:
-					access = self.eval(args[1])
-				addr = virtmem.translate(self.eval(args[:1]), access)
-				print("0x%08X" %addr)
-					
-		elif cmd == "getreg":
-			if len(args) != 1:
-				print("Usage: getreg <reg>")
-			else:
-				value = core.reg(int(args[0]))
-				print("0x%08X (%i)" %(value, value))
-			
-		elif cmd == "setreg":
-			if len(args) < 2:
-				print("Usage: setreg <reg> <value>")
-			else:
-				core.setreg(int(args[0]), self.eval(args[1:]))
-					
-		elif cmd == "set":
-			if len(args) != 2:
-				print("Usage: set <option> <value>")
-			else:
-				debugger.set_option(args[1], args[2])
+			except KeyboardInterrupt as e:
+				#Exit if Ctrl+C is pressed during input()
+				if self.input_interrupt: raise
+
+				#But show the debugger if Ctrl+C is pressed while the interpreter is running
+				print("Keyboard interrupt")
 				
-		elif cmd == "run": return True
-		elif cmd == "step": interpreter.step()
-		elif cmd == "state": debugger.print_state()
-			
-		elif cmd == "eval":
-			result = self.eval(args)
-			if type(result) == int:
-				print("0x%08X (%i)" %(result, result))
-			elif result is not None:
-				print(result)
-		
+			except Exception as e:
+				print("%s: %s" %(e.__class__.__name__, e))
+				
+	def get_command(self, cmd):
+		for plugin in [self, self.current().debugger]:
+			if cmd in plugin.commands:
+				return plugin.commands[cmd]
+		print("Unknown command")
+
+	def execute_command(self, cmd, args):
+		command = self.get_command(cmd)
+		if command:
+			command.call(self.current(), args)
+
+	def eval(self, source):
+		return self.current().debugger.eval(source)
+
+	def help(self, current, cmd=None):
+		debugger = current.debugger
+
+		if cmd:
+			command = self.get_command(cmd)
+			if command:
+				command.print_usage()
+				
 		else:
-			print("Unknown command")
-			
-	def eval(self, strings):
-		string = " ".join(strings)
-		debugger = self.get_current().debugger
-		return eval(" ".join(strings), debugger.get_context())
+			print()
+			for plugin in [self, current.debugger]:
+				print("%s:" %plugin.__class__.__name__)
+				for cmd in sorted(plugin.commands.keys()):
+					print("\t%s" %cmd)
+				print()
+
+	def select(self, current, index):
+		self.current_override = self.scheduler.emulators[int(index)]
+
+	def breakp(self, current, op, address):
+		func = {
+			"add": current.breakpoints.add,
+			"del": current.breakpoints.remove
+		}[op]
+		func(self.eval(address), self.handle_breakpoint)
+
+	def watch(self, current, op, type, address):
+		func = {
+			"add": current.breakpoints.watch,
+			"del": current.breakpoints.unwatch
+		}[op]
+		
+		write = {
+			"read": False,
+			"write": True
+		}[type]
+
+		func(write, self.eval(address), self.handle_watchpoint)
+
+	def read(self, current, type, address, length):
+		address = self.eval(address)
+		if type == "virt":
+			address = current.virtmem.translate(address)
+
+		data = current.physmem.read(address, self.eval(length))
+		print(data.hex())
+		if is_printable(data):
+			print(data.decode("ascii"))
+
+	def translate(self, current, address, type=pyemu.IVirtualMemory.DATA_READ):
+		addr = current.virtmem.translate(self.eval(address), type)
+		print("0x%08X" %addr)
+		
+	def getreg(self, current, reg):
+		value = current.core.reg(int(reg))
+		print("0x%08X (%i)" %(value, value))
+		
+	def setreg(self, current, reg, value):
+		current.core.setreg(int(reg), self.eval(value))
+
+	def step(self, current):
+		current.interpreter.step()
+		
+	def evalcmd(self, current, source):
+		result = self.eval(source)
+		if type(result) == int:
+			print("%08X (%i)" %(result, result))
+		else:
+			print(result)

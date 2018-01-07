@@ -30,11 +30,14 @@ bool ARMMMU::translate(uint32_t *addr, uint32_t length, Access type) {
 	int translationTableOffs = (*addr >> 20) * 4;
 	
 	uint32_t firstLevelDesc;
-	if (!read32(translationTableBase + translationTableOffs, &firstLevelDesc))
+	if (!read32(translationTableBase + translationTableOffs, &firstLevelDesc)) {
+		RuntimeError("Couldn't read first level descriptor from memory");
 		return false;
+	}
 	
 	int firstLevelType = firstLevelDesc & 3;
 	if (firstLevelType == 0) { //Fault
+		RuntimeError("Access fault (first level descriptor)");
 		return false;
 	}
 	else if (firstLevelType == 1) { //Coarse page table
@@ -42,11 +45,14 @@ bool ARMMMU::translate(uint32_t *addr, uint32_t length, Access type) {
 		int coarseTableOffs = ((*addr >> 12) & 0xFF) * 4;
 		
 		uint32_t secondLevelDesc;
-		if (!read32(coarseTableBase + coarseTableOffs, &secondLevelDesc))
+		if (!read32(coarseTableBase + coarseTableOffs, &secondLevelDesc)) {
+			RuntimeError("Couldn't read second level descriptor from memory");
 			return false;
+		}
 		
 		int secondLevelType = secondLevelDesc & 3;
 		if (secondLevelType == 0) { //Fault
+			RuntimeError("Access fault (second level descriptor)");
 			return false;
 		}
 		else if (secondLevelType == 2) { //Small page

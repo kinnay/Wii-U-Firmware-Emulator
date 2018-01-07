@@ -30,7 +30,6 @@ PyObject *IVirtMem_translate(IVirtMemObj *self, PyObject *args) {
 	}
 	
 	if (!self->object->translate(&addr, 1, (IVirtualMemory::Access)type)) return NULL;
-	
 	return PyLong_FromUnsignedLong(addr);
 }
 

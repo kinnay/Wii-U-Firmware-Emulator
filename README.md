@@ -18,21 +18,33 @@ Pass "noprint" as a command line argument to disable print messages on unimpleme
 ## Debugger
 Using this emulator you can actually see what IOSU and the PowerPC kernel/loader look like at runtime (at least, the parts that this emulator is able to emulate accurately), and even perform some debugging operations on them. There's still some room for improvement on this end, but here's a list of commands:
 
+### General
 | Command | Description |
 | --- | --- |
+| help (&lt;command&gt;) | Print list of commands or information about a command |
 | select &lt;index&gt; | Select a processor to debug: 0=ARM, 1-3=PPC cores |
-| break &lt;add/del&gt; &lt;address&gt; | Add/remove breakpoint |
-| watch &lt;add/del&gt; &lt;read/write&gt; &lt;address&gt; | Add/remove memory read/write watchpoint |
-| phys read &lt;address&gt; &lt;length&gt; | Read and print physical memory |
-| virt read &lt;address&gt; &lt;length&gt; | Read and print memory at translated address |
+| break add/del &lt;address&gt; | Add/remove breakpoint |
+| watch add/del read/write &lt;address&gt; | Add/remove memory read/write watchpoint |
+| read phys/virt &lt;address&gt; &lt;length&gt; | Read and print memory with optional address translation |
 | translate &lt;address&gt; (&lt;type&gt;) | Translate address with optional type: 0=code, 1=data read (default), 2=data write |
 | getreg &lt;reg&gt; | Print general purpose register |
 | setreg &lt;reg&gt; &lt;value&gt; | Change general purpose register |
-| set thumb &lt;0/1&gt; | Enable/disable thumb mode |
-| state | Print all general purpose registers |
 | step | Step through code |
 | run | Continue emulation |
-| eval &lt;...&gt; | Call python's eval, given the processor registers as variables, and print the result |
+| eval &lt;expr&gt; | Call python's eval, given the processor registers as variables, and print the result |
+
+### ARM only
+| Command | Description |
+| --- | --- |
+| state | Print all general purpose registers |
+
+### PPC only
+| Command | Description |
+| --- | --- |
+| state | Print all GPRs and the most important other registers |
+| getspr &lt;spr&gt; | Print a special purpose register |
+| setspr &lt;spr&gt; &lt;value&gt; | Change a special purpose register |
+| setpc &lt;value&gt; | Change the program counter |
 
 To enable the debugger, pass "break" as command line argument.
 

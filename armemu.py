@@ -454,13 +454,8 @@ class ExceptionHandler:
 		self.core = core
 		
 	def data_abort(self, addr, write):
-		if "abort" in sys.argv:
-			self.data_fault_status = (write << 11) | 5
-			self.fault_address = addr
-			self.core.trigger_exception(self.core.DATA_ABORT)
-		else:
-			type = ["read from", "write to"][write]
-			raise RuntimeError("Data abort: %s %08X at %08X" %(type, addr, self.core.reg(15)))
+		type = ["read from", "write to"][write]
+		raise RuntimeError("Data abort: %s %08X at %08X" %(type, addr, self.core.reg(15)))
 
 			
 class ARMEmulator:
