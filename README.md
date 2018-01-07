@@ -45,6 +45,7 @@ Using this emulator you can actually see what IOSU and the PowerPC kernel/loader
 | getspr &lt;spr&gt; | Print a special purpose register |
 | setspr &lt;spr&gt; &lt;value&gt; | Change a special purpose register |
 | setpc &lt;value&gt; | Change the program counter |
+| modules | Print a list of loaded RPL files |
 
 To enable the debugger, pass "break" as command line argument.
 

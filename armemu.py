@@ -69,38 +69,6 @@ class CoprocHandler:
 			raise RuntimeError("Read from coprocessor %i" %coproc)
 			
 			
-class MemoryReader:
-	def __init__(self, physmem, virtmem):
-		self.physmem = physmem
-		self.virtmem = virtmem
-		
-	def read(self, addr, len):
-		addr = self.virtmem.translate(addr)
-		return self.physmem.read(addr, len)
-		
-	def string(self, addr):
-		data = b""
-		char = self.read(addr, 1)
-		while char != b"\0":
-			data += char
-			addr += 1
-			char = self.read(addr, 1)
-		return data.decode("ascii")
-		
-	def u32(self, addr):
-		return struct.unpack(">I", self.read(addr, 4))[0]
-		
-		
-class MemoryWriter:
-	def __init__(self, physmem, virtmem):
-		self.physmem = physmem
-		self.virtmem = virtmem
-		
-	def write(self, addr, data):
-		addr = self.virtmem.translate(addr)
-		self.physmem.write(addr, data)
-			
-			
 class SVCHandler:
 	def __init__(self, core, reader, writer):
 		self.core = core
@@ -469,8 +437,8 @@ class ARMEmulator:
 		self.interpreter.set_alarm(5000, hw.latte.update_timer)
 		self.interrupts = hw.latte.irq_arm
 		
-		self.mem_reader = MemoryReader(physmem, self.virtmem)
-		self.mem_writer = MemoryWriter(physmem, self.virtmem)
+		self.mem_reader = debug.MemoryReader(physmem, self.virtmem)
+		self.mem_writer = debug.MemoryWriter(physmem, self.virtmem)
 		self.breakpoints = debug.BreakpointHandler(self.interpreter)
 		self.coproc_handler = CoprocHandler(self.core, self.virtmem)
 		self.svc_handler = SVCHandler(self.core, self.mem_reader, self.mem_writer)

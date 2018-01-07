@@ -2146,7 +2146,7 @@ class TCLController:
 			self.rlc_microcode_pos += 1
 			return value
 		elif addr == TCL_FLUSH:
-			print("TCL CP:", self.physmem.read(self.cp_ringbuf_base + self.curpos * 4, (self.cp_write_pos - self.curpos) * 4).hex())
+			#Process command buffer here?
 			self.curpos = self.cp_write_pos
 			self.physmem.write(self.cp_read_pos_ptr, struct.pack(">H", self.cp_write_pos))
 			return 0

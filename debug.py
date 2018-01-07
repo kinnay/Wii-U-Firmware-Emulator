@@ -2,6 +2,7 @@
 import pyemu
 import log
 import time
+import struct
 
 
 class BreakpointHandler:
@@ -42,6 +43,40 @@ class BreakpointHandler:
 		callbacks = self.callbacks_write if write else self.callbacks_read
 		for callback in callbacks[addr]:
 			callback(addr, write)
+
+	
+class MemoryReader:
+	def __init__(self, physmem, virtmem):
+		self.physmem = physmem
+		self.virtmem = virtmem
+		
+	def read(self, addr, len, trans=True):
+		if trans:
+			addr = self.virtmem.translate(addr)
+		return self.physmem.read(addr, len)
+		
+	def string(self, addr, trans=True):
+		data = b""
+		char = self.read(addr, 1, trans)
+		while char != b"\0":
+			data += char
+			addr += 1
+			char = self.read(addr, 1, trans)
+		return data.decode("ascii")
+		
+	def u32(self, addr, trans=True):
+		return struct.unpack(">I", self.read(addr, 4, trans))[0]
+		
+		
+class MemoryWriter:
+	def __init__(self, physmem, virtmem):
+		self.physmem = physmem
+		self.virtmem = virtmem
+		
+	def write(self, addr, data, trans=True):
+		if trans:
+			addr = self.virtmem.translate(addr, trans)
+		self.physmem.write(addr, data)
 
 			
 class ArgParser:
@@ -173,7 +208,8 @@ class PPCDebugger:
 			"state": Command(0, 0, self.state, "state"),
 			"getspr": Command(1, 1, self.getspr, "getspr <spr>"),
 			"setspr": Command(2, 2, self.setspr, "setspr <spr> <value>"),
-			"setpc": Command(1, 1, self.setpc, "setpc <value>")
+			"setpc": Command(1, 1, self.setpc, "setpc <value>"),
+			"modules": Command(0, 0, self.modules, "modules")
 		}
 		
 	def name(self): return "PPC%i" %self.core_id
@@ -214,6 +250,15 @@ class PPCDebugger:
 
 	def setpc(self, current, value):
 		self.core.setpc(self.eval(value))
+		
+	def modules(self, current):
+		module = current.mem_reader.u32(0x10081018)
+		while module:
+			info = current.mem_reader.u32(module + 0x28)
+			path = current.mem_reader.string(current.mem_reader.u32(info))
+			code = current.mem_reader.u32(info + 4)
+			print("%08X: %s" %(code, path))
+			module = current.mem_reader.u32(module + 0x54)
 		
 		
 class DebugShell:
