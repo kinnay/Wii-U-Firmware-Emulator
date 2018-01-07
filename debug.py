@@ -253,12 +253,16 @@ class PPCDebugger:
 		
 	def modules(self, current):
 		module = current.mem_reader.u32(0x10081018)
+		modules = {}
 		while module:
 			info = current.mem_reader.u32(module + 0x28)
 			path = current.mem_reader.string(current.mem_reader.u32(info))
-			code = current.mem_reader.u32(info + 4)
-			print("%08X: %s" %(code, path))
+			codebase = current.mem_reader.u32(info + 4)
+			modules[codebase] = path
 			module = current.mem_reader.u32(module + 0x54)
+			
+		for codebase in sorted(modules.keys()):
+			print("%08X: %s" %(codebase, modules[codebase]))
 		
 		
 class DebugShell:
