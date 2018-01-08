@@ -210,7 +210,8 @@ class PPCDebugger:
 			"setspr": Command(2, 2, self.setspr, "setspr <spr> <value>"),
 			"setpc": Command(1, 1, self.setpc, "setpc <value>"),
 			"modules": Command(0, 0, self.modules, "modules"),
-			"threads": Command(0, 0, self.threads, "threads")
+			"threads": Command(0, 0, self.threads, "threads"),
+			"thread": Command(1, 1, self.thread, "thread <addr>")
 		}
 		
 	def name(self): return "PPC%i" %self.core_id
@@ -273,6 +274,19 @@ class PPCDebugger:
 			name = reader.string(reader.u32(thread + 0x5C0))
 			print("%08X: %s" %(thread, name))
 			thread = reader.u32(thread + 0x38C)
+			
+	def thread(self, current, thread):
+		thread = self.eval(thread)
+		reader = current.mem_reader
+		print("Name:", reader.string(reader.u32(thread + 0x5C0)))
+		print("Stack trace:")
+		
+		sp = reader.u32(thread + 0xC)
+		for i in range(15):
+			if not sp: break
+			lr = reader.u32(sp + 4)
+			print("\t%08X" %lr)
+			sp = reader.u32(sp)
 		
 		
 class DebugShell:
@@ -320,7 +334,9 @@ class DebugShell:
 			try:
 				try: inp = input("%s:%08X> " %(debugger.name(),  debugger.pc()))
 				except EOFError: #Apparently this is a Windows problem
-					time.sleep(1) #Wait for keyboard interrupt
+					time.sleep(2) #Wait for keyboard interrupt
+					self.input_interrupt = True
+					raise
 			except KeyboardInterrupt:
 				self.input_interrupt = True
 				raise #Exit
