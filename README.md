@@ -16,7 +16,7 @@ Before running this, you need to update the path to fw.img in main.py and the pa
 Pass "noprint" as a command line argument to disable print messages on unimplemented hardware reads/writes. Pass "logall" to enable hack that sets the COS log level to the highest possible value. Pass "logsys" to enable IOSU syscall logging. This generates ipc.txt (ipc requests like ioctls), messages.txt (message queue operations) and files.txt (files openend by IOSU). It slows down the code a lot however.
 
 ## Debugger
-Using this emulator you can actually see what IOSU and the PowerPC kernel/loader look like at runtime (at least, the parts that this emulator is able to emulate accurately), and even perform some debugging operations on them. There's still some room for improvement on this end, but here's a list of commands:
+Using this emulator you can actually see what IOSU and the PowerPC kernel/loader look like at runtime (at least, the parts that this emulator is able to emulate accurately), and even perform some debugging operations on them. To enable the debugger, pass "break" as command line argument. Here's a list of commands:
 
 ### General
 | Command | Description |
@@ -48,8 +48,6 @@ Using this emulator you can actually see what IOSU and the PowerPC kernel/loader
 | modules | Print a list of loaded RPL files |
 | threads | Print thread list |
 | thread &lt;addr&gt; | Print information about a specific thread |
-
-To enable the debugger, pass "break" as command line argument.
 
 ## Wiki
 https://github.com/Kinnay/Wii-U-Firmware-Emulator/wiki
