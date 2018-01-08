@@ -8,10 +8,10 @@ This emulator consists of both Python and C++ code. The C++ code (which is compi
 Requirements:
 * A fw.img file, this contains the first code that's run by the emulator
 * A NAND dump (otp, seeprom, slc and mlc)
-* Python 3 (tested with 3.6.3)
+* Python 3 (tested with 3.6.4)
 * PyCrypto / PyCryptodome (for AES hardware)
 
-Before running this, you need to update the path to fw.img in main.py and the paths to your NAND dump files in hardware.py. Also create a file named espresso_key.txt and put the espresso ancast key into it as ascii hex digits.
+Before running this, you need to update the path to fw.img in main.py and the paths to your NAND dump files in hardware.py. This emulator writes to these files if they're accessed by IOSU, so it may be a good idea to use a backup. Also create a file named espresso_key.txt and put the espresso ancast key into it as ascii hex digits.
 
 Pass "noprint" as a command line argument to disable print messages on unimplemented hardware reads/writes. Pass "logall" to enable hack that sets the COS log level to the highest possible value. Pass "logsys" to enable IOSU syscall logging. This generates ipc.txt (ipc requests like ioctls), messages.txt (message queue operations) and files.txt (files openend by IOSU). It slows down the code a lot however.
 
