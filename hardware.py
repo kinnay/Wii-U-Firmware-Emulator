@@ -1399,9 +1399,6 @@ LT_IRQ_ARM_END = 0xD000488
 LT_GPIO2_START = 0xD000520
 LT_GPIO2_END = 0xD000560
 
-LT_I2C_START = 0xD000570
-LT_I2C_END = 0xD000588
-
 BUS_CLOCK_SPEED = 248625000
 TIMER_SPEED = 0x1DA36E
 HARDWARE_VERSION_ACR = 0x21
@@ -1626,90 +1623,132 @@ class GPIOController:
 		elif addr == LT_GPIO_OWNER: self.gpio_owner = value
 		else:
 			print("GPIO WRITE 0x%X 0x%08X at %08X" %(addr, value, self.scheduler.pc()))
-			
 
-LT_I2C_CLOCK = 0xD000570
-LT_I2C_INOUT_DATA = 0xD000574
-LT_I2C_INOUT_CTRL = 0xD000578
-LT_I2C_INOUT_SIZE = 0xD00057C
-LT_I2C_INT_MASK = 0xD000580
-LT_I2C_INT_STATE = 0xD000584
+
+I2C_CLOCK = 0
+I2C_WRITE_DATA = 1
+I2C_WRITE_CTRL = 2
+I2C_READ_DATA = 3
+I2C_INT_MASK = 4
+I2C_INT_STATE = 5
+
+LT_I2C_REGS = {
+	0xD000570: I2C_CLOCK,
+	0xD000574: I2C_WRITE_DATA,
+	0xD000578: I2C_WRITE_CTRL,
+	0xD00057C: I2C_READ_DATA,
+	0xD000580: I2C_INT_MASK,
+	0xD000584: I2C_INT_STATE
+}
+
+LT_I2C_REGS_PPC = {
+	0xD000068: I2C_INT_MASK,
+	0xD00006C: I2C_INT_STATE,
+	0xD000250: I2C_CLOCK,
+	0xD000254: I2C_WRITE_DATA,
+	0xD000258: I2C_WRITE_CTRL,
+	0xD00025C: I2C_READ_DATA
+}
 
 class I2CController:
-
-	LISTEN = 0
-	READ = 1
-	WRITE = 2
-
-	def __init__(self, scheduler, armirq):
+	def __init__(self, scheduler, irq, espresso):
 		self.scheduler = scheduler
-		self.armirq = armirq
-	
-		self.value = 0
+		self.irq = irq
+		self.espresso = espresso
+		
+		self.readbuf = b""
+		self.readoffs = 0
+		self.readsize = False
+		self.writebuf = b""
+		self.writeval = 0
+		self.offset = 0
+		
+		self.clock = 0
 		self.int_mask = 0
 		self.int_state = 0
 		
-		self.state = self.LISTEN
+	def read(self, addr):
+		if addr == I2C_CLOCK: return self.clock
+		elif addr == I2C_WRITE_DATA: return self.writeval
+		elif addr == I2C_READ_DATA:
+			if self.readsize:
+				self.readsize = False
+				return len(self.readbuf) << 16
+			
+			self.readoffs += 1
+			return self.readbuf[self.readoffs]
+		elif addr == I2C_WRITE_CTRL: return 0
+		elif addr == I2C_INT_MASK: return self.int_mask
+		elif addr == I2C_INT_STATE: return self.int_state
+		
+		raise RuntimeError("Read from I2C register %i" %addr)
+		
+	def write(self, addr, value):
+		if addr == I2C_CLOCK: self.clock = value
+		elif addr == I2C_WRITE_DATA: self.writeval = value
+		elif addr == I2C_WRITE_CTRL:
+			if value & 1:
+				self.writebuf += bytes([self.writeval & 0xFF])
+				if self.writeval & 0x100:
+					self.handle_data(self.writebuf)
+					self.writebuf = b""
+		elif addr == I2C_INT_MASK: self.int_mask = value
+		elif addr == I2C_INT_STATE: self.int_state &= ~value
+		else:
+			raise RuntimeError("Write to I2C register %i" %addr)
+		
+	def handle_data(self, data):
+		slave = data[0] >> 1
+		read = data[0] & 1
+		
+		if read:
+			self.readbuf = self.read_data(slave, self.offset, len(data) - 1)
+			self.readoffs = -1
+			self.readsize = not self.espresso
+		else:
+			if len(data) > 2:
+				self.write_data(slave, data[1], data[2:])
+			self.offset = data[1]
+
+		self.irq.trigger_irq_lt(14 - self.espresso)
+		
+	def read_data(self, slave, offset, length):
+		print("I2C READ 0x%X 0x%X 0x%X" %(slave, offset, length))
+		return bytes(length)
+		
+	def write_data(self, slave, offset, data):
+		print("I2C WRITE 0x%X 0x%X 0x%X" %(slave, offset, len(data)))
+
+
+LT_I2C_PPC_INOUT_DATA = 0xD000254
+LT_I2C_PPC_INOUT_CTRL = 0xD000258
+
+class I2CControllerPPC:
+	def __init__(self, scheduler, ppcirq):
+		self.scheduler = scheduler
+		self.ppcirq = ppcirq
+
+		self.value = 0
 		self.buffer = b""
-		self.data = b""
-		self.command = 0
 
 	def read(self, addr):
-		if addr == LT_I2C_INOUT_SIZE:
-			if self.offset == -1:
-				value = len(self.data) << 16
-			else:
-				value = self.data[self.offset]
-			self.offset += 1
-			return value
-		elif addr == LT_I2C_INT_MASK: return self.int_mask
-		elif addr == LT_I2C_INT_STATE: return self.int_state
-
-		print("I2C READ 0x%X at %08X" %(addr, self.scheduler.pc()))
+		print("I2C_PPC READ 0x%X at %08X" %(addr, self.scheduler.pc()))
 		return 0
-	
-	def write(self, addr, value):
-		if addr == LT_I2C_CLOCK: pass
-		elif addr == LT_I2C_INOUT_DATA: self.value = value
-		elif addr == LT_I2C_INOUT_CTRL:
-			if value:
-				self.handle_data(self.value)
-		elif addr == LT_I2C_INT_MASK: self.int_mask = value
-		elif addr == LT_I2C_INT_STATE: self.int_state = value
-		else:
-			print("I2C WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
-			
-	def handle_data(self, value):
-		if self.state == self.LISTEN:
-			if value >> 1 != 0x50:
-				raise NotImplementedError("I2C VALUE 0x%X at %08X" %(value, self.scheduler.pc()))
-
-			if value & 1:
-				self.state = self.READ
-			else:
-				self.state = self.WRITE
-				
-		else:
-			self.buffer += bytes([value & 0xFF])
-			if value & 0x100:
-				if self.state == self.READ:
-					self.finish_read()
-				else:
-					self.finish_write()
-				self.state = self.LISTEN
-
-				self.int_state = 0
-				self.armirq.trigger_irq_lt(14)
-				
-	def finish_read(self):
-		self.offset = -1
-		if self.command == 0x41: self.data = b"\0" #SystemEventFlag
-		else:
-			print("I2C CMD 0x%X at %08X" %(self.command, self.scheduler.pc()))
-			self.data = b""
 		
+	def write(self, addr, value):
+		if addr == LT_I2C_PPC_INOUT_DATA: self.value = value
+		elif addr == LT_I2C_PPC_INOUT_CTRL:
+			if value & 1:
+				self.handle_data(self.value)
+		print("I2C_PPC WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
+		
+	def handle_data(self, value):
+		self.buffer += bytes([value & 0xFF])
+		if value & 0x100:
+			self.finish_write()
+			
 	def finish_write(self):
-		self.command = self.buffer[0]
+		self.buffer = b""
 
 			
 class ASICBusController:
@@ -1828,6 +1867,8 @@ class IRQController:
 		
 	def trigger_irq_all(self, type): self.intsr_ahball |= (1 << type)
 	def trigger_irq_lt(self, type): self.intsr_ahblt |= (1 << type)
+	def is_triggered_all(self, type): return self.intsr_ahball & self.intmr_ahball & (1 << type)
+	def is_triggered_lt(self, type): return self.intsr_ahblt & self.intmr_ahblt & (1 << type)
 		
 	def check_interrupts(self):
 		self.update_interrupts()
@@ -1879,7 +1920,8 @@ class LatteController:
 		self.otp = OTPController(scheduler)
 		self.gpio = GPIOController(scheduler, GPIOGroup1(scheduler))
 		self.gpio2 = GPIOController(scheduler, GPIOGroup2(scheduler))
-		self.i2c = I2CController(scheduler, self.irq_arm)
+		self.i2c = I2CController(scheduler, self.irq_arm, False)
+		self.i2c_ppc = I2CController(scheduler, self.irq_ppc[1], True)
 		self.asicbus = ASICBusController(scheduler)
 	
 		self.timer = 0
@@ -1955,7 +1997,6 @@ class LatteController:
 		elif addr == LT_D800500: return self.d800500
 		elif addr == LT_D800504: return self.d800504
 		elif LT_GPIO2_START <= addr < LT_GPIO2_END: return self.gpio2.read(addr - LT_GPIO2_START)
-		elif LT_I2C_START <= addr < LT_I2C_END: return self.i2c.read(addr)
 		elif addr == LT_ASICREV_CCR: return HARDWARE_VERSION_CCR
 		elif addr == LT_DEBUG: return self.debug
 		elif addr == LT_COMPAT_MEMCTRL_STATE: return self.compat_memctrl_state
@@ -1968,6 +2009,8 @@ class LatteController:
 		elif addr == LT_ABIF_CPLTL_DATA: return self.asicbus.get_data()
 		elif addr == LT_D800628: return self.d800628
 		elif addr == LT_60XE_CFG: return self.cfg_60xe
+		elif addr in LT_I2C_REGS: return self.i2c.read(LT_I2C_REGS[addr])
+		elif addr in LT_I2C_REGS_PPC: return self.i2c_ppc.read(LT_I2C_REGS_PPC[addr])
 
 		print("LATTE READ 0x%X at %08X" %(addr, self.scheduler.pc()))
 		return 0
@@ -2014,7 +2057,6 @@ class LatteController:
 		elif addr == LT_D800504: self.d800504 = value
 		elif addr == LT_OTPPROT: pass
 		elif LT_GPIO2_START <= addr < LT_GPIO2_END: self.gpio2.write(addr - LT_GPIO2_START, value)
-		elif LT_I2C_START <= addr < LT_I2C_END: self.i2c.write(addr, value)
 		elif addr == LT_DEBUG: self.debug = value
 		elif addr == LT_COMPAT_MEMCTRL_STATE: self.compat_memctrl_state = value
 		elif addr == LT_IOP2X:
@@ -2030,6 +2072,8 @@ class LatteController:
 		elif addr == LT_D800628: self.d800628 = value
 		elif addr == LT_60XE_CFG: self.cfg_60xe = value
 		elif addr == LT_D800660: pass
+		elif addr in LT_I2C_REGS: self.i2c.write(LT_I2C_REGS[addr], value)
+		elif addr in LT_I2C_REGS_PPC: self.i2c_ppc.write(LT_I2C_REGS_PPC[addr], value)
 		else:
 			print("LATTE WRITE 0x%X 0x%08X at %08X" %(addr, value, self.scheduler.pc()))
 			
@@ -2059,9 +2103,8 @@ PI_INTSR = 0
 PI_INTMR = 4
 
 class PIController:
-	def __init__(self, scheduler, ipc, irq, index):
+	def __init__(self, scheduler, irq, index):
 		self.scheduler = scheduler
-		self.ipc = ipc
 		self.irq = irq
 		self.index = index
 
@@ -2088,10 +2131,13 @@ class PIController:
 		return self.intsr & self.intmr
 		
 	def update_interrupts(self):
-		if self.ipc.check_interrupts_ppc():
-			self.trigger_irq(26 + self.index * 2)
 		if self.irq.check_interrupts():
 			self.trigger_irq(24)
+
+		if self.irq.is_triggered_lt(26 + self.index * 2):
+			self.trigger_irq(26 + self.index * 2)
+		if self.irq.is_triggered_lt(13):
+			self.trigger_irq(13)
 
 
 #These are ignored for now:
@@ -2190,7 +2236,7 @@ class HardwareController:
 	def __init__(self, scheduler, physmem):
 		self.latte = LatteController(scheduler)
 
-		self.pi = [PIController(scheduler, self.latte.ipc[i], self.latte.irq_ppc[i], i) for i in range(3)]
+		self.pi = [PIController(scheduler, self.latte.irq_ppc[i], i) for i in range(3)]
 		self.tcl = TCLController(scheduler, physmem)
 		
 		armirq = self.latte.irq_arm
