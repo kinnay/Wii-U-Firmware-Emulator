@@ -209,7 +209,8 @@ class PPCDebugger:
 			"getspr": Command(1, 1, self.getspr, "getspr <spr>"),
 			"setspr": Command(2, 2, self.setspr, "setspr <spr> <value>"),
 			"setpc": Command(1, 1, self.setpc, "setpc <value>"),
-			"modules": Command(0, 0, self.modules, "modules")
+			"modules": Command(0, 0, self.modules, "modules"),
+			"threads": Command(0, 0, self.threads, "threads")
 		}
 		
 	def name(self): return "PPC%i" %self.core_id
@@ -252,17 +253,26 @@ class PPCDebugger:
 		self.core.setpc(self.eval(value))
 		
 	def modules(self, current):
-		module = current.mem_reader.u32(0x10081018)
+		reader = current.mem_reader
+		module = reader.u32(0x10081018)
 		modules = {}
 		while module:
-			info = current.mem_reader.u32(module + 0x28)
-			path = current.mem_reader.string(current.mem_reader.u32(info))
-			codebase = current.mem_reader.u32(info + 4)
+			info = reader.u32(module + 0x28)
+			path = reader.string(reader.u32(info))
+			codebase = reader.u32(info + 4)
 			modules[codebase] = path
-			module = current.mem_reader.u32(module + 0x54)
+			module = reader.u32(module + 0x54)
 			
 		for codebase in sorted(modules.keys()):
 			print("%08X: %s" %(codebase, modules[codebase]))
+			
+	def threads(self, current):
+		reader = current.mem_reader
+		thread = reader.u32(0x100567F8)
+		while thread:
+			name = reader.string(reader.u32(thread + 0x5C0))
+			print("%08X: %s" %(thread, name))
+			thread = reader.u32(thread + 0x38C)
 		
 		
 class DebugShell:
