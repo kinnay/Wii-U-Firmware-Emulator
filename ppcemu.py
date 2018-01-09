@@ -163,8 +163,7 @@ class ExceptionHandler:
 		self.core.trigger_exception(self.core.DSI)
 	
 	def handle_isi(self, addr):
-		print("ISI exception: %08X" %addr)
-		self.core.trigger_exception(self.core.ISI)
+		raise RuntimeError("ISI exception: %08X" %addr)
 
 
 class PPCEmulator:
