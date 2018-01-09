@@ -119,7 +119,7 @@ class PPCCore {
 	void setSrReadCB(SRReadCB callback);
 	void setSrWriteCB(SRWriteCB callback);
 	
-	void triggerException(ExceptionType type);
+	bool triggerException(ExceptionType type);
 	
 	private:
 	SPRReadCB sprReadCB;

@@ -12,18 +12,18 @@ PPCCore::PPCCore(PPCLockMgr *lockMgr)
 	}
 }
 
-void PPCCore::triggerException(ExceptionType type) {
+bool PPCCore::triggerException(ExceptionType type) {
 	if (!(msr & 0x8000)) {
-		if (type == ExternalInterrupt) return;
+		if (type == ExternalInterrupt) return true;
 		if (type == Decrementer) {
 			decrementerPending = true;
-			return;
+			return true;
 		}
 	}
 	
 	srr0 = pc;
 	srr1 = (msr & 0xFF73) | 2; //Recoverable exception
-	setMsr(msr & ~0x4EF70);
+	if (!setMsr(msr & ~0x4EF70)) return false;
 
 	if (type == DSI) {
 		srr0 = pc - 4;
@@ -33,6 +33,7 @@ void PPCCore::triggerException(ExceptionType type) {
 	else if (type == ExternalInterrupt) pc = 0xFFF00500;
 	else if (type == Decrementer) pc = 0xFFF00900;
 	else if (type == SystemCall) pc = 0xFFF00C00;
+	return true;
 }
 
 bool PPCCore::setSpr(SPR spr, uint32_t value) {
@@ -99,7 +100,7 @@ bool PPCCore::setMsr(uint32_t value) {
 	
 	if ((msr & 0x8000) && decrementerPending) {
 		decrementerPending = false;
-		triggerException(Decrementer);
+		return triggerException(Decrementer);
 	}
 	return true;
 }

@@ -712,8 +712,7 @@ bool PPCInstr_mtspr(PPCInterpreter *cpu, PPCInstruction instr) {
 }
 
 bool PPCInstr_sc(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->triggerException(PPCCore::SystemCall);
-	return true;
+	return cpu->core->triggerException(PPCCore::SystemCall);
 }
 
 /********** SUPERVISOR INSTRUCTIONS **********/

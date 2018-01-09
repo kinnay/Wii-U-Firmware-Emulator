@@ -208,7 +208,9 @@ PyObject *PPCCore_triggerException(PPCCoreObj *self, PyObject *arg) {
 		return NULL;
 	}
 	
-	self->object->triggerException((PPCCore::ExceptionType)type);
+	if (!self->object->triggerException((PPCCore::ExceptionType)type)) {
+		return NULL;
+	}
 	Py_RETURN_NONE;
 }
 
