@@ -45,7 +45,8 @@ Using this emulator you can actually see what IOSU and the PowerPC kernel/loader
 | getspr &lt;spr&gt; | Print a special purpose register |
 | setspr &lt;spr&gt; &lt;value&gt; | Change a special purpose register |
 | setpc &lt;value&gt; | Change the program counter |
-| modules | Print a list of loaded RPL files |
+| modules | Print list of loaded RPL files |
+| module &lt;name&gt; | Print information about a specific module |
 | threads | Print thread list |
 | thread &lt;addr&gt; | Print information about a specific thread |
 

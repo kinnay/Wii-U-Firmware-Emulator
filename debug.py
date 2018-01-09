@@ -211,6 +211,7 @@ class PPCDebugger:
 			"setspr": Command(2, 2, self.setspr, "setspr <spr> <value>"),
 			"setpc": Command(1, 1, self.setpc, "setpc <value>"),
 			"modules": Command(0, 0, self.modules, "modules"),
+			"module": Command(1, 1, self.module, "module <name>"),
 			"threads": Command(0, 0, self.threads, "threads"),
 			"thread": Command(1, 1, self.thread, "thread <addr>")
 		}
@@ -278,6 +279,22 @@ class PPCDebugger:
 			
 		for codebase in sorted(modules.keys()):
 			print("%08X: %s" %(codebase, modules[codebase]))
+			
+	def module(self, current, name):
+		reader = current.mem_reader
+		module = reader.u32(0x10081018)
+		while module:
+			info = reader.u32(module + 0x28)
+			path = reader.string(reader.u32(info))
+			if name in path:
+				codebase = reader.u32(info + 4)
+				codesize = reader.u32(info + 0xC)
+				database = reader.u32(info + 0x10)
+				datasize = reader.u32(info + 0x18)
+				print("%s:" %path)
+				print("\t.text: %08X - %08X" %(codebase, codebase + codesize))
+				print("\t.data: %08X - %08X" %(database, database + datasize))
+			module = reader.u32(module + 0x54)
 			
 	def threads(self, current):
 		reader = current.mem_reader
