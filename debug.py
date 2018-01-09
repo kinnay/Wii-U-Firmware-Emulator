@@ -201,6 +201,7 @@ class ARMDebugger:
 	
 class PPCDebugger:
 	def __init__(self, emulator, core_id):
+		self.emulator = emulator
 		self.core = emulator.core
 		self.core_id = core_id
 		
@@ -253,6 +254,17 @@ class PPCDebugger:
 	def setpc(self, current, value):
 		self.core.setpc(self.eval(value))
 		
+	def find_module(self, addr):
+		reader = self.emulator.mem_reader
+		module = reader.u32(0x10081018)
+		while module:
+			info = reader.u32(module + 0x28)
+			codebase = reader.u32(info + 4)
+			codesize = reader.u32(info + 0xC)
+			if codebase <= addr < codebase + codesize:
+				return module
+			module = reader.u32(module + 0x54)
+		
 	def modules(self, current):
 		reader = current.mem_reader
 		module = reader.u32(0x10081018)
@@ -282,10 +294,17 @@ class PPCDebugger:
 		print("Stack trace:")
 		
 		sp = reader.u32(thread + 0xC)
-		for i in range(15):
-			if not sp: break
+		while sp:
 			lr = reader.u32(sp + 4)
-			print("\t%08X" %lr)
+			module = self.find_module(lr)
+			if module:
+				info = reader.u32(module + 0x28)
+				path = reader.string(reader.u32(info))
+				name = path.split("\\")[-1]
+				codebase = reader.u32(info + 4)
+				print("\t%08X: %s+0x%X" %(lr, name, lr - codebase))
+			else:
+				print("\t%08X" %lr)
 			sp = reader.u32(sp)
 		
 		
