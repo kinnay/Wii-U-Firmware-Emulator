@@ -216,7 +216,8 @@ class PPCDebugger:
 			"module": Command(1, 1, self.module, "module <name>"),
 			"threads": Command(0, 0, self.threads, "threads"),
 			"thread": Command(1, 1, self.thread, "thread <addr>"),
-			"find": Command(1, 1, self.find, "find <addr>")
+			"find": Command(1, 1, self.find, "find <addr>"),
+			"trace": Command(0, 0, self.trace, "trace")
 		}
 		
 	def name(self): return "PPC%i" %self.core_id
@@ -260,7 +261,8 @@ class PPCDebugger:
 		
 	def find_module(self, addr):
 		reader = self.emulator.mem_reader
-		module = reader.u32(0x10081018)
+		try: module = reader.u32(0x10081018)
+		except ValueError: return None
 		while module:
 			info = reader.u32(module + 0x28)
 			codebase = reader.u32(info + 4)
@@ -268,6 +270,24 @@ class PPCDebugger:
 			if codebase <= addr < codebase + codesize:
 				return module
 			module = reader.u32(module + 0x54)
+			
+	def print_stack_trace(self, sp, tabs=0):
+		tabs = "\t" * tabs
+		reader = self.emulator.mem_reader
+		while sp:
+			lr = reader.u32(sp + 4)
+			if not lr: return
+
+			module = self.find_module(lr)
+			if module:
+				info = reader.u32(module + 0x28)
+				path = reader.string(reader.u32(info))
+				name = path.split("\\")[-1]
+				codebase = reader.u32(info + 4)
+				print("%s%08X: %s+0x%X" %(tabs, lr, name, lr - codebase))
+			else:
+				print("%s%08X" %(tabs, lr))
+			sp = reader.u32(sp)
 		
 	def modules(self):
 		reader = self.emulator.mem_reader
@@ -312,20 +332,7 @@ class PPCDebugger:
 		reader = self.emulator.mem_reader
 		print("Name:", reader.string(reader.u32(thread + 0x5C0)))
 		print("Stack trace:")
-		
-		sp = reader.u32(thread + 0xC)
-		while sp:
-			lr = reader.u32(sp + 4)
-			module = self.find_module(lr)
-			if module:
-				info = reader.u32(module + 0x28)
-				path = reader.string(reader.u32(info))
-				name = path.split("\\")[-1]
-				codebase = reader.u32(info + 4)
-				print("\t%08X: %s+0x%X" %(lr, name, lr - codebase))
-			else:
-				print("\t%08X" %lr)
-			sp = reader.u32(sp)
+		self.print_stack_trace(reader.u32(thread + 0xC), 1)
 			
 	def find(self, addr):
 		addr = self.eval(addr)
@@ -339,6 +346,9 @@ class PPCDebugger:
 			print("%s+0x%X" %(name, addr - codebase))
 		else:
 			print("Unknown")
+			
+	def trace(self):
+		self.print_stack_trace(self.core.reg(1))
 		
 		
 class DebugShell:
