@@ -145,9 +145,11 @@ class Command:
 		self.usage = usage
 		
 	def call(self, emulator, args):
-		if not self.min_args <= len(args) <= self.max_args:
+		if len(args) < self.min_args:
 			self.print_usage()
 		else:
+			if len(args) > self.max_args and self.max_args != 0:
+				args = args[:self.max_args - 1] + [" ".join(args[self.max_args - 1:])]
 			self.func(emulator, *args)
 				
 	def print_usage(self):
