@@ -144,13 +144,13 @@ class Command:
 		self.func = func
 		self.usage = usage
 		
-	def call(self, emulator, args):
+	def call(self, args):
 		if len(args) < self.min_args:
 			self.print_usage()
 		else:
 			if len(args) > self.max_args and self.max_args != 0:
 				args = args[:self.max_args - 1] + [" ".join(args[self.max_args - 1:])]
-			self.func(emulator, *args)
+			self.func(*args)
 				
 	def print_usage(self):
 		print("Usage: %s" %self.usage)
@@ -237,7 +237,7 @@ class PPCDebugger:
 	def eval(self, source):
 		return eval(source, self.get_context())
 		
-	def state(self, current):
+	def state(self):
 		core = self.core
 		print("r0 = %08X r1 = %08X r2 = %08X r3 = %08X r4 = %08X" %(core.reg(0), core.reg(1), core.reg(2), core.reg(3), core.reg(4)))
 		print("r5 = %08X r6 = %08X r7 = %08X r8 = %08X r9 = %08X" %(core.reg(5), core.reg(6), core.reg(7), core.reg(8), core.reg(9)))
@@ -248,14 +248,14 @@ class PPCDebugger:
 		print("r30= %08X r31= %08X pc = %08X lr = %08X ctr= %08X" %(core.reg(30), core.reg(31), core.pc(), core.spr(core.LR), core.spr(core.CTR)))
 		print("cr = %08X" %(core.cr()))
 		
-	def getspr(self, current, spr):
+	def getspr(self, spr):
 		value = self.core.spr(int(spr))
 		print("%08X (%i)" %(value, value))
 		
-	def setspr(self, current, spr, value):
+	def setspr(self, spr, value):
 		self.core.setspr(int(spr), self.eval(value))
 
-	def setpc(self, current, value):
+	def setpc(self, value):
 		self.core.setpc(self.eval(value))
 		
 	def find_module(self, addr):
@@ -269,8 +269,8 @@ class PPCDebugger:
 				return module
 			module = reader.u32(module + 0x54)
 		
-	def modules(self, current):
-		reader = current.mem_reader
+	def modules(self):
+		reader = self.emulator.mem_reader
 		module = reader.u32(0x10081018)
 		modules = {}
 		while module:
@@ -283,8 +283,8 @@ class PPCDebugger:
 		for codebase in sorted(modules.keys()):
 			print("%08X: %s" %(codebase, modules[codebase]))
 			
-	def module(self, current, name):
-		reader = current.mem_reader
+	def module(self, name):
+		reader = self.emulator.mem_reader
 		module = reader.u32(0x10081018)
 		while module:
 			info = reader.u32(module + 0x28)
@@ -299,17 +299,17 @@ class PPCDebugger:
 				print("\t.data: %08X - %08X" %(database, database + datasize))
 			module = reader.u32(module + 0x54)
 			
-	def threads(self, current):
-		reader = current.mem_reader
+	def threads(self):
+		reader = self.emulator.mem_reader
 		thread = reader.u32(0x100567F8)
 		while thread:
 			name = reader.string(reader.u32(thread + 0x5C0))
 			print("%08X: %s" %(thread, name))
 			thread = reader.u32(thread + 0x38C)
 			
-	def thread(self, current, thread):
+	def thread(self, thread):
 		thread = self.eval(thread)
-		reader = current.mem_reader
+		reader = self.emulator.mem_reader
 		print("Name:", reader.string(reader.u32(thread + 0x5C0)))
 		print("Stack trace:")
 		
@@ -327,9 +327,9 @@ class PPCDebugger:
 				print("\t%08X" %lr)
 			sp = reader.u32(sp)
 			
-	def find(self, current, addr):
+	def find(self, addr):
 		addr = self.eval(addr)
-		reader = current.mem_reader
+		reader = self.emulator.mem_reader
 		module = self.find_module(addr)
 		if module:
 			info = reader.u32(module + 0x28)
@@ -424,13 +424,13 @@ class DebugShell:
 	def execute_command(self, cmd, args):
 		command = self.get_command(cmd)
 		if command:
-			command.call(self.current(), args)
+			command.call(args)
 
 	def eval(self, source):
 		return self.current().debugger.eval(source)
 
-	def help(self, current, cmd=None):
-		debugger = current.debugger
+	def help(self, cmd=None):
+		debugger = self.current().debugger
 
 		if cmd:
 			command = self.get_command(cmd)
@@ -439,26 +439,26 @@ class DebugShell:
 				
 		else:
 			print()
-			for plugin in [self, current.debugger]:
+			for plugin in [self, debugger]:
 				print("%s:" %plugin.__class__.__name__)
 				for cmd in sorted(plugin.commands.keys()):
 					print("\t%s" %cmd)
 				print()
 
-	def select(self, current, index):
+	def select(self, index):
 		self.current_override = self.scheduler.emulators[int(index)]
 
-	def breakp(self, current, op, address):
+	def breakp(self, op, address):
 		func = {
-			"add": current.breakpoints.add,
-			"del": current.breakpoints.remove
+			"add": self.current().breakpoints.add,
+			"del": self.current().breakpoints.remove
 		}[op]
 		func(self.eval(address), self.handle_breakpoint)
 
-	def watch(self, current, op, type, address):
+	def watch(self, op, type, address):
 		func = {
-			"add": current.breakpoints.watch,
-			"del": current.breakpoints.unwatch
+			"add": self.current().breakpoints.watch,
+			"del": self.current().breakpoints.unwatch
 		}[op]
 		
 		write = {
@@ -468,31 +468,31 @@ class DebugShell:
 
 		func(write, self.eval(address), self.handle_watchpoint)
 
-	def read(self, current, type, address, length):
+	def read(self, type, address, length):
 		address = self.eval(address)
 		if type == "virt":
-			address = current.virtmem.translate(address)
+			address = self.current().virtmem.translate(address)
 
-		data = current.physmem.read(address, self.eval(length))
+		data = self.current().physmem.read(address, self.eval(length))
 		print(data.hex())
 		if is_printable(data):
 			print(data.decode("ascii"))
 
-	def translate(self, current, address, type=pyemu.IVirtualMemory.DATA_READ):
-		addr = current.virtmem.translate(self.eval(address), type)
+	def translate(self, address, type=pyemu.IVirtualMemory.DATA_READ):
+		addr = self.current().virtmem.translate(self.eval(address), type)
 		print("0x%08X" %addr)
 		
-	def getreg(self, current, reg):
-		value = current.core.reg(int(reg))
+	def getreg(self, reg):
+		value = self.current().core.reg(int(reg))
 		print("0x%08X (%i)" %(value, value))
 		
-	def setreg(self, current, reg, value):
-		current.core.setreg(int(reg), self.eval(value))
+	def setreg(self, reg, value):
+		self.current().core.setreg(int(reg), self.eval(value))
 
-	def step(self, current):
-		current.interpreter.step()
+	def step(self):
+		self.current().interpreter.step()
 		
-	def evalcmd(self, current, source):
+	def evalcmd(self, source):
 		result = self.eval(source)
 		if type(result) == int:
 			print("%08X (%i)" %(result, result))
