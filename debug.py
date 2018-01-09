@@ -200,6 +200,21 @@ class ARMDebugger:
 		print("R10= %08X R11= %08X R12= %08X" %(core.reg(10), core.reg(11), core.reg(12)))
 		print("SP = %08X LR = %08X PC = %08X" %(core.reg(13), core.reg(14), core.reg(15)))
 
+		
+class Module:
+	def __init__(self, reader, module):
+		info = reader.u32(module + 0x28)
+		self.path = reader.string(reader.u32(info))
+		self.name = self.path.split("\\")[-1]
+		self.text = reader.u32(info + 4)
+		self.textsize = reader.u32(info + 0xC)
+		self.data = reader.u32(info + 0x10)
+		self.datasize = reader.u32(info + 0x18)
+		self.next = reader.u32(module + 0x54)
+		
+	def __repr__(self):
+		return "<module %s>" %self.name
+		
 
 class PPCDebugger:
 	def __init__(self, emulator, core_id):
@@ -223,7 +238,7 @@ class PPCDebugger:
 	def name(self): return "PPC%i" %self.core_id
 	def pc(self): return self.core.pc()
 	def lr(self): return self.core.spr(pyemu.PPCCore.LR)
-		
+
 	def get_context(self):
 		core = self.core
 		vars = {"r%i" %i: core.reg(i) for i in range(32)}
@@ -231,7 +246,8 @@ class PPCDebugger:
 			"sp": vars["r1"],
 			"pc": core.pc(),
 			"lr": core.spr(pyemu.PPCCore.LR),
-			"ctr": core.spr(pyemu.PPCCore.CTR)
+			"ctr": core.spr(pyemu.PPCCore.CTR),
+			"module": self.get_module_by_name
 		})
 		return vars
 		
@@ -259,17 +275,30 @@ class PPCDebugger:
 	def setpc(self, value):
 		self.core.setpc(self.eval(value))
 		
-	def find_module(self, addr):
+	def get_modules(self):
 		reader = self.emulator.mem_reader
-		try: module = reader.u32(0x10081018)
-		except ValueError: return None
-		while module:
-			info = reader.u32(module + 0x28)
-			codebase = reader.u32(info + 4)
-			codesize = reader.u32(info + 0xC)
-			if codebase <= addr < codebase + codesize:
+	
+		#Memory might not be mapped yet
+		try: addr = reader.u32(0x10081018)
+		except: return []
+		
+		modules = []
+		while addr:
+			module = Module(reader, addr)
+			modules.append(module)
+			addr = module.next
+		return modules
+		
+	def get_module_by_name(self, name):
+		for module in self.get_modules():
+			if name in module.path:
 				return module
-			module = reader.u32(module + 0x54)
+		
+	def get_module_by_addr(self, addr):
+		for module in self.get_modules():
+			if module.text <= addr < module.text + module.textsize or \
+			   module.data <= addr < module.data + module.datasize:
+				return module
 			
 	def print_stack_trace(self, sp, tabs=0):
 		tabs = "\t" * tabs
@@ -278,46 +307,22 @@ class PPCDebugger:
 			lr = reader.u32(sp + 4)
 			if not lr: return
 
-			module = self.find_module(lr)
+			module = self.get_module_by_addr(lr)
 			if module:
-				info = reader.u32(module + 0x28)
-				path = reader.string(reader.u32(info))
-				name = path.split("\\")[-1]
-				codebase = reader.u32(info + 4)
-				print("%s%08X: %s+0x%X" %(tabs, lr, name, lr - codebase))
+				print("%s%08X: %s+0x%X" %(tabs, lr, module.name, lr - module.text))
 			else:
 				print("%s%08X" %(tabs, lr))
 			sp = reader.u32(sp)
 		
 	def modules(self):
-		reader = self.emulator.mem_reader
-		module = reader.u32(0x10081018)
-		modules = {}
-		while module:
-			info = reader.u32(module + 0x28)
-			path = reader.string(reader.u32(info))
-			codebase = reader.u32(info + 4)
-			modules[codebase] = path
-			module = reader.u32(module + 0x54)
-			
-		for codebase in sorted(modules.keys()):
-			print("%08X: %s" %(codebase, modules[codebase]))
+		for module in sorted(self.get_modules(), key=lambda m: m.text):
+			print("%08X: %s" %(module.text, module.path))
 			
 	def module(self, name):
-		reader = self.emulator.mem_reader
-		module = reader.u32(0x10081018)
-		while module:
-			info = reader.u32(module + 0x28)
-			path = reader.string(reader.u32(info))
-			if name in path:
-				codebase = reader.u32(info + 4)
-				codesize = reader.u32(info + 0xC)
-				database = reader.u32(info + 0x10)
-				datasize = reader.u32(info + 0x18)
-				print("%s:" %path)
-				print("\t.text: %08X - %08X" %(codebase, codebase + codesize))
-				print("\t.data: %08X - %08X" %(database, database + datasize))
-			module = reader.u32(module + 0x54)
+		for module in filter(lambda m: name in m.path, self.get_modules()):
+			print("%s:" %module.path)
+			print("\t.text: %08X - %08X" %(module.text, module.text + module.textsize))
+			print("\t.data: %08X - %08X" %(module.data, module.data + module.datasize))
 			
 	def threads(self):
 		reader = self.emulator.mem_reader
@@ -335,15 +340,9 @@ class PPCDebugger:
 		self.print_stack_trace(reader.u32(thread + 0xC), 1)
 			
 	def find(self, addr):
-		addr = self.eval(addr)
-		reader = self.emulator.mem_reader
-		module = self.find_module(addr)
+		module = self.get_module_by_addr(addr)
 		if module:
-			info = reader.u32(module + 0x28)
-			path = reader.string(reader.u32(info))
-			name = path.split("\\")[-1]
-			codebase = reader.u32(info + 4)
-			print("%s+0x%X" %(name, addr - codebase))
+			print("%s+0x%X" %(module.name, addr - module.text))
 		else:
 			print("Unknown")
 			
