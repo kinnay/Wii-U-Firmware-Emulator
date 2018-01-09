@@ -199,8 +199,8 @@ class ARMDebugger:
 		print("R5 = %08X R6 = %08X R7 = %08X R8 = %08X R9 = %08X" %(core.reg(5), core.reg(6), core.reg(7), core.reg(8), core.reg(9)))
 		print("R10= %08X R11= %08X R12= %08X" %(core.reg(10), core.reg(11), core.reg(12)))
 		print("SP = %08X LR = %08X PC = %08X" %(core.reg(13), core.reg(14), core.reg(15)))
-	
-	
+
+
 class PPCDebugger:
 	def __init__(self, emulator, core_id):
 		self.emulator = emulator
@@ -215,7 +215,8 @@ class PPCDebugger:
 			"modules": Command(0, 0, self.modules, "modules"),
 			"module": Command(1, 1, self.module, "module <name>"),
 			"threads": Command(0, 0, self.threads, "threads"),
-			"thread": Command(1, 1, self.thread, "thread <addr>")
+			"thread": Command(1, 1, self.thread, "thread <addr>"),
+			"find": Command(1, 1, self.find, "find <addr>")
 		}
 		
 	def name(self): return "PPC%i" %self.core_id
@@ -325,6 +326,19 @@ class PPCDebugger:
 			else:
 				print("\t%08X" %lr)
 			sp = reader.u32(sp)
+			
+	def find(self, current, addr):
+		addr = self.eval(addr)
+		reader = current.mem_reader
+		module = self.find_module(addr)
+		if module:
+			info = reader.u32(module + 0x28)
+			path = reader.string(reader.u32(info))
+			name = path.split("\\")[-1]
+			codebase = reader.u32(info + 4)
+			print("%s+0x%X" %(name, addr - codebase))
+		else:
+			print("Unknown")
 		
 		
 class DebugShell:

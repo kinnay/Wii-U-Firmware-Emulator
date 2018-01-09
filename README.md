@@ -49,6 +49,7 @@ Using this emulator you can actually see what IOSU and the PowerPC kernel/loader
 | module &lt;name&gt; | Print information about a specific module |
 | threads | Print thread list |
 | thread &lt;addr&gt; | Print information about a specific thread |
+| find &lt;addr&gt; | Find and print the module that contains `addr` |
 
 ## Wiki
 https://github.com/Kinnay/Wii-U-Firmware-Emulator/wiki
