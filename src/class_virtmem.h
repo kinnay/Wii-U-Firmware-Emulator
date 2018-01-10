@@ -15,10 +15,12 @@ class MemoryRange : public Range {
 
 class VirtualMemory : public IVirtualMemory {
 	public:
+	VirtualMemory();
 	~VirtualMemory();
 	bool addRange(uint32_t start, uint32_t end, uint32_t phys);
 	bool translate(uint32_t *addr, uint32_t length, Access type);
 	
 	private:
 	std::vector<MemoryRange *> ranges;
+	MemoryRange *prevRange;
 };

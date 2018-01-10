@@ -7,6 +7,8 @@
 MemoryRange::MemoryRange(uint32_t start, uint32_t end, uint32_t phys)
 	: Range(start, end), phys(phys) {}
 	
+VirtualMemory::VirtualMemory() : prevRange(0) {}
+	
 VirtualMemory::~VirtualMemory() {
 	for (MemoryRange *r : ranges) {
 		delete r;
@@ -29,15 +31,23 @@ bool VirtualMemory::addRange(uint32_t start, uint32_t end, uint32_t phys) {
 	}
 	
 	ranges.push_back(range);
+	prevRange = 0;
 	return true;
 }
 
 bool VirtualMemory::translate(uint32_t *addr, uint32_t length, Access type) {
 	uint32_t start = *addr;
 	uint32_t end = start + length - 1;
+	
+	if (prevRange && prevRange->contains(start, end)) {
+		*addr = prevRange->phys + start - prevRange->start;
+		return true;
+	}
+	
 	for (MemoryRange *r : ranges) {
 		if (r->contains(start, end)) {
 			*addr = r->phys + start - r->start;
+			prevRange = r;
 			return true;
 		}
 	}
