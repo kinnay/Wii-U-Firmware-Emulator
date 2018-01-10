@@ -20,30 +20,31 @@ class CoprocHandler:
 
 	def write(self, coproc, opc, value, rn, rm, type):
 		if coproc == 15:
-			fields = [rn, rm, type]
+			if rn == 7:
+				if rm == 10 and type == 1: pass #Data synchronization barrier register
+				elif rm == 6 and type == 1: pass #Invalidate data cache line register
+				elif rm == 10 and type == 4: pass #Clean and invalidate entire data cache register
+				elif rm == 0 and type == 4: pass #Wait for interrupt
+				elif rm == 5 and type == 0: #Invalidate instruction cache line register
+					self.interpreter.invalidate_icache()
+				elif rm == 6 and type == 0: pass #Invalidate data cache line register
 
-			if fields == [7, 10, 1]: pass #Data synchronization barrier register
-			elif fields == [7, 6, 1]: pass #Invalidate data cache line register
-			elif fields == [3, 0, 0]: #Write domain access control register
+			elif rn == 3 and rm == 0 and type == 0: #Write domain access control register
 				self.domain_access_reg = value
-			elif fields == [7, 10, 4]: pass #Clean and invalidate entire data cache register
-			elif fields == [8, 7, 0]: pass #Invalidate unified TLB register
+				
+			elif rn == 8 and rm == 7 and type == 0: pass #Invalidate unified TLB register
 
-			elif fields == [1, 0, 0]: #Write control register
+			elif rn == 1 and rm == 0 and type == 0: #Write control register
 				self.control_reg = value
 				self.mmu.set_enabled(value & 1)
-			elif fields == [2, 0, 0]: #Write translation table base register 0
+			elif rn == 2 and rm == 0 and type == 0: #Write translation table base register 0
 				self.mmu.set_translation_table_base(value)
-			elif fields == [5, 0, 0]: #Write data fault status register
+			elif rn == 5 and rm == 0 and type == 0: #Write data fault status register
 				self.data_fault_status = value
-			elif fields == [5, 0, 1]: #Write instruction fault status register
+			elif rn == 5 and rm == 0 and type == 1: #Write instruction fault status register
 				self.instr_fault_status = value
-			elif fields == [6, 0, 0]: #Write fault address register
+			elif rn == 6 and rm == 0 and type == 0: #Write fault address register
 				self.fault_address = value
-			elif fields == [7, 0, 4]: pass #Wait for interrupt
-			elif fields == [7, 5, 0]: #Invalidate instruction cache line register
-				self.interpreter.invalidate_icache()
-			elif fields == [7, 6, 0]: pass #Invalidate data cache line register
 			else:
 				print("COPROC WRITE p%i %i %08X c%i c%i %i at %08X" %(coproc, opc, value, rn, rm, type, self.core.reg(15)))
 		else:
