@@ -18,6 +18,13 @@ class SpecialRange : public Range {
 	WriteCB writeCB;
 };
 
+class PhysicalRange : public Range {
+	public:
+	PhysicalRange(uint32_t start, uint32_t end);
+
+	void *buffer;
+};
+
 class PhysicalMemory : public IPhysicalMemory {
 	public:
 	~PhysicalMemory();
@@ -39,8 +46,7 @@ class PhysicalMemory : public IPhysicalMemory {
 	template <class T> int writeTmpl(uint32_t addr, T value);
 	
 	std::vector<SpecialRange *> specialRanges;
-	std::vector<Range *> ranges;
-	std::vector<void *> buffers;
+	std::vector<PhysicalRange *> ranges;
 	
 	bool checkOverlap(uint32_t start, uint32_t end);
 };
