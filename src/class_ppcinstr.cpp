@@ -763,7 +763,10 @@ bool PPCInstr_dcbz(PPCInterpreter *cpu, PPCInstruction instr) {
 }
 bool PPCInstr_dcbz_l(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
 bool PPCInstr_dcbst(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
-bool PPCInstr_icbi(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
+bool PPCInstr_icbi(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->invalidateICache();
+	return true;
+}
 
 /********** PAIRED SINGLE INSTRUCTIONS **********/
 

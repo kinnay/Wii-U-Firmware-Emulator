@@ -4,7 +4,7 @@
 #include "errors.h"
 
 Interpreter::Interpreter(IPhysicalMemory *physmem, IVirtualMemory *virtmem, bool bigEndian)
-	: physmem(physmem), virtmem(virtmem), watchpointHit(false) {
+	: physmem(physmem), virtmem(virtmem), watchpointHit(false), iCacheValid(false), iCacheEnabled(false) {
 	swapEndian = bigEndian != (Endian::getSystemEndian() == Endian::Big);
 }
 
@@ -31,6 +31,14 @@ void Interpreter::setWatchpointCB(bool write, WatchpointCB callback) {
 void Interpreter::setAlarm(uint32_t alarm, AlarmCB callback) {
 	alarmInterval = alarmTimer = alarm;
 	alarmCB = callback;
+}
+
+void Interpreter::setICacheEnabled(bool enabled) {
+	iCacheEnabled = enabled;
+}
+
+void Interpreter::invalidateICache() {
+	iCacheValid = false;
 }
 
 void Interpreter::invalidateMMUCache() {

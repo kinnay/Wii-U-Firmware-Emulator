@@ -69,6 +69,18 @@ PyObject *Interpreter_step(InterpreterObj *self, PyObject *args) {
 	Py_RETURN_NONE;
 }
 
+PyObject *Interpreter_setICacheEnabled(InterpreterObj *self, PyObject *arg) {
+	CHECK_INIT(self->object);
+	self->object->setICacheEnabled(PyObject_IsTrue(arg) != 0);
+	Py_RETURN_NONE;
+}
+
+PyObject *Interpreter_invalidateICache(InterpreterObj *self, PyObject *args) {
+	CHECK_INIT(self->object);
+	self->object->invalidateICache();
+	Py_RETURN_NONE;
+}
+
 PyObject *Interpreter_onDataError(InterpreterObj *self, PyObject *arg) {
 	CHECK_INIT(self->object);
 	if (!PyCallable_Check(arg)) {
@@ -293,6 +305,8 @@ PyObject *Interpreter_setAlarm(InterpreterObj *self, PyObject *args) {
 PyMethodDef Interpreter_methods[] = {
 	{"run", (PyCFunction)Interpreter_run, METH_VARARGS, NULL},
 	{"step", (PyCFunction)Interpreter_step, METH_NOARGS, NULL},
+	{"set_icache_enabled", (PyCFunction)Interpreter_setICacheEnabled, METH_O, NULL},
+	{"invalidate_icache", (PyCFunction)Interpreter_invalidateICache, METH_NOARGS, NULL},
 	{"on_data_error", (PyCFunction)Interpreter_onDataError, METH_O, NULL},
 	{"on_fetch_error", (PyCFunction)Interpreter_onFetchError, METH_O, NULL},
 	{"on_breakpoint", (PyCFunction)Interpreter_onBreakpoint, METH_O, NULL},

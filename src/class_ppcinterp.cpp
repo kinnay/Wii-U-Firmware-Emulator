@@ -11,7 +11,7 @@ PPCInterpreter::PPCInterpreter(PPCCore *core, IPhysicalMemory *physmem, IVirtual
 
 bool PPCInterpreter::step() {
 	PPCInstruction instr;
-	if (!read<uint32_t>(core->pc, &instr.value, true)) return false;
+	if (!readCode<uint32_t>(core->pc, &instr.value)) return false;
 
 	core->pc += 4;
 	

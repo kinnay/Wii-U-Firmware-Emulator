@@ -70,7 +70,7 @@ bool ARMInterpreter::handleUndefined() {
 
 bool ARMInterpreter::stepARM() {
 	ARMInstruction instr;
-	if (!read<uint32_t>(core->regs[ARMCore::PC], &instr.value, true)) {
+	if (!readCode<uint32_t>(core->regs[ARMCore::PC], &instr.value)) {
 		return false;
 	}
 
@@ -88,7 +88,7 @@ bool ARMInterpreter::stepARM() {
 
 bool ARMInterpreter::stepThumb() {
 	ARMThumbInstr instr;
-	if (!read<uint16_t>(core->regs[ARMCore::PC], &instr.value, true)) {
+	if (!readCode<uint16_t>(core->regs[ARMCore::PC], &instr.value)) {
 		return false;
 	}
 	

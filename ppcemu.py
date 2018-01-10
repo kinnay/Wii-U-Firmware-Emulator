@@ -178,6 +178,7 @@ class PPCEmulator:
 		self.virtmem.set_cache_enabled(True)
 		self.virtmem.set_rpn_size(15) #This is so weird
 		self.interpreter = pyemu.PPCInterpreter(self.core, self.physmem, self.virtmem, True)
+		self.interpreter.set_icache_enabled(True)
 		self.interrupts = hw.pi[core_id]
 
 		self.mem_reader = debug.MemoryReader(self.physmem, self.virtmem)

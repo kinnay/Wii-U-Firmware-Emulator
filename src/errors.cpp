@@ -33,6 +33,10 @@ bool ErrorOccurred() {
 	return PyErr_Occurred();
 }
 
+void ErrorClear() {
+	PyErr_Clear();
+}
+
 void Errors_Init() {
 	MyExc_ParseError = PyErr_NewException("pyemu.ParseError", NULL, NULL);
 }

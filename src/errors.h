@@ -11,5 +11,6 @@ void ValueError(const char *message, ...);
 void ParseError(const char *message, ...);
 
 bool ErrorOccurred();
+void ErrorClear();
 
 void Errors_Init();

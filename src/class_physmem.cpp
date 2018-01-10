@@ -9,6 +9,8 @@ SpecialRange::SpecialRange(uint32_t start, uint32_t end, ReadCB readCB, WriteCB 
 	
 PhysicalRange::PhysicalRange(uint32_t start, uint32_t end) : Range(start, end), buffer(0) {}
 	
+PhysicalMemory::PhysicalMemory() : prevRange(0) {}
+	
 PhysicalMemory::~PhysicalMemory() {
 	for (PhysicalRange *r : ranges) {
 		if (r->buffer) delete r->buffer;
@@ -57,6 +59,7 @@ bool PhysicalMemory::addRange(uint32_t start, uint32_t end) {
 	range->buffer = buffer;
 	
 	ranges.push_back(range);
+	prevRange = 0;
 	return true;
 }
 
@@ -77,10 +80,15 @@ bool PhysicalMemory::addSpecial(uint32_t start, uint32_t end, ReadCB readCB, Wri
 int PhysicalMemory::read(uint32_t addr, void *data, uint32_t length) {
 	uint32_t end = addr + length - 1;
 	
+	if (prevRange && prevRange->contains(addr, end)) {
+		memcpy(data, (char *)prevRange->buffer + addr - prevRange->start, length);
+		return 0;
+	}
+	
 	for (PhysicalRange *r : ranges) {
 		if (r->contains(addr, end)) {
-			void *buffer = r->buffer;
-			memcpy(data, (char *)buffer + addr - r->start, length);
+			memcpy(data, (char *)r->buffer + addr - r->start, length);
+			prevRange = r;
 			return 0;
 		}
 	}
@@ -98,10 +106,15 @@ int PhysicalMemory::read(uint32_t addr, void *data, uint32_t length) {
 int PhysicalMemory::write(uint32_t addr, const void *data, uint32_t length) {
 	uint32_t end = addr + length - 1;
 	
+	if (prevRange && prevRange->contains(addr, end)) {
+		memcpy((char *)prevRange->buffer + addr - prevRange->start, data, length);
+		return 0;
+	}
+	
 	for (PhysicalRange *r : ranges) {
 		if (r->contains(addr, end)) {
-			void *buffer = r->buffer;
-			memcpy((char *)buffer + addr - r->start, data, length);
+			memcpy((char *)r->buffer + addr - r->start, data, length);
+			prevRange = r;
 			return 0;
 		}
 	}
@@ -129,10 +142,15 @@ template <class T>
 int PhysicalMemory::readTmpl(uint32_t addr, T *value) {
 	uint32_t end = addr + sizeof(T) - 1;
 	
+	if (prevRange && prevRange->contains(addr, end)) {
+		*value = *(T *)((char *)prevRange->buffer + addr - prevRange->start);
+		return 0;
+	}
+	
 	for (PhysicalRange *r : ranges) {
 		if (r->contains(addr, end)) {
-			void *buffer = r->buffer;
-			*value = *(T *)((char *)buffer + addr - r->start);
+			*value = *(T *)((char *)r->buffer + addr - r->start);
+			prevRange = r;
 			return 0;
 		}
 	}
@@ -151,10 +169,15 @@ template <class T>
 int PhysicalMemory::writeTmpl(uint32_t addr, T value) {
 	uint32_t end = addr + sizeof(T) - 1;
 	
+	if (prevRange && prevRange->contains(addr, end)) {
+		*(T *)((char *)prevRange->buffer + addr - prevRange->start) = value;
+		return 0;
+	}
+	
 	for (PhysicalRange *r : ranges) {
 		if (r->contains(addr, end)) {
-			void *buffer = r->buffer;
-			*(T *)((char *)buffer + addr - r->start) = value;
+			*(T *)((char *)r->buffer + addr - r->start) = value;
+			prevRange = r;
 			return 0;
 		}
 	}

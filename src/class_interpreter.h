@@ -3,9 +3,13 @@
 
 #include "interface_physmem.h"
 #include "interface_virtmem.h"
+#include "errors.h"
+
 #include <functional>
 #include <vector>
 #include <cstdint>
+
+const int iCacheSize = 0x30;
 
 class Interpreter {
 	public:
@@ -18,23 +22,61 @@ class Interpreter {
 	Interpreter(IPhysicalMemory *physmem, IVirtualMemory *virtmem, bool bigEndian);
 	
 	template <class T>
-	bool read(uint32_t addr, T *value, bool isCode=false) {
-		#ifdef WATCHPOINTS
-		if (!isCode) {
-			checkWatchpoints(false, addr, sizeof(T));
+	bool readCode(uint32_t addr, T *value) {
+		if (iCacheEnabled) {
+			if (iCacheValid && iCacheStart <= addr && addr < iCacheStart + iCacheSize) {
+				//Cache hit
+				*value = *(T *)(&instructionCache[addr - iCacheStart]);
+				if (swapEndian) Endian::swap(value);
+				return true;
+			}
+			
+			else {
+				//Cache miss
+				if (virtmem->translate(&addr, iCacheSize, IVirtualMemory::Instruction)) {
+					if (physmem->read(addr, instructionCache, iCacheSize) == 0) {
+						iCacheStart = addr;
+						iCacheValid = true;
+						*value = *(T *)(&instructionCache[addr - iCacheStart]);
+						if (swapEndian) Endian::swap(value);
+						return true;
+					}
+				}
+				ErrorClear();
+			}
 		}
+		
+		if (!virtmem->translate(&addr, sizeof(T), IVirtualMemory::Instruction)) {
+			handleMemoryError(addr, false, true);
+			return false;
+		}
+		
+		int result = physmem->read(addr, value);
+		if (result == -1) return false;
+		else if (result == -2) {
+			handleMemoryError(addr, false, true);
+			return false;
+		}
+		
+		if (swapEndian) Endian::swap(value);
+		return true;
+	}
+	
+	template <class T>
+	bool read(uint32_t addr, T *value) {
+		#ifdef WATCHPOINTS
+		checkWatchpoints(false, addr, sizeof(T));
 		#endif
 
-		IVirtualMemory::Access type = isCode ? IVirtualMemory::Instruction : IVirtualMemory::DataRead;
-		if (!virtmem->translate(&addr, sizeof(T), type)) {
-			handleMemoryError(addr, false, isCode);
+		if (!virtmem->translate(&addr, sizeof(T), IVirtualMemory::DataRead)) {
+			handleMemoryError(addr, false, false);
 			return false;
 		}
 
 		int result = physmem->read<sizeof(T)>(addr, value);
 		if (result == -1) return false;
 		else if (result == -2) {
-			handleMemoryError(addr, false, isCode);
+			handleMemoryError(addr, false, false);
 			return false;
 		}
 		if (swapEndian) Endian::swap<sizeof(T)>(value);
@@ -77,6 +119,8 @@ class Interpreter {
 	std::vector<uint32_t> watchpointsRead;
 	std::vector<uint32_t> watchpointsWrite;
 	
+	void setICacheEnabled(bool enabled);
+	void invalidateICache();
 	void invalidateMMUCache();
 	
 	private:
@@ -97,6 +141,11 @@ class Interpreter {
 	uint32_t alarmTimer;
 	uint32_t alarmInterval;
 	AlarmCB alarmCB;
+	
+	uint8_t instructionCache[iCacheSize];
+	uint32_t iCacheStart;
+	bool iCacheEnabled;
+	bool iCacheValid;
 	
 	bool swapEndian;
 	

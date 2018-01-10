@@ -27,6 +27,7 @@ class PhysicalRange : public Range {
 
 class PhysicalMemory : public IPhysicalMemory {
 	public:
+	PhysicalMemory();
 	~PhysicalMemory();
 	bool addRange(uint32_t start, uint32_t end);
 	bool addSpecial(uint32_t start, uint32_t end, ReadCB readCB, WriteCB writeCB);
@@ -47,6 +48,7 @@ class PhysicalMemory : public IPhysicalMemory {
 	
 	std::vector<SpecialRange *> specialRanges;
 	std::vector<PhysicalRange *> ranges;
+	PhysicalRange *prevRange;
 	
 	bool checkOverlap(uint32_t start, uint32_t end);
 };

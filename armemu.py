@@ -7,7 +7,8 @@ import debug
 import log
 
 class CoprocHandler:
-	def __init__(self, core, mmu):
+	def __init__(self, interpreter, core, mmu):
+		self.interpreter = interpreter
 		self.core = core
 		self.mmu = mmu
 
@@ -34,7 +35,8 @@ class CoprocHandler:
 			elif fields == [6, 0, 0]: #Write fault address register
 				self.fault_address = value
 			elif fields == [7, 0, 4]: pass #Wait for interrupt
-			elif fields == [7, 5, 0]: pass #Invalidate instruction cache line register
+			elif fields == [7, 5, 0]: #Invalidate instruction cache line register
+				self.interpreter.invalidate_icache()
 			elif fields == [7, 6, 0]: pass #Invalidate data cache line register
 			elif fields == [7, 6, 1]: pass #Invalidate data cache line register
 			elif fields == [7, 10, 1]: pass #Data synchronization barrier register
@@ -434,13 +436,14 @@ class ARMEmulator:
 		self.virtmem = pyemu.ARMMMU(physmem, True)
 		self.virtmem.set_cache_enabled(True)
 		self.interpreter = pyemu.ARMInterpreter(self.core, physmem, self.virtmem, True)
+		self.interpreter.set_icache_enabled(True)
 		self.interpreter.set_alarm(5000, hw.latte.update_timer)
 		self.interrupts = hw.latte.irq_arm
 		
 		self.mem_reader = debug.MemoryReader(physmem, self.virtmem)
 		self.mem_writer = debug.MemoryWriter(physmem, self.virtmem)
 		self.breakpoints = debug.BreakpointHandler(self.interpreter)
-		self.coproc_handler = CoprocHandler(self.core, self.virtmem)
+		self.coproc_handler = CoprocHandler(self.interpreter, self.core, self.virtmem)
 		self.svc_handler = SVCHandler(self.core, self.mem_reader, self.mem_writer)
 		self.und_handler = UNDHandler(self.breakpoints, self.core, self.mem_reader, self.mem_writer)
 		self.exc_handler = ExceptionHandler(self.core)
