@@ -24,7 +24,8 @@ module = Extension(
 	name = "pyemu",
 	sources = sources,
 	define_macros = macros,
-	extra_compile_args = ["/WX"]
+	extra_compile_args = ["/WX"],
+	extra_link_args = ["/DEBUG"]
 )
 
 setup(
