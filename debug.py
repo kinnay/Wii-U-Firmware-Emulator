@@ -340,6 +340,7 @@ class PPCDebugger:
 		self.print_stack_trace(reader.u32(thread + 0xC), 1)
 			
 	def find(self, addr):
+		addr = self.eval(addr)
 		module = self.get_module_by_addr(addr)
 		if module:
 			print("%s+0x%X" %(module.name, addr - module.text))
@@ -347,7 +348,13 @@ class PPCDebugger:
 			print("Unknown")
 			
 	def trace(self):
-		self.print_stack_trace(self.core.reg(1))
+		for addr in [self.core.pc(), self.core.spr(self.core.LR)]:
+			module = self.get_module_by_addr(addr)
+			if module: print("%08X: %s+0x%X" %(addr, module.name, addr - module.text))
+			else: print("%08X" %addr)
+
+		sp = self.emulator.mem_reader.u32(self.core.reg(1))
+		self.print_stack_trace(sp)
 		
 		
 class DebugShell:
