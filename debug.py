@@ -348,12 +348,17 @@ class PPCDebugger:
 			print("Unknown")
 			
 	def trace(self):
-		for addr in [self.core.pc(), self.core.spr(self.core.LR)]:
+		#Stack frame might be set up only partially
+		lr = self.core.spr(self.core.LR)
+		for addr in [self.core.pc(), lr]:
 			module = self.get_module_by_addr(addr)
 			if module: print("%08X: %s+0x%X" %(addr, module.name, addr - module.text))
 			else: print("%08X" %addr)
 
-		sp = self.emulator.mem_reader.u32(self.core.reg(1))
+		reader = self.emulator.mem_reader
+		sp = reader.u32(self.core.reg(1))
+		if sp and reader.u32(sp + 4) == lr:
+			sp = reader.u32(sp)
 		self.print_stack_trace(sp)
 		
 		
