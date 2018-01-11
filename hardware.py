@@ -1719,37 +1719,6 @@ class I2CController:
 	def write_data(self, slave, offset, data):
 		print("I2C WRITE 0x%X 0x%X 0x%X" %(slave, offset, len(data)))
 
-
-LT_I2C_PPC_INOUT_DATA = 0xD000254
-LT_I2C_PPC_INOUT_CTRL = 0xD000258
-
-class I2CControllerPPC:
-	def __init__(self, scheduler, ppcirq):
-		self.scheduler = scheduler
-		self.ppcirq = ppcirq
-
-		self.value = 0
-		self.buffer = b""
-
-	def read(self, addr):
-		print("I2C_PPC READ 0x%X at %08X" %(addr, self.scheduler.pc()))
-		return 0
-		
-	def write(self, addr, value):
-		if addr == LT_I2C_PPC_INOUT_DATA: self.value = value
-		elif addr == LT_I2C_PPC_INOUT_CTRL:
-			if value & 1:
-				self.handle_data(self.value)
-		print("I2C_PPC WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
-		
-	def handle_data(self, value):
-		self.buffer += bytes([value & 0xFF])
-		if value & 0x100:
-			self.finish_write()
-			
-	def finish_write(self):
-		self.buffer = b""
-
 			
 class ASICBusController:
 	def __init__(self, scheduler):
