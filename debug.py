@@ -343,7 +343,13 @@ class PPCDebugger:
 		addr = self.eval(addr)
 		module = self.get_module_by_addr(addr)
 		if module:
-			print("%s+0x%X" %(module.name, addr - module.text))
+			if module.text <= addr <= module.text + module.textsize:
+				segment = "text"
+				addr -= module.text
+			else:
+				segment = "data"
+				addr -= module.data
+			print("%s:%s+0x%X" %(module.name, segment, addr))
 		else:
 			print("Unknown")
 			
