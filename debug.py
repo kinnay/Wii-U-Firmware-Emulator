@@ -415,51 +415,52 @@ class PPCDebugger:
 		sdr1 = mmu.get_sdr1()
 		pagetbl = sdr1 & 0xFFFF0000
 		pagemask = sdr1 & 0x1FF
+		hashmask = (pagemask << 10) | 0x3FF
 		
 		print("\nPage table (%08X):" %pagetbl)
 
 		pagemap = []
 		current = None
-		for addr in range(0, 0x100000000, 0x20000):
-			sr = mmu.get_sr(addr >> 28)
+		pageidx = 0
+		for segment in range(16):
+			sr = mmu.get_sr(segment)
 			if sr >> 31: #Direct-store
 				if current: pagemap.append(current)
 				current = None
-
+			
 			else:
 				ks = (sr >> 30) & 1
 				kp = (sr >> 29) & 1
 				nx = (sr >> 28) & 1
 				vsid = sr & 0xFFFFFF
-				
-				pageidx = (addr >> 17) & 0x1FFFF
-				hash = (vsid & 0x7FFFF) ^ pageidx
-				hash &= (pagemask << 10) | 0x3FF
-				api = pageidx >> 5
-				
-				pte = pagetbl | (hash << 6)
-				for i in range(8):
-					ptehi = reader.u32(pte + i * 8, False)
-					ptelo = reader.u32(pte + i * 8 + 4, False)
+			
+				for addr in range(segment * 0x10000000, (segment + 1) * 0x10000000, 0x20000):
+					hash = ((vsid & 0x7FFFF) ^ pageidx) & hashmask
+					api = pageidx >> 5
 					
-					if not ptehi >> 31: continue
-					if (ptehi >> 6) & 1: continue
-					if (ptehi >> 7) & 0xFFFFFF != vsid: continue
-					if (ptehi & 0x3F) != api: continue
-					
-					pp = ptelo & 3
-					phys = ptelo & 0xFFFFF000
-					
-					if current and current[2:] == [ks, kp, nx, pp, phys - current[1]]:
-						current[1] += 0x20000
+					pteaddr = pagetbl | (hash << 6)
+					ptes = struct.unpack_from(">8Q", reader.read(pteaddr, 64, False))
+					for pte in ptes:
+						if not pte >> 63: continue
+						if (pte >> 38) & 1: continue
+						if (pte >> 39) & 0xFFFFFF != vsid: continue
+						if (pte >> 32) & 0x3F != api: continue
+						
+						pp = pte & 3
+						phys = pte & 0xFFFFF000
+						
+						if current and current[2:] == [ks, kp, nx, pp, phys - current[1]]:
+							current[1] += 0x20000
+						else:
+							if current: pagemap.append(current)
+							current = [addr, 0x20000, ks, kp, nx, pp, phys]
+						break
+
 					else:
 						if current: pagemap.append(current)
-						current = [addr, 0x20000, ks, kp, nx, pp, phys]
-					break
-
-				else:
-					if current: pagemap.append(current)
-					current = None
+						current = None
+						
+					pageidx += 1
 					
 		if current: pagemap.append(current)
 		
@@ -476,7 +477,7 @@ class PPCDebugger:
 					start, start + size, phys, phys + size, user_access, kernel_access, no_execute
 				))
 		else:
-			print("no pages mapped")
+			print("\tno pages mapped")
 
 		
 class DebugShell:
