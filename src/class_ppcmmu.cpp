@@ -6,6 +6,13 @@
 PPCMMU::PPCMMU(IPhysicalMemory *physmem, bool bigEndian)
 	: physmem(physmem), dataTranslation(false), instrTranslation(false), supervisorMode(true)
 {
+	for (int i = 0; i < 8; i++) {
+		dbatu[i] = 0;
+		dbatl[i] = 0;
+		ibatu[i] = 0;
+		ibatl[i] = 0;
+	}
+
 	swapEndian = bigEndian != (Endian::getSystemEndian() == Endian::Big);
 	setRpnSize(20);
 }

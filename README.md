@@ -1,6 +1,6 @@
 # Wii U Firmware Emulator
 ## What does this do?
-This takes a fw.img and a NAND dump (otp, seeprom, slc and mlc) and tries to emulate the Wii U processors and hardware. It's currently able to emulate all the way through IOSU until it boots the PowerPC kernel, and the PowerPC processor actually loads the system libraries and root.rpx until it gets stuck initializing one of the graphics related drivers.
+This takes a fw.img and a NAND dump (otp, seeprom, slc and mlc) and tries to emulate the Wii U processors and hardware. It's currently able to emulate all the way through IOSU until it boots the PowerPC kernel, and the PowerPC processor actually loads the system libraries and root.rpx until it gets stuck initializing the HDMI driver in tve.rpl.
 
 This emulator consists of both Python and C++ code. The C++ code (which is compiled into a python module) contains the ARM and PowerPC interpreters and a few other classes, like a SHA1 calculator. This is kept as generic as possible and can in theory be used in any kind of emulator. The Python code is responsible for the things that don't require high performance. It emulates the hardware devices and provides a debugger for example.
 
@@ -51,6 +51,7 @@ Using this emulator you can actually see what IOSU and the PowerPC kernel/loader
 | thread &lt;addr&gt; | Print information about a specific thread |
 | find &lt;addr&gt; | Find and print the module that contains `addr` |
 | trace | Print stack trace |
+| memmap | Print the virtual memory map, this only prints BAT registers for now |
 
 ## Wiki
 https://github.com/Kinnay/Wii-U-Firmware-Emulator/wiki

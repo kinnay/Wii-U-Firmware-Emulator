@@ -232,7 +232,8 @@ class PPCDebugger:
 			"threads": Command(0, 0, self.threads, "threads"),
 			"thread": Command(1, 1, self.thread, "thread <addr>"),
 			"find": Command(1, 1, self.find, "find <addr>"),
-			"trace": Command(0, 0, self.trace, "trace")
+			"trace": Command(0, 0, self.trace, "trace"),
+			"memmap": Command(0, 0, self.memmap, "memmap")
 		}
 		
 	def name(self): return "PPC%i" %self.core_id
@@ -366,6 +367,49 @@ class PPCDebugger:
 		if sp and reader.u32(sp + 4) == lr:
 			sp = reader.u32(sp)
 		self.print_stack_trace(sp)
+		
+	def print_bat(self, name, batu, batl):
+		if batu & 3:
+			validity = {
+				1: "user mode only",
+				2: "supervisor only",
+				3: "user/supervisor"
+			}[batu & 3]
+			
+			access = [
+				"no access", "read only", "read/write", "read only"
+			][batl & 3]
+			
+			size = 0x20000
+			sizemask = (batu >> 2) & 0x7FF
+			while sizemask & 1:
+				size *= 2
+				sizemask >>= 1
+				
+			vaddr = batu & 0xFFFE0000
+			paddr = batl & 0xFFFE0000
+			print("\t%s: %08X-%08X => %08X-%08X (%s, %s)" %(
+				name, vaddr, vaddr + size, paddr, paddr + size, access, validity
+			))
+
+		else:
+			print("\t%s: disabled" %name)
+		
+	def memmap(self):
+		reader = self.emulator.mem_reader
+		mmu = self.emulator.virtmem
+		
+		print("DBAT:")
+		for i in range(8):
+			dbatu = mmu.get_dbatu(i)
+			dbatl = mmu.get_dbatl(i)
+			self.print_bat("dbat%i" %i, dbatu, dbatl)
+			
+		print("\nIBAT:")
+		for i in range(8):
+			ibatu = mmu.get_ibatu(i)
+			ibatl = mmu.get_ibatl(i)
+			self.print_bat("ibat%i" %i, ibatu, ibatl)
 		
 		
 class DebugShell:
