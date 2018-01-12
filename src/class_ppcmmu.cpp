@@ -4,15 +4,9 @@
 #include "errors.h"
 
 PPCMMU::PPCMMU(IPhysicalMemory *physmem, bool bigEndian)
-	: physmem(physmem), dataTranslation(false), instrTranslation(false), supervisorMode(true)
+	: physmem(physmem), dataTranslation(false), instrTranslation(false), supervisorMode(true),
+	  sdr1(0), dbatu{}, dbatl{}, ibatu{}, ibatl{}, sr{}
 {
-	for (int i = 0; i < 8; i++) {
-		dbatu[i] = 0;
-		dbatl[i] = 0;
-		ibatu[i] = 0;
-		ibatl[i] = 0;
-	}
-
 	swapEndian = bigEndian != (Endian::getSystemEndian() == Endian::Big);
 	setRpnSize(20);
 }

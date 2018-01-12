@@ -193,7 +193,7 @@ class ARMDebugger:
 	def eval(self, source):
 		return eval(source, self.get_context())
 			
-	def state(self, current):
+	def state(self):
 		core = self.core
 		print("R0 = %08X R1 = %08X R2 = %08X R3 = %08X R4 = %08X" %(core.reg(0), core.reg(1), core.reg(2), core.reg(3), core.reg(4)))
 		print("R5 = %08X R6 = %08X R7 = %08X R8 = %08X R9 = %08X" %(core.reg(5), core.reg(6), core.reg(7), core.reg(8), core.reg(9)))
@@ -395,6 +395,7 @@ class PPCDebugger:
 		else:
 			print("\t%s: disabled" %name)
 		
+	#Prints the virtual memory map of a PowerPC core
 	def memmap(self):
 		reader = self.emulator.mem_reader
 		mmu = self.emulator.virtmem
@@ -411,6 +412,72 @@ class PPCDebugger:
 			ibatl = mmu.get_ibatl(i)
 			self.print_bat("ibat%i" %i, ibatu, ibatl)
 		
+		sdr1 = mmu.get_sdr1()
+		pagetbl = sdr1 & 0xFFFF0000
+		pagemask = sdr1 & 0x1FF
+		
+		print("\nPage table (%08X):" %pagetbl)
+
+		pagemap = []
+		current = None
+		for addr in range(0, 0x100000000, 0x20000):
+			sr = mmu.get_sr(addr >> 28)
+			if sr >> 31: #Direct-store
+				if current: pagemap.append(current)
+				current = None
+
+			else:
+				ks = (sr >> 30) & 1
+				kp = (sr >> 29) & 1
+				nx = (sr >> 28) & 1
+				vsid = sr & 0xFFFFFF
+				
+				pageidx = (addr >> 17) & 0x1FFFF
+				hash = (vsid & 0x7FFFF) ^ pageidx
+				hash &= (pagemask << 10) | 0x3FF
+				api = pageidx >> 5
+				
+				pte = pagetbl | (hash << 6)
+				for i in range(8):
+					ptehi = reader.u32(pte + i * 8, False)
+					ptelo = reader.u32(pte + i * 8 + 4, False)
+					
+					if not ptehi >> 31: continue
+					if (ptehi >> 6) & 1: continue
+					if (ptehi >> 7) & 0xFFFFFF != vsid: continue
+					if (ptehi & 0x3F) != api: continue
+					
+					pp = ptelo & 3
+					phys = ptelo & 0xFFFFF000
+					
+					if current and current[2:] == [ks, kp, nx, pp, phys - current[1]]:
+						current[1] += 0x20000
+					else:
+						if current: pagemap.append(current)
+						current = [addr, 0x20000, ks, kp, nx, pp, phys]
+					break
+
+				else:
+					if current: pagemap.append(current)
+					current = None
+					
+		if current: pagemap.append(current)
+		
+		if pagemap:
+			for start, size, ks, kp, nx, pp, phys in pagemap:
+				access_prot = [
+					["read/write", "read/write", "read/write", "read only"],
+					["no access", "read only", "read/write", "read only"]
+				]
+				user_access = "user: %s" %access_prot[kp][pp]
+				kernel_access = "supervisor: %s" %access_prot[ks][pp]
+				no_execute = "no execute" if nx else "executable"
+				print("\t%08X-%08X => %08X-%08X (%s, %s, %s)" %(
+					start, start + size, phys, phys + size, user_access, kernel_access, no_execute
+				))
+		else:
+			print("no pages mapped")
+
 		
 class DebugShell:
 	def __init__(self, scheduler):

@@ -243,6 +243,11 @@ PyObject *PPCMMU_getSr(PPCMMUObj *self, PyObject *arg) {
 	return PyLong_FromUnsignedLong(self->object->sr[index]);
 }
 
+PyObject *PPCMMU_getSdr1(PPCMMUObj *self, PyObject *args) {
+	CHECK_INIT(self->object);
+	return PyLong_FromUnsignedLong(self->object->sdr1);
+}
+
 PyObject *PPCMMU_setSdr1(PPCMMUObj *self, PyObject *arg) {
 	CHECK_INIT(self->object);
 	
@@ -269,6 +274,7 @@ PyMethodDef PPCMMU_methods[] = {
 	{"get_ibatl", (PyCFunction)PPCMMU_getIbatl, METH_O, NULL},
 	{"set_sr", (PyCFunction)PPCMMU_setSr, METH_VARARGS, NULL},
 	{"get_sr", (PyCFunction)PPCMMU_getSr, METH_O, NULL},
+	{"get_sdr1", (PyCFunction)PPCMMU_getSdr1, METH_NOARGS, NULL},
 	{"set_sdr1", (PyCFunction)PPCMMU_setSdr1, METH_O, NULL},
 	{NULL}
 };
