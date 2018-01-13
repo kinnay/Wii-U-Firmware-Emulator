@@ -789,7 +789,7 @@ class SDIOController:
 		if self.file:
 			self.file.close()
 		
-	def trigger_irq(self):
+	def trigger_interrupt(self):
 		if self.index == 0:
 			self.armirq.trigger_irq_all(7)
 		else:
@@ -831,7 +831,7 @@ class SDIOController:
 			else:
 				self.handle_command(value >> 24, self.argument)
 
-			self.trigger_irq()
+			self.trigger_interrupt()
 		elif addr == 0x28:
 			self.host_control = value & 0xFF
 			self.power_control = (value >> 8) & 0xFF
@@ -1629,13 +1629,12 @@ class GPIOController:
 		else:
 			print("GPIO WRITE 0x%X 0x%08X at %08X" %(addr, value, self.scheduler.pc()))
 			
-	def trigger_irq(self, type, espresso):
+	def trigger_interrupt(self, type, espresso):
 		if espresso: self.gpioe_intflag |= 1 << type
 		else: self.gpio_intflag |= 1 << type
 			
 	def check_interrupts_ppc(self): return self.gpioe_intflag & self.gpioe_intmask
 	def check_interrupts_arm(self): return self.gpio_intflag & self.gpio_intmask
-		
 
 
 I2C_CLOCK = 0
@@ -1664,9 +1663,9 @@ LT_I2C_REGS_PPC = {
 }
 
 class I2CController:
-	def __init__(self, scheduler, irq, espresso):
+	def __init__(self, scheduler, gpio2, espresso):
 		self.scheduler = scheduler
-		self.irq = irq
+		self.gpio2 = gpio2
 		self.espresso = espresso
 		
 		self.readbuf = b""
@@ -1679,6 +1678,9 @@ class I2CController:
 		self.clock = 0
 		self.int_mask = 0
 		self.int_state = 0
+		
+		self.readint = 5 if espresso else 0
+		self.writeint = 6 if espresso else 1
 		
 	def read(self, addr):
 		if addr == I2C_CLOCK: return self.clock
@@ -1717,20 +1719,29 @@ class I2CController:
 		if read:
 			self.readbuf = self.read_data(slave, self.offset, len(data) - 1)
 			self.readoffs = -1
-			self.readsize = not self.espresso
+			self.readsize = not self.espresso #This is weird
+			self.trigger_interrupt(self.readint)
 		else:
 			if len(data) > 2:
 				self.write_data(slave, data[1], data[2:])
 			self.offset = data[1]
-
-		self.irq.trigger_irq_lt(14 - self.espresso)
+			self.trigger_interrupt(self.writeint)
 		
 	def read_data(self, slave, offset, length):
-		print("I2C READ 0x%X 0x%X 0x%X" %(slave, offset, length))
+		print("I2C READ 0x%X 0x%X %i" %(slave, offset, length))
 		return bytes(length)
 		
 	def write_data(self, slave, offset, data):
-		print("I2C WRITE 0x%X 0x%X 0x%X" %(slave, offset, len(data)))
+		if slave == 0x3D and offset == 0x89:
+			self.gpio2.trigger_interrupt(4, True)
+		else:
+			print("I2C WRITE 0x%X 0x%X %s" %(slave, offset, data.hex()))
+		
+	def trigger_interrupt(self, type):
+		self.int_state |= 1 << type
+		
+	def check_interrupts(self):
+		return self.int_state & self.int_mask
 
 			
 class ASICBusController:
@@ -1859,11 +1870,12 @@ class IRQController:
 	def update_interrupts(self): pass
 	
 class IRQControllerPPC(IRQController):
-	def __init__(self, ipc, gpio, gpio2, index):
+	def __init__(self, ipc, gpio, gpio2, i2c, index):
 		super().__init__()
 		self.ipc = ipc
 		self.gpio = gpio
 		self.gpio2 = gpio2
+		self.i2c = i2c
 		self.index = index
 		
 	def update_interrupts(self):
@@ -1871,9 +1883,11 @@ class IRQControllerPPC(IRQController):
 			self.trigger_irq_lt(30 - 2 * self.index)
 		if self.gpio.check_interrupts_ppc() or self.gpio2.check_interrupts_ppc():
 			self.trigger_irq_all(10)
+		if self.i2c.check_interrupts():
+			self.trigger_irq_lt(13)
 
 class IRQControllerARM(IRQController):
-	def __init__(self, ipc, gpio, gpio2):
+	def __init__(self, ipc, gpio, gpio2, i2c):
 		super().__init__()
 		self.intmr_ahball_2x = 0
 		self.intmr_ahblt_2x = 0
@@ -1881,6 +1895,7 @@ class IRQControllerARM(IRQController):
 		self.ipc = ipc
 		self.gpio = gpio
 		self.gpio2 = gpio2
+		self.i2c = i2c
 		
 	def read(self, addr):
 		if addr == LT_INTMR_AHBALL_2X: return self.intmr_ahball_2x
@@ -1898,7 +1913,8 @@ class IRQControllerARM(IRQController):
 				self.trigger_irq_lt(31 - 2 * i)
 		if self.gpio.check_interrupts_arm() or self.gpio2.check_interrupts_arm():
 			self.trigger_irq_all(11)
-	
+		if self.i2c.check_interrupts():
+			self.trigger_irq_lt(14)
 
 class LatteController:
 	def __init__(self, scheduler, debug=False):
@@ -1907,13 +1923,13 @@ class LatteController:
 		self.gpio.set_group(GPIOGroup1(scheduler, self.gpio))
 		self.gpio2 = GPIOController(scheduler)
 		self.gpio2.set_group(GPIOGroup2(scheduler, self.gpio2))
+		self.i2c = I2CController(scheduler, self.gpio2, False)
+		self.i2c_ppc = I2CController(scheduler, self.gpio2, True)
 
-		self.irq_ppc = [IRQControllerPPC(self.ipc[i], self.gpio, self.gpio2, i) for i in range(3)]
-		self.irq_arm = IRQControllerARM(self.ipc, self.gpio, self.gpio2)
+		self.irq_ppc = [IRQControllerPPC(self.ipc[i], self.gpio, self.gpio2, self.i2c_ppc, i) for i in range(3)]
+		self.irq_arm = IRQControllerARM(self.ipc, self.gpio, self.gpio2, self.i2c)
 		
 		self.otp = OTPController(scheduler)
-		self.i2c = I2CController(scheduler, self.irq_arm, False)
-		self.i2c_ppc = I2CController(scheduler, self.irq_ppc[1], True)
 		self.asicbus = ASICBusController(scheduler)
 	
 		self.timer = 0
@@ -2126,6 +2142,7 @@ class PIController:
 		if self.irq.check_interrupts():
 			self.trigger_irq(24)
 
+		#Both GPIO/I2C? (see tve.rpl)
 		if self.irq.is_triggered_all(10):
 			self.trigger_irq(10)
 		if self.irq.is_triggered_lt(26 + self.index * 2):
