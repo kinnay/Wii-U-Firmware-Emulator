@@ -1498,15 +1498,16 @@ PIN_WIFI_MODE = 29
 PIN_31 = 31
 		
 class GPIOGroup1:
-	def __init__(self, scheduler):
+	def __init__(self, scheduler, gpio):
 		self.seeprom = SEEPROMController(scheduler)
 		
 		self.scheduler = scheduler
+		self.gpio = gpio
 		
-	def read(self):
+	def read(self, espresso):
 		return self.seeprom.pin_state << PIN_EEPROM_DI
 		
-	def write(self, pin, state):
+	def write(self, pin, state, espresso):
 		if pin == PIN_DWIFI_MODE: pass
 		elif pin == PIN_ESP10_WORKAROUND: pass
 		elif pin == PIN_9: pass
@@ -1532,13 +1533,14 @@ class GPIOGroup1:
 PIN_AV_RESET = 6
 		
 class GPIOGroup2:
-	def __init__(self, scheduler):
+	def __init__(self, scheduler, gpio):
 		self.scheduler = scheduler
+		self.gpio = gpio
 
-	def read(self):
+	def read(self, espresso):
 		return 0
 		
-	def write(self, pin, state):
+	def write(self, pin, state, espresso):
 		if pin == PIN_AV_RESET: pass
 		else:
 			print("GPIO2 PIN WRITE %i %i at %08X" %(pin, state, self.scheduler.pc()))
@@ -1562,9 +1564,8 @@ LT_GPIO_INMIR = 0x38
 LT_GPIO_OWNER = 0x3C
 	
 class GPIOController:
-	def __init__(self, scheduler, group):
+	def __init__(self, scheduler):
 		self.scheduler = scheduler
-		self.group = group
 	
 		self.gpioe_dir = 0
 		self.gpioe_out = 0
@@ -1579,6 +1580,10 @@ class GPIOController:
 		self.gpio_owner = 0
 		self.gpio_intflag = 0
 		self.gpio_intlvl = 0
+		
+		self.group = None
+		
+	def set_group(self, group): self.group = group
 
 	def read(self, addr):
 		if addr == LT_GPIOE_OUT: return self.gpioe_out
@@ -1590,7 +1595,7 @@ class GPIOController:
 		elif addr == LT_GPIO_ENABLE: return self.gpio_enabled
 		elif addr == LT_GPIO_OUT: return self.gpio_out
 		elif addr == LT_GPIO_DIR: return self.gpio_dir
-		elif addr == LT_GPIO_IN: return self.group.read()
+		elif addr == LT_GPIO_IN: return self.group.read(False)
 		elif addr == LT_GPIO_INTLVL: return self.gpio_intlvl
 		elif addr == LT_GPIO_INTFLAG: return self.gpio_intflag
 		elif addr == LT_GPIO_INTMASK: return self.gpio_intmask
@@ -1603,26 +1608,34 @@ class GPIOController:
 			for i in range(32):
 				if self.gpio_owner & (1 << i):
 					if value & (1 << i) != self.gpioe_out & (1 << i):
-						self.group.write(i, (value >> i) & 1)
+						self.group.write(i, (value >> i) & 1, True)
 				self.gpioe_out = value
 		elif addr == LT_GPIOE_DIR: self.gpioe_dir = value
 		elif addr == LT_GPIOE_INTLVL: self.gpioe_intlvl = value
-		elif addr == LT_GPIOE_INTFLAG: self.gpioe_intflag = value
+		elif addr == LT_GPIOE_INTFLAG: self.gpioe_intflag &= ~value
 		elif addr == LT_GPIOE_INTMASK: self.gpioe_intmask = value
 			
 		elif addr == LT_GPIO_ENABLE: self.gpio_enabled = value
 		elif addr == LT_GPIO_OUT:
 			for i in range(32):
 				if value & (1 << i) != self.gpio_out & (1 << i):
-					self.group.write(i, (value >> i) & 1)
+					self.group.write(i, (value >> i) & 1, False)
 			self.gpio_out = value
 		elif addr == LT_GPIO_DIR: self.gpio_dir = value
 		elif addr == LT_GPIO_INTLVL: self.gpio_intlvl = value
-		elif addr == LT_GPIO_INTFLAG: self.gpio_intflag = value
+		elif addr == LT_GPIO_INTFLAG: self.gpio_intflag &= ~value
 		elif addr == LT_GPIO_INTMASK: self.gpio_intmask = value
 		elif addr == LT_GPIO_OWNER: self.gpio_owner = value
 		else:
 			print("GPIO WRITE 0x%X 0x%08X at %08X" %(addr, value, self.scheduler.pc()))
+			
+	def trigger_irq(self, type, espresso):
+		if espresso: self.gpioe_intflag |= 1 << type
+		else: self.gpio_intflag |= 1 << type
+			
+	def check_interrupts_ppc(self): return self.gpioe_intflag & self.gpioe_intmask
+	def check_interrupts_arm(self): return self.gpio_intflag & self.gpio_intmask
+		
 
 
 I2C_CLOCK = 0
@@ -1846,22 +1859,28 @@ class IRQController:
 	def update_interrupts(self): pass
 	
 class IRQControllerPPC(IRQController):
-	def __init__(self, ipc, index):
+	def __init__(self, ipc, gpio, gpio2, index):
 		super().__init__()
 		self.ipc = ipc
+		self.gpio = gpio
+		self.gpio2 = gpio2
 		self.index = index
 		
 	def update_interrupts(self):
 		if self.ipc.check_interrupts_ppc():
 			self.trigger_irq_lt(30 - 2 * self.index)
+		if self.gpio.check_interrupts_ppc() or self.gpio2.check_interrupts_ppc():
+			self.trigger_irq_all(10)
 
 class IRQControllerARM(IRQController):
-	def __init__(self, ipc):
+	def __init__(self, ipc, gpio, gpio2):
 		super().__init__()
 		self.intmr_ahball_2x = 0
 		self.intmr_ahblt_2x = 0
 		
 		self.ipc = ipc
+		self.gpio = gpio
+		self.gpio2 = gpio2
 		
 	def read(self, addr):
 		if addr == LT_INTMR_AHBALL_2X: return self.intmr_ahball_2x
@@ -1877,18 +1896,22 @@ class IRQControllerARM(IRQController):
 		for i in range(3):
 			if self.ipc[i].check_interrupts_arm():
 				self.trigger_irq_lt(31 - 2 * i)
+		if self.gpio.check_interrupts_arm() or self.gpio2.check_interrupts_arm():
+			self.trigger_irq_all(11)
 	
 
 class LatteController:
 	def __init__(self, scheduler, debug=False):
 		self.ipc = [IPCController(scheduler) for i in range(3)]
+		self.gpio = GPIOController(scheduler)
+		self.gpio.set_group(GPIOGroup1(scheduler, self.gpio))
+		self.gpio2 = GPIOController(scheduler)
+		self.gpio2.set_group(GPIOGroup2(scheduler, self.gpio2))
 
-		self.irq_ppc = [IRQControllerPPC(self.ipc[i], i) for i in range(3)]
-		self.irq_arm = IRQControllerARM(self.ipc)
-
+		self.irq_ppc = [IRQControllerPPC(self.ipc[i], self.gpio, self.gpio2, i) for i in range(3)]
+		self.irq_arm = IRQControllerARM(self.ipc, self.gpio, self.gpio2)
+		
 		self.otp = OTPController(scheduler)
-		self.gpio = GPIOController(scheduler, GPIOGroup1(scheduler))
-		self.gpio2 = GPIOController(scheduler, GPIOGroup2(scheduler))
 		self.i2c = I2CController(scheduler, self.irq_arm, False)
 		self.i2c_ppc = I2CController(scheduler, self.irq_ppc[1], True)
 		self.asicbus = ASICBusController(scheduler)
@@ -2103,6 +2126,8 @@ class PIController:
 		if self.irq.check_interrupts():
 			self.trigger_irq(24)
 
+		if self.irq.is_triggered_all(10):
+			self.trigger_irq(10)
 		if self.irq.is_triggered_lt(26 + self.index * 2):
 			self.trigger_irq(26 + self.index * 2)
 		if self.irq.is_triggered_lt(13):
