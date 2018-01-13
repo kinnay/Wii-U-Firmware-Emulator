@@ -494,6 +494,11 @@ bool PPCInstr_lwz(PPCInterpreter *cpu, PPCInstruction instr) {
 	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr.rD()]);
 }
 
+bool PPCInstr_lfs(PPCInterpreter *cpu, PPCInstruction instr) {
+	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
+	return cpu->read<float>(addr, &cpu->core->fprs[instr.rD()].ps0);
+}
+
 bool PPCInstr_lfd(PPCInterpreter *cpu, PPCInstruction instr) {
 	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
 	return cpu->read<double>(addr, &cpu->core->fprs[instr.rD()].dbl);
@@ -512,6 +517,11 @@ bool PPCInstr_sth(PPCInterpreter *cpu, PPCInstruction instr) {
 bool PPCInstr_stw(PPCInterpreter *cpu, PPCInstruction instr) {
 	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
 	return cpu->write<uint32_t>(addr, cpu->core->regs[instr.rS()]);
+}
+
+bool PPCInstr_stfs(PPCInterpreter *cpu, PPCInstruction instr) {
+	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
+	return cpu->write<float>(addr, cpu->core->fprs[instr.rS()].ps0);
 }
 
 bool PPCInstr_stfd(PPCInterpreter *cpu, PPCInstruction instr) {
@@ -915,7 +925,9 @@ PPCInstrCallback PPCInstruction::decode() {
 		case 45: return PPCInstr_sthu;
 		case 46: return PPCInstr_lmw;
 		case 47: return PPCInstr_stmw;
+		case 48: return PPCInstr_lfs;
 		case 50: return PPCInstr_lfd;
+		case 52: return PPCInstr_stfs;
 		case 54: return PPCInstr_stfd;
 		case 56: return PPCInstr_psq_l;
 		default:
