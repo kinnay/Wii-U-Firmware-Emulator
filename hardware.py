@@ -2175,6 +2175,7 @@ class PIController:
 
 TCL_RLC_MICROCODE_CTRL = 0xC203F2C
 TCL_RLC_MICROCODE_DATA = 0xC203F30
+TCL_DC_C2064A0 = 0xC2064A0
 TCL_CP_RESET = 0xC208020
 TCL_FLUSH = 0xC208500
 TCL_CP_RB_BASE = 0xC20C100
@@ -2212,6 +2213,7 @@ class TCLController:
 			value = self.rlc_microcode[self.rlc_microcode_pos]
 			self.rlc_microcode_pos += 1
 			return value
+		elif addr == TCL_DC_C2064A0: return 2
 		elif addr == TCL_FLUSH:
 			#Process command buffers here?
 			self.physmem.write(self.cp_read_pos_ptr, struct.pack(">H", self.cp_write_pos))
