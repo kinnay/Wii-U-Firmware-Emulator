@@ -1682,6 +1682,9 @@ class I2CController:
 		self.readint = 5 if espresso else 0
 		self.writeint = 6 if espresso else 1
 		
+		self.av_int_mask = 0
+		self.av_int_info = [0] * 6
+		
 	def read(self, addr):
 		if addr == I2C_CLOCK: return self.clock
 		elif addr == I2C_WRITE_DATA: return self.writeval
@@ -1728,11 +1731,16 @@ class I2CController:
 			self.trigger_interrupt(self.writeint)
 		
 	def read_data(self, slave, offset, length):
+		if slave == 0x38 and offset == 0x90: return bytes([self.av_int_mask])
+		elif slave == 0x38 and 0x91 <= offset <= 0x97: return bytes([self.av_int_info[offset - 0x91]])
+	
 		print("I2C READ 0x%X 0x%X %i" %(slave, offset, length))
 		return bytes(length)
 		
 	def write_data(self, slave, offset, data):
 		if slave == 0x3D and offset == 0x89:
+			self.av_int_mask |= 0x10
+			self.av_int_info[4] = 0
 			self.gpio2.trigger_interrupt(4, True)
 		else:
 			print("I2C WRITE 0x%X 0x%X %s" %(slave, offset, data.hex()))
