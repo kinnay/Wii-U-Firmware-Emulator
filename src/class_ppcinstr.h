@@ -12,10 +12,12 @@ struct PPCInstruction {
 	
 	inline int opcode() { return value >> 26; }
 	inline int opcode2() { return (value >> 1) & 0x3FF; }
+	inline int opcode3() { return (value >> 1) & 0x1F; }
 	inline int rD() { return (value >> 21) & 0x1F; }
 	inline int rS() { return (value >> 21) & 0x1F; }
 	inline int rA() { return (value >> 16) & 0x1F; }
 	inline int rB() { return (value >> 11) & 0x1F; }
+	inline int rC() { return (value >> 6) & 0x1F; }
 	inline int crbD() { return (value >> 21) & 0x1F; }
 	inline int crbA() { return (value >> 16) & 0x1F; }
 	inline int crbB() { return (value >> 11) & 0x1F; }

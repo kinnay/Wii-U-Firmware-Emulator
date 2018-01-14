@@ -778,6 +778,18 @@ bool PPCInstr_icbi(PPCInterpreter *cpu, PPCInstruction instr) {
 	return true;
 }
 
+/********** FLOATING POINT INSTRUCTIONS **********/
+
+bool PPCInstr_frsp(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].ps0 = (float)cpu->core->fprs[instr.rB()].dbl;
+	return true;
+}
+
+bool PPCInstr_fmuls(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 * cpu->core->fprs[instr.rC()].ps0;
+	return true;
+}
+
 /********** PAIRED SINGLE INSTRUCTIONS **********/
 
 template <class T>
@@ -930,6 +942,20 @@ PPCInstrCallback PPCInstruction::decode() {
 		case 52: return PPCInstr_stfs;
 		case 54: return PPCInstr_stfd;
 		case 56: return PPCInstr_psq_l;
+		case 59:
+			switch(opcode3()) {
+				case 25: return PPCInstr_fmuls;
+				default:
+					NotImplementedError("PPC opcode 59: %i", opcode3());
+					return NULL;
+			}
+		case 63:
+			switch(opcode2()) {
+				case 12: return PPCInstr_frsp;
+				default:
+					NotImplementedError("PPC opcode 63: %i", opcode2());
+					return NULL;
+			}
 		default:
 			NotImplementedError("PPC opcode %i", opcode());
 			return NULL;
