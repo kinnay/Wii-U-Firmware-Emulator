@@ -301,6 +301,14 @@ class PPCDebugger:
 			   module.data <= addr < module.data + module.datasize:
 				return module
 			
+	def format_module_addr(self, addr):
+		module = self.get_module_by_addr(addr)
+		if module:
+			if module.text <= addr < module.text + module.textsize:
+				return "%08X: %s:text+0x%X" %(addr, module.name, addr - module.text)
+			return "%08X: %s:data+0x%X" %(addr, module.name, addr - module.data)
+		return "%08X" %addr
+			
 	def print_stack_trace(self, sp, tabs=0):
 		tabs = "\t" * tabs
 		reader = self.emulator.mem_reader
@@ -308,11 +316,7 @@ class PPCDebugger:
 			lr = reader.u32(sp + 4)
 			if not lr: return
 
-			module = self.get_module_by_addr(lr)
-			if module:
-				print("%s%08X: %s+0x%X" %(tabs, lr, module.name, lr - module.text))
-			else:
-				print("%s%08X" %(tabs, lr))
+			print("%s%s" %(tabs, self.format_module_addr(lr)))
 			sp = reader.u32(sp)
 		
 	def modules(self):
@@ -337,30 +341,18 @@ class PPCDebugger:
 		thread = self.eval(thread)
 		reader = self.emulator.mem_reader
 		print("Name:", reader.string(reader.u32(thread + 0x5C0)))
+		print("Entry point: %s" %self.format_module_addr(reader.u32(thread + 0x39C)))
 		print("Stack trace:")
 		self.print_stack_trace(reader.u32(thread + 0xC), 1)
 			
 	def find(self, addr):
-		addr = self.eval(addr)
-		module = self.get_module_by_addr(addr)
-		if module:
-			if module.text <= addr <= module.text + module.textsize:
-				segment = "text"
-				addr -= module.text
-			else:
-				segment = "data"
-				addr -= module.data
-			print("%s:%s+0x%X" %(module.name, segment, addr))
-		else:
-			print("Unknown")
+		print(self.format_module_addr(self.eval(addr)))
 			
 	def trace(self):
 		#Stack frame might be set up only partially
 		lr = self.core.spr(self.core.LR)
 		for addr in [self.core.pc(), lr]:
-			module = self.get_module_by_addr(addr)
-			if module: print("%08X: %s+0x%X" %(addr, module.name, addr - module.text))
-			else: print("%08X" %addr)
+			print(self.format_module_addr(addr))
 
 		reader = self.emulator.mem_reader
 		sp = reader.u32(self.core.reg(1))
