@@ -2119,9 +2119,10 @@ PI_INTSR = 0
 PI_INTMR = 4
 
 class PIController:
-	def __init__(self, scheduler, irq, index):
+	def __init__(self, scheduler, irq, tcl, index):
 		self.scheduler = scheduler
 		self.irq = irq
+		self.tcl = tcl
 		self.index = index
 
 		self.intsr = 0
@@ -2138,7 +2139,7 @@ class PIController:
 		elif addr == PI_INTMR: self.intmr = value
 		else:
 			print("PI(%i) WRITE 0x%X %08X at %08X" %(self.index, addr, value, self.scheduler.pc()))
-			
+
 	def trigger_irq(self, type):
 		self.intsr |= 1 << type
 			
@@ -2149,6 +2150,8 @@ class PIController:
 	def update_interrupts(self):
 		if self.irq.check_interrupts():
 			self.trigger_irq(24)
+		if self.tcl.check_interrupts():
+			self.trigger_irq(23)
 
 		#Both GPIO/I2C? (see tve.rpl)
 		if self.irq.is_triggered_all(10):
@@ -2173,10 +2176,15 @@ class PIController:
 #	TCL_CP_IB2 = 0xC20873C
 #	TCL_CP_IB2_SIZE = 0xC208744
 
+TCL_INTR_INFO_PTR = 0xC203E04
+TCL_INTR_READ_POS = 0xC203E08
+TCL_INTR_INFO_POS_PTR = 0xC203E14
 TCL_RLC_MICROCODE_CTRL = 0xC203F2C
 TCL_RLC_MICROCODE_DATA = 0xC203F30
 TCL_DC_C206070 = 0xC206070
+TCL_DC0_INT_MASK = 0xC2060DC
 TCL_DC_C2064A0 = 0xC2064A0
+TCL_DC1_INT_MASK = 0xC2068DC
 TCL_CP_RESET = 0xC208020
 TCL_FLUSH = 0xC208500
 TCL_CP_RB_BASE = 0xC20C100
@@ -2188,17 +2196,23 @@ TCL_CP_MICROCODE2_CTRL = 0xC20C15C
 TCL_CP_MICROCODE2_DATA = 0xC20C160
 TCL_DRMDMA_READ_POS = 0xC20D008
 TCL_DRMDMA_WRITE_POS = 0xC20D00C
-			
+
 TCL_START = 0xC200000
 TCL_END = 0xC300000
 
 class TCLController:
 	def __init__(self, scheduler, physmem):
 		self.scheduler = scheduler
+		self.scheduler.add_alarm(50000000, self.trigger_vsync)
 		self.physmem = physmem
 
+		self.intr_info_ptr = 0
+		self.intr_read_pos = 0
+		self.intr_info_pos_ptr = 0
 		self.rlc_microcode = [0] * 0x400
 		self.rlc_microcode_pos = 0
+		self.dc0_int_mask = 0
+		self.dc1_int_mask = 0
 		self.cp_ringbuf_base = 0
 		self.cp_read_pos_ptr = 0
 		self.cp_write_pos = 0
@@ -2234,10 +2248,15 @@ class TCLController:
 		return 0
 		
 	def write(self, addr, value):
-		if addr == TCL_RLC_MICROCODE_CTRL: self.rlc_microcode_pos = value
+		if addr == TCL_INTR_INFO_PTR: self.intr_info_ptr = value << 8
+		elif addr == TCL_INTR_READ_POS: self.intr_read_pos = value
+		elif addr == TCL_INTR_INFO_POS_PTR: self.intr_info_pos_ptr = value
+		elif addr == TCL_RLC_MICROCODE_CTRL: self.rlc_microcode_pos = value
 		elif addr == TCL_RLC_MICROCODE_DATA:
 			self.rlc_microcode[self.rlc_microcode_pos] = value
 			self.rlc_microcode_pos += 1
+		elif addr == TCL_DC0_INT_MASK: self.dc0_int_mask = value
+		elif addr == TCL_DC1_INT_MASK: self.dc1_int_mask = value
 		elif addr == TCL_CP_RESET: pass
 		elif addr == TCL_CP_RB_BASE: self.cp_ringbuf_base = value << 8
 		elif addr == TCL_CP_READ_POS_PTR: self.cp_read_pos_ptr = value
@@ -2253,14 +2272,31 @@ class TCLController:
 		elif addr == TCL_DRMDMA_WRITE_POS: self.drmdma_write_pos = value
 		else:
 			print("TCL WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
+			
+	def get_intr_info_pos(self): return struct.unpack(">I", self.physmem.read(self.intr_info_pos_ptr, 4))[0]
+	def set_intr_info_pos(self, pos): self.physmem.write(self.intr_info_pos_ptr, struct.pack(">I", pos))
+			
+	def trigger_interrupt(self, type, data1=0, data2=0, data3=0):
+		pos = self.get_intr_info_pos()
+		self.physmem.write(self.intr_info_ptr + pos * 4, struct.pack(">IIII", type, data1, data2, data3))
+		self.set_intr_info_pos(pos + 4)
+
+	def trigger_vsync(self):
+		#avm.rpl seems to be signalling vsync on 'DVOCap' and 'TrigA' instead
+		#of the real vsync interrupt, we're triggering 'TrigA' here
+		if self.dc0_int_mask & 0x01000000: self.trigger_interrupt(2, 3)
+		if self.dc1_int_mask & 0x01000000: self.trigger_interrupt(6, 3)
+
+	def check_interrupts(self):
+		return self.get_intr_info_pos() != self.intr_read_pos
 
 			
 class HardwareController:
 	def __init__(self, scheduler, physmem):
 		self.latte = LatteController(scheduler)
 
-		self.pi = [PIController(scheduler, self.latte.irq_ppc[i], i) for i in range(3)]
 		self.tcl = TCLController(scheduler, physmem)
+		self.pi = [PIController(scheduler, self.latte.irq_ppc[i], self.tcl, i) for i in range(3)]
 		
 		armirq = self.latte.irq_arm
 		self.ahmn = AHMNController(scheduler)

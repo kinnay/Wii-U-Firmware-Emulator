@@ -11,10 +11,23 @@ import hardware
 import debug
 
 
+class Alarm:
+	def __init__(self, interval, callback):
+		self.interval = interval
+		self.callback = callback
+		self.timer = interval
+		
+	def update(self, tick):
+		self.timer -= tick
+		if self.timer < 0:
+			self.timer += self.interval
+			self.callback()
+
 class Scheduler:
 	def __init__(self):
 		self.emulators = []
 		self.running = []
+		self.alarms = []
 		self.steps = {}
 		self.current = None
 
@@ -39,12 +52,18 @@ class Scheduler:
 			self.current.check_interrupts()
 			self.current.interpreter.run(self.steps[self.current])
 
+			for alarm in self.alarms:
+				alarm.update(self.steps[self.current])
+
 			index += 1
 			if index >= len(self.running):
 				index = 0
 				
 	def pc(self):
 		return self.current.debugger.pc()
+		
+	def add_alarm(self, interval, callback):
+		self.alarms.append(Alarm(interval, callback))
 				
 				
 class Emulator:
