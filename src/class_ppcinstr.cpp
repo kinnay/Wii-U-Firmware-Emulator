@@ -631,6 +631,13 @@ bool PPCInstr_stwx(PPCInterpreter *cpu, PPCInstruction instr) {
 	return cpu->write<uint32_t>(addr, cpu->core->regs[instr.rS()]);
 }
 
+bool PPCInstr_stwbrx(PPCInterpreter *cpu, PPCInstruction instr) {
+	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr.rB()];
+	uint32_t value = Endian::swap32(cpu->core->regs[instr.rS()]);
+	return cpu->write<uint32_t>(addr, value);
+}
+
 bool PPCInstr_stfsx(PPCInterpreter *cpu, PPCInstruction instr) {
 	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
 	uint32_t addr = base + cpu->core->regs[instr.rB()];
@@ -1003,6 +1010,7 @@ PPCInstrCallback PPCInstruction::decode() {
 				case 536: return PPCInstr_srw;
 				case 595: return PPCInstr_mfsr;
 				case 598: return PPCInstr_sync;
+				case 662: return PPCInstr_stwbrx;
 				case 663: return PPCInstr_stfsx;
 				case 792: return PPCInstr_sraw;
 				case 824: return PPCInstr_srawi;
