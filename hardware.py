@@ -2119,10 +2119,10 @@ PI_INTSR = 0
 PI_INTMR = 4
 
 class PIController:
-	def __init__(self, scheduler, irq, tcl, index):
+	def __init__(self, scheduler, irq, gpu, index):
 		self.scheduler = scheduler
 		self.irq = irq
-		self.tcl = tcl
+		self.gpu = gpu
 		self.index = index
 
 		self.intsr = 0
@@ -2150,7 +2150,7 @@ class PIController:
 	def update_interrupts(self):
 		if self.irq.check_interrupts():
 			self.trigger_irq(24)
-		if self.tcl.check_interrupts():
+		if self.gpu.check_interrupts():
 			self.trigger_irq(23)
 
 		#Both GPIO/I2C? (see tve.rpl)
@@ -2177,124 +2177,128 @@ class PADController:
 		print("PAD WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 
 
-#These are ignored for now:
-#	TCL_CP_EOP_EVENT = 0xC208400
-#	TCL_CP_EOP_ADDR = 0xC208408
-#	TCL_CP_RINGBUF_STATS = 0xC208544
-#	TCL_CP_STAT = 0xC208680
-#	TCL_CP_BUSY_STAT = 0xC20867C
-#	TCL_CP_ME_HEADER = 0xC208684
-#	TCL_CP_PFP_HEADER = 0xC208688
-#	TCL_CP_RB_RPTR = 0xC208700
-#	TCL_CP_IB1 = 0xC208730
-#	TCL_CP_IB1_SIZE = 0xC208738
-#	TCL_CP_IB2 = 0xC20873C
-#	TCL_CP_IB2_SIZE = 0xC208744
+#Interrupt handling
+GPU_IH_RB_BASE = 0xC203E04
+GPU_IH_RB_RPTR = 0xC203E08
+GPU_IH_RB_WPTR_ADDR_LO = 0xC203E14
 
-TCL_INTR_INFO_PTR = 0xC203E04
-TCL_INTR_READ_POS = 0xC203E08
-TCL_INTR_INFO_POS_PTR = 0xC203E14
-TCL_RLC_MICROCODE_CTRL = 0xC203F2C
-TCL_RLC_MICROCODE_DATA = 0xC203F30
-TCL_DC_C206070 = 0xC206070
-TCL_DC0_INT_MASK = 0xC2060DC
-TCL_DC_C2064A0 = 0xC2064A0
-TCL_DC1_INT_MASK = 0xC2068DC
-TCL_CP_RESET = 0xC208020
-TCL_FLUSH = 0xC208500
-TCL_CP_RB_BASE = 0xC20C100
-TCL_CP_READ_POS_PTR = 0xC20C10C
-TCL_CP_WRITE_POS = 0xC20C114
-TCL_CP_MICROCODE1_CTRL = 0xC20C150
-TCL_CP_MICROCODE1_DATA = 0xC20C154
-TCL_CP_MICROCODE2_CTRL = 0xC20C15C
-TCL_CP_MICROCODE2_DATA = 0xC20C160
-TCL_DRMDMA_READ_POS = 0xC20D008
-TCL_DRMDMA_WRITE_POS = 0xC20D00C
+#RLC
+GPU_RLC_UCODE_ADDR = 0xC203F2C
+GPU_RLC_UCODE_DATA = 0xC203F30
 
-TCL_START = 0xC200000
-TCL_END = 0xC300000
+#Unknown
+GPU_DC_C206070 = 0xC206070
+GPU_DC0_INT_MASK = 0xC2060DC
+GPU_DC_C2064A0 = 0xC2064A0
+GPU_DC1_INT_MASK = 0xC2068DC
+GPU_CP_RESET = 0xC208020
+GPU_FLUSH = 0xC208500
 
-class TCLController:
+#Command processor
+GPU_CP_RB_BASE = 0xC20C100
+GPU_CP_RB_RPTR_ADDR = 0xC20C10C
+GPU_CP_RB_WPTR = 0xC20C114
+GPU_CP_PFP_UCODE_ADDR = 0xC20C150
+GPU_CP_PFP_UCODE_DATA = 0xC20C154
+GPU_CP_ME_RAM_WADDR = 0xC20C15C
+GPU_CP_ME_RAM_DATA = 0xC20C160
+
+#DMA
+GPU_DMA_RB_RPTR = 0xC20D008
+GPU_DMA_RB_WPTR = 0xC20D00C
+
+GPU_START = 0xC200000
+GPU_END = 0xC300000
+
+class GPUController:
 	def __init__(self, scheduler, physmem):
 		self.scheduler = scheduler
 		self.scheduler.add_alarm(50000000, self.trigger_vsync)
 		self.physmem = physmem
 
-		self.intr_info_ptr = 0
-		self.intr_read_pos = 0
-		self.intr_info_pos_ptr = 0
-		self.rlc_microcode = [0] * 0x400
-		self.rlc_microcode_pos = 0
+		self.ih_rb_base = 0
+		self.ih_rb_rptr = 0
+		self.ih_rb_wptr_addr = 0
+
+		self.rlc_ucode_data = [0] * 0x400
+		self.rlc_ucode_addr = 0
+
 		self.dc0_int_mask = 0
 		self.dc1_int_mask = 0
-		self.cp_ringbuf_base = 0
-		self.cp_read_pos_ptr = 0
-		self.cp_write_pos = 0
-		self.cp_microcode1 = [0] * 0x350
-		self.cp_microcode1_pos = 0
-		self.cp_microcode2 = [0] * 0x550
-		self.cp_microcode2_pos = 0
-		self.drmdma_read_pos = 0
-		self.drmdma_write_pos = 0
+
+		self.cp_rb_base = 0
+		self.cp_rb_rptr_addr = 0
+		self.cp_rb_wptr = 0
+		self.cp_pfp_ucode_data = [0] * 0x350
+		self.cp_pfp_ucode_addr = 0
+		self.cp_me_ram_data = [0] * 0x550
+		self.cp_me_ram_waddr = 0
+
+		self.dma_rb_rptr = 0
+		self.dma_rb_wptr = 0
 		
 	def read(self, addr):
-		if addr == TCL_RLC_MICROCODE_DATA:
-			value = self.rlc_microcode[self.rlc_microcode_pos]
-			self.rlc_microcode_pos += 1
+		if addr == GPU_RLC_UCODE_DATA:
+			value = self.rlc_ucode_data[self.rlc_ucode_addr]
+			self.rlc_ucode_addr += 1
 			return value
-		elif addr == TCL_DC_C206070: return 0x10000
-		elif addr == TCL_DC_C2064A0: return 2
-		elif addr == TCL_FLUSH:
+
+		elif addr == GPU_DC_C206070: return 0x10000
+		elif addr == GPU_DC_C2064A0: return 2
+		elif addr == GPU_FLUSH:
 			#Process command buffers here?
-			self.physmem.write(self.cp_read_pos_ptr, struct.pack(">H", self.cp_write_pos))
-			self.drmdma_read_pos = self.drmdma_write_pos
+			self.physmem.write(self.cp_rb_rptr_addr, struct.pack(">H", self.cp_rb_wptr))
+			self.dma_rb_rptr = self.dma_rb_wptr
 			return 0
-		elif addr == TCL_CP_MICROCODE1_DATA:
-			value = self.cp_microcode1[self.cp_microcode1_pos]
-			self.cp_microcode1_pos += 1
+
+		elif addr == GPU_CP_PFP_UCODE_DATA:
+			value = self.cp_pfp_ucode_data[self.cp_pfp_ucode_addr]
+			self.cp_pfp_ucode_addr += 1
 			return value
-		elif addr == TCL_CP_MICROCODE2_DATA:
-			value = self.cp_microcode2[self.cp_microcode2_pos]
-			self.cp_microcode2_pos += 1
+		elif addr == GPU_CP_ME_RAM_DATA:
+			value = self.cp_me_ram_data[self.cp_me_ram_waddr]
+			self.cp_me_ram_waddr += 1
 			return value
-		elif addr == TCL_DRMDMA_READ_POS: return self.drmdma_read_pos
-		print("TCL READ 0x%X at %08X" %(addr, self.scheduler.pc()))
+		elif addr == GPU_DMA_RB_RPTR: return self.dma_rb_rptr
+		print("GPU READ 0x%X at %08X" %(addr, self.scheduler.pc()))
 		return 0
 		
 	def write(self, addr, value):
-		if addr == TCL_INTR_INFO_PTR: self.intr_info_ptr = value << 8
-		elif addr == TCL_INTR_READ_POS: self.intr_read_pos = value
-		elif addr == TCL_INTR_INFO_POS_PTR: self.intr_info_pos_ptr = value
-		elif addr == TCL_RLC_MICROCODE_CTRL: self.rlc_microcode_pos = value
-		elif addr == TCL_RLC_MICROCODE_DATA:
-			self.rlc_microcode[self.rlc_microcode_pos] = value
-			self.rlc_microcode_pos += 1
-		elif addr == TCL_DC0_INT_MASK: self.dc0_int_mask = value
-		elif addr == TCL_DC1_INT_MASK: self.dc1_int_mask = value
-		elif addr == TCL_CP_RESET: pass
-		elif addr == TCL_CP_RB_BASE: self.cp_ringbuf_base = value << 8
-		elif addr == TCL_CP_READ_POS_PTR: self.cp_read_pos_ptr = value
-		elif addr == TCL_CP_WRITE_POS: self.cp_write_pos = value
-		elif addr == TCL_CP_MICROCODE1_CTRL: self.cp_microcode1_pos = value
-		elif addr == TCL_CP_MICROCODE1_DATA:
-			self.cp_microcode1[self.cp_microcode1_pos] = value
-			self.cp_microcode1_pos += 1
-		elif addr == TCL_CP_MICROCODE2_CTRL: self.cp_microcode2_pos = value
-		elif addr == TCL_CP_MICROCODE2_DATA:
-			self.cp_microcode2[self.cp_microcode2_pos] = value
-			self.cp_microcode2_pos += 1
-		elif addr == TCL_DRMDMA_WRITE_POS: self.drmdma_write_pos = value
+		if addr == GPU_IH_RB_BASE: self.ih_rb_base = value << 8
+		elif addr == GPU_IH_RB_RPTR: self.ih_rb_rptr = value
+		elif addr == GPU_IH_RB_WPTR_ADDR_LO: self.ih_rb_wptr_addr = value
+
+		elif addr == GPU_RLC_UCODE_ADDR: self.rlc_ucode_addr = value
+		elif addr == GPU_RLC_UCODE_DATA:
+			self.rlc_ucode_data[self.rlc_ucode_addr] = value
+			self.rlc_ucode_addr += 1
+
+		elif addr == GPU_DC0_INT_MASK: self.dc0_int_mask = value
+		elif addr == GPU_DC1_INT_MASK: self.dc1_int_mask = value
+		elif addr == GPU_CP_RESET: pass
+
+		elif addr == GPU_CP_RB_BASE: self.cp_rb_base = value << 8
+		elif addr == GPU_CP_RB_RPTR_ADDR: self.cp_rb_rptr_addr = value
+		elif addr == GPU_CP_RB_WPTR: self.cp_rb_wptr = value
+		elif addr == GPU_CP_PFP_UCODE_ADDR: self.cp_pfp_ucode_addr = value
+		elif addr == GPU_CP_PFP_UCODE_DATA:
+			self.cp_pfp_ucode_data[self.cp_pfp_ucode_addr] = value
+			self.cp_pfp_ucode_addr += 1
+		elif addr == GPU_CP_ME_RAM_WADDR: self.cp_me_ram_waddr = value
+		elif addr == GPU_CP_ME_RAM_DATA:
+			self.cp_me_ram_data[self.cp_me_ram_waddr] = value
+			self.cp_me_ram_waddr += 1
+		elif addr == GPU_DMA_RB_WPTR: self.dma_rb_wptr = value
 		else:
-			print("TCL WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
+			print("GPU WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 			
-	def get_intr_info_pos(self): return struct.unpack(">I", self.physmem.read(self.intr_info_pos_ptr, 4))[0]
-	def set_intr_info_pos(self, pos): self.physmem.write(self.intr_info_pos_ptr, struct.pack(">I", pos))
+	def get_ih_rb_wptr(self): return struct.unpack(">I", self.physmem.read(self.ih_rb_wptr_addr, 4))[0]
+	def set_ih_rb_wptr(self, pos): self.physmem.write(self.ih_rb_wptr_addr, struct.pack(">I", pos))
 			
 	def trigger_interrupt(self, type, data1=0, data2=0, data3=0):
-		pos = self.get_intr_info_pos()
-		self.physmem.write(self.intr_info_ptr + pos * 4, struct.pack(">IIII", type, data1, data2, data3))
-		self.set_intr_info_pos(pos + 4)
+		pos = self.get_ih_rb_wptr()
+		self.physmem.write(self.ih_rb_base + pos * 4, struct.pack(">IIII", type, data1, data2, data3))
+		self.set_ih_rb_wptr(pos + 4)
 
 	def trigger_vsync(self):
 		#avm.rpl seems to be signalling vsync on 'DVOCap' and 'TrigA' instead
@@ -2303,7 +2307,7 @@ class TCLController:
 		if self.dc1_int_mask & 0x01000000: self.trigger_interrupt(6, 3)
 
 	def check_interrupts(self):
-		return self.get_intr_info_pos() != self.intr_read_pos
+		return self.get_ih_rb_wptr() != self.ih_rb_rptr
 
 		
 TCL_D0000000 = 0xD0000000
@@ -2313,8 +2317,8 @@ class HardwareController:
 		self.latte = LatteController(scheduler)
 
 		self.pad = PADController(scheduler)
-		self.tcl = TCLController(scheduler, physmem)
-		self.pi = [PIController(scheduler, self.latte.irq_ppc[i], self.tcl, i) for i in range(3)]
+		self.gpu = GPUController(scheduler, physmem)
+		self.pi = [PIController(scheduler, self.latte.irq_ppc[i], self.gpu, i) for i in range(3)]
 		
 		armirq = self.latte.irq_arm
 		self.ahmn = AHMNController(scheduler)
@@ -2358,7 +2362,7 @@ class HardwareController:
 			elif PI_CPU0_START <= addr < PI_CPU0_END: value = self.pi[0].read(addr - PI_CPU0_START)
 			elif PI_CPU1_START <= addr < PI_CPU1_END: value = self.pi[1].read(addr - PI_CPU1_START)
 			elif PI_CPU2_START <= addr < PI_CPU2_END: value = self.pi[2].read(addr - PI_CPU2_START)
-			elif TCL_START <= addr < TCL_END: value = self.tcl.read(addr)
+			elif GPU_START <= addr < GPU_END: value = self.gpu.read(addr)
 			elif AHMN_START <= addr < AHMN_END: value = self.ahmn.read(addr)
 			elif EXI_START <= addr < EXI_END: value = self.exi.read(addr)
 			elif DI2SATA_START <= addr < DI2SATA_END: value = self.di2sata.read(addr)
@@ -2405,7 +2409,7 @@ class HardwareController:
 			elif PI_CPU0_START <= addr < PI_CPU0_END: self.pi[0].write(addr - PI_CPU0_START, value)
 			elif PI_CPU1_START <= addr < PI_CPU1_END: self.pi[1].write(addr - PI_CPU1_START, value)
 			elif PI_CPU2_START <= addr < PI_CPU2_END: self.pi[2].write(addr - PI_CPU2_START, value)
-			elif TCL_START <= addr < TCL_END: self.tcl.write(addr, value)
+			elif GPU_START <= addr < GPU_END: self.gpu.write(addr, value)
 			elif AHMN_START <= addr < AHMN_END: self.ahmn.write(addr, value)
 			elif MEM_START <= addr < MEM_END: self.mem.write(addr, value)
 			elif EXI_START <= addr < EXI_END: self.exi.write(addr, value)
