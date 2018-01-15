@@ -13,7 +13,10 @@ class PPCCore {
 			float ps0;
 			float ps1;
 		};
-		
+		struct {
+			int32_t iw0;
+			int32_t iw1;
+		};
 		double dbl;
 	};
 	
