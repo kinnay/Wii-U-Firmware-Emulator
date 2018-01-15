@@ -70,7 +70,7 @@ class AHMNController:
 		elif AHMN_MEM1_START <= addr < AHMN_MEM1_END: self.mem1[(addr - AHMN_MEM1_START) // 4] = value ^ 0x80000000
 		elif AHMN_MEM2_START <= addr < AHMN_MEM2_END: self.mem2[(addr - AHMN_MEM2_START) // 4] = value ^ 0x80000000
 		else:
-			print("AHMN WRITE 0x%X 0x%08X at %08X" %(addr, value, self.scheduler.pc()))
+			print("AHMN WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 			
 
 MEM_D8B4200 = 0xD0B4200
@@ -121,7 +121,7 @@ class MEMController:
 		elif addr == MEM_D8B44E8: pass
 		elif addr == MEM_D8B44EA: pass
 		else:
-			print("MEM WRITE 0x%X 0x%08X at %08X" %(addr, value, self.scheduler.pc()))
+			print("MEM WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 			
 			
 DI2SATA_CVR = 0xD006004
@@ -240,7 +240,7 @@ class EXIController:
 			self.data0 = value
 
 		else:
-			print("EXI WRITE 0x%X 0x%08X at %08X" %(addr, value, self.scheduler.pc()))
+			print("EXI WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 			
 
 EHCI_CMD = 0
@@ -1627,7 +1627,7 @@ class GPIOController:
 		elif addr == LT_GPIO_INTMASK: self.gpio_intmask = value
 		elif addr == LT_GPIO_OWNER: self.gpio_owner = value
 		else:
-			print("GPIO WRITE 0x%X 0x%08X at %08X" %(addr, value, self.scheduler.pc()))
+			print("GPIO WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 			
 	def trigger_interrupt(self, type, espresso):
 		if espresso: self.gpioe_intflag |= 1 << type
@@ -2091,7 +2091,7 @@ class LatteController:
 		elif addr in LT_I2C_REGS: self.i2c.write(LT_I2C_REGS[addr], value)
 		elif addr in LT_I2C_REGS_PPC: self.i2c_ppc.write(LT_I2C_REGS_PPC[addr], value)
 		else:
-			print("LATTE WRITE 0x%X 0x%08X at %08X" %(addr, value, self.scheduler.pc()))
+			print("LATTE WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 			
 	def update_timer(self):
 		start = self.timer
@@ -2160,6 +2160,21 @@ class PIController:
 			self.trigger_irq(26 + self.index * 2)
 		if self.irq.is_triggered_lt(13):
 			self.trigger_irq(13)
+			
+			
+PAD_START = 0xC1E0000
+PAD_END = 0xC200000
+		
+class PADController:
+	def __init__(self, scheduler):
+		self.scheduler = scheduler
+		
+	def read(self, addr):
+		print("PAD READ 0x%X at %08X" %(addr, self.scheduler.pc()))
+		return 0
+		
+	def write(self, addr, value):
+		print("PAD WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 
 
 #These are ignored for now:
@@ -2290,11 +2305,14 @@ class TCLController:
 	def check_interrupts(self):
 		return self.get_intr_info_pos() != self.intr_read_pos
 
-			
+		
+TCL_D0000000 = 0xD0000000
+
 class HardwareController:
 	def __init__(self, scheduler, physmem):
 		self.latte = LatteController(scheduler)
 
+		self.pad = PADController(scheduler)
 		self.tcl = TCLController(scheduler, physmem)
 		self.pi = [PIController(scheduler, self.latte.irq_ppc[i], self.tcl, i) for i in range(3)]
 		
@@ -2325,82 +2343,92 @@ class HardwareController:
 
 	def read(self, addr, length):
 		addr &= ~0x800000
-		
-		#Special case
-		if MEM_START <= addr < MEM_END:
-			if length != 2: raise RuntimeError("Must read 2 bytes at once from MEM (tried to read %i)" %length)
-			return struct.pack(">H", self.mem.read(addr))
 
-		if length != 4: raise RuntimeError("Must read 4 bytes at once from HW (tried to read %i)" %length)
+		if length == 2:
+			if MEM_START <= addr < MEM_END: value = self.mem.read(addr)
+			elif PAD_START <= addr < PAD_END: value = self.pad.read(addr)
+			else:
+				print("HW READ(2) 0x%X at %08X" %(addr, self.scheduler.pc()))
+				value = 0
 
-		if LATTE_START <= addr < LATTE_END: value = self.latte.read(addr)
-		elif PI_CPU0_START <= addr < PI_CPU0_END: value = self.pi[0].read(addr - PI_CPU0_START)
-		elif PI_CPU1_START <= addr < PI_CPU1_END: value = self.pi[1].read(addr - PI_CPU1_START)
-		elif PI_CPU2_START <= addr < PI_CPU2_END: value = self.pi[2].read(addr - PI_CPU2_START)
-		elif TCL_START <= addr < TCL_END: value = self.tcl.read(addr)
-		elif AHMN_START <= addr < AHMN_END: value = self.ahmn.read(addr)
-		elif EXI_START <= addr < EXI_END: value = self.exi.read(addr)
-		elif DI2SATA_START <= addr < DI2SATA_END: value = self.di2sata.read(addr)
-		elif EHCI0_START <= addr < EHCI0_END: value = self.ehci0.read(addr - EHCI0_START)
-		elif EHCI1_START <= addr < EHCI1_END: value = self.ehci1.read(addr - EHCI1_START)
-		elif EHCI2_START <= addr < EHCI2_END: value = self.ehci2.read(addr - EHCI2_START)
-		elif OHCI00_START <= addr < OHCI00_END: value = self.ohci00.read(addr - OHCI00_START)
-		elif OHCI01_START <= addr < OHCI01_END: value = self.ohci01.read(addr - OHCI01_START)
-		elif OHCI1_START <= addr < OHCI1_END: value = self.ohci1.read(addr - OHCI1_START)
-		elif OHCI2_START <= addr < OHCI2_END: value = self.ohci2.read(addr - OHCI2_START)
-		elif AHCI_START <= addr < AHCI_END: value = self.ahci.read(addr)
-		elif SDIO0_START <= addr < SDIO0_END: value = self.sdio0.read(addr - SDIO0_START)
-		elif SDIO1_START <= addr < SDIO1_END: value = self.sdio1.read(addr - SDIO1_START)
-		elif SDIO2_START <= addr < SDIO2_END: value = self.sdio2.read(addr - SDIO2_START)
-		elif WIFI_START <= addr < WIFI_END: value = self.wifi.read(addr - WIFI_START)
-		elif NAND_START <= addr < NAND_END: value = self.nand.read(addr)
-		elif AES_START <= addr < AES_END: value = self.aes.read(addr - AES_START)
-		elif AESS_START <= addr < AESS_END: value = self.aess.read(addr - AESS_START)
-		elif SHA_START <= addr < SHA_END: value = self.sha.read(addr - SHA_START)
-		elif SHAS_START <= addr < SHAS_END: value = self.shas.read(addr - SHAS_START)
+			return struct.pack(">H", value)
+
+		elif length == 4:
+			if LATTE_START <= addr < LATTE_END: value = self.latte.read(addr)
+			elif PI_CPU0_START <= addr < PI_CPU0_END: value = self.pi[0].read(addr - PI_CPU0_START)
+			elif PI_CPU1_START <= addr < PI_CPU1_END: value = self.pi[1].read(addr - PI_CPU1_START)
+			elif PI_CPU2_START <= addr < PI_CPU2_END: value = self.pi[2].read(addr - PI_CPU2_START)
+			elif TCL_START <= addr < TCL_END: value = self.tcl.read(addr)
+			elif AHMN_START <= addr < AHMN_END: value = self.ahmn.read(addr)
+			elif EXI_START <= addr < EXI_END: value = self.exi.read(addr)
+			elif DI2SATA_START <= addr < DI2SATA_END: value = self.di2sata.read(addr)
+			elif EHCI0_START <= addr < EHCI0_END: value = self.ehci0.read(addr - EHCI0_START)
+			elif EHCI1_START <= addr < EHCI1_END: value = self.ehci1.read(addr - EHCI1_START)
+			elif EHCI2_START <= addr < EHCI2_END: value = self.ehci2.read(addr - EHCI2_START)
+			elif OHCI00_START <= addr < OHCI00_END: value = self.ohci00.read(addr - OHCI00_START)
+			elif OHCI01_START <= addr < OHCI01_END: value = self.ohci01.read(addr - OHCI01_START)
+			elif OHCI1_START <= addr < OHCI1_END: value = self.ohci1.read(addr - OHCI1_START)
+			elif OHCI2_START <= addr < OHCI2_END: value = self.ohci2.read(addr - OHCI2_START)
+			elif AHCI_START <= addr < AHCI_END: value = self.ahci.read(addr)
+			elif SDIO0_START <= addr < SDIO0_END: value = self.sdio0.read(addr - SDIO0_START)
+			elif SDIO1_START <= addr < SDIO1_END: value = self.sdio1.read(addr - SDIO1_START)
+			elif SDIO2_START <= addr < SDIO2_END: value = self.sdio2.read(addr - SDIO2_START)
+			elif WIFI_START <= addr < WIFI_END: value = self.wifi.read(addr - WIFI_START)
+			elif NAND_START <= addr < NAND_END: value = self.nand.read(addr)
+			elif AES_START <= addr < AES_END: value = self.aes.read(addr - AES_START)
+			elif AESS_START <= addr < AESS_END: value = self.aess.read(addr - AESS_START)
+			elif SHA_START <= addr < SHA_END: value = self.sha.read(addr - SHA_START)
+			elif SHAS_START <= addr < SHAS_END: value = self.shas.read(addr - SHAS_START)
+			elif addr == TCL_D0000000: value = 0
+			else:
+				print("HW READ(4) 0x%X at %08X" %(addr, self.scheduler.pc()))
+				value = 0
+
+			return struct.pack(">I", value)
+			
 		else:
-			print("HW READ 0x%X at %08X" %(addr, self.scheduler.pc()))
-			value = 0
-
-		return struct.pack(">I", value)
+			raise RuntimeError("Invalid HW read length: %i" %length)
 	
 	def write(self, addr, data):
 		addr &= ~0x800000
 		
-		#Spcial case
-		if MEM_START <= addr < MEM_END:
-			if len(data) != 2: raise RuntimeError("Must write 4 bytes at once to MEM (tried to write %i)" %len(data))
-			self.mem.write(addr, struct.unpack(">H", data)[0])
-			return
-	
-		if len(data) != 4: raise RuntimeError("Must write 4 bytes at once to HW (tried to write %i)" %len(data))
-
-		value = struct.unpack(">I",  data)[0]
-		if LATTE_START <= addr < LATTE_END: self.latte.write(addr, value)
-		elif PI_CPU0_START <= addr < PI_CPU0_END: self.pi[0].write(addr - PI_CPU0_START, value)
-		elif PI_CPU1_START <= addr < PI_CPU1_END: self.pi[1].write(addr - PI_CPU1_START, value)
-		elif PI_CPU2_START <= addr < PI_CPU2_END: self.pi[2].write(addr - PI_CPU2_START, value)
-		elif TCL_START <= addr < TCL_END: self.tcl.write(addr, value)
-		elif AHMN_START <= addr < AHMN_END: self.ahmn.write(addr, value)
-		elif MEM_START <= addr < MEM_END: self.mem.write(addr, value)
-		elif EXI_START <= addr < EXI_END: self.exi.write(addr, value)
-		elif DI2SATA_START <= addr < DI2SATA_END: self.di2sata.write(addr, value)
-		elif EHCI0_START <= addr < EHCI0_END: self.ehci0.write(addr - EHCI0_START, value)
-		elif EHCI1_START <= addr < EHCI1_END: self.ehci1.write(addr - EHCI1_START, value)
-		elif EHCI2_START <= addr < EHCI2_END: self.ehci2.write(addr - EHCI2_START, value)
-		elif OHCI00_START <= addr < OHCI00_END: self.ohci00.write(addr - OHCI00_START, value)
-		elif OHCI01_START <= addr < OHCI01_END: self.ohci01.write(addr - OHCI01_START, value)
-		elif OHCI1_START <= addr < OHCI1_END: self.ohci1.write(addr - OHCI1_START, value)
-		elif OHCI2_START <= addr < OHCI2_END: self.ohci2.write(addr - OHCI2_START, value)
-		elif AHCI_START <= addr < AHCI_END: self.ahci.write(addr, value)
-		elif SDIO0_START <= addr < SDIO0_END: self.sdio0.write(addr - SDIO0_START, value)
-		elif SDIO1_START <= addr < SDIO1_END: self.sdio1.write(addr - SDIO1_START, value)
-		elif SDIO2_START <= addr < SDIO2_END: self.sdio2.write(addr - SDIO2_START, value)
-		elif WIFI_START <= addr < WIFI_END: self.wifi.write(addr - WIFI_START, value)
-		elif NAND_START <= addr < NAND_END: self.nand.write(addr, value)
-		elif AES_START <= addr < AES_END: self.aes.write(addr - AES_START, value)
-		elif AESS_START <= addr < AESS_END: self.aess.write(addr - AESS_START, value)
-		elif SHA_START <= addr < SHA_END: self.sha.write(addr - SHA_START, value)
-		elif SHAS_START <= addr < SHAS_END: self.shas.write(addr - SHAS_START, value)
+		if len(data) == 2:
+			value = struct.unpack(">H", data)[0]
+			if MEM_START <= addr < MEM_END: self.mem.write(addr, value)
+			elif PAD_START <= addr < PAD_END: self.pad.write(addr, value)
+			else:
+				print("HW WRITE 0x%X %04X at %08X" %(addr, value, self.scheduler.pc()))
+				
+		elif len(data) == 4:
+			value = struct.unpack(">I",  data)[0]
+			if LATTE_START <= addr < LATTE_END: self.latte.write(addr, value)
+			elif PI_CPU0_START <= addr < PI_CPU0_END: self.pi[0].write(addr - PI_CPU0_START, value)
+			elif PI_CPU1_START <= addr < PI_CPU1_END: self.pi[1].write(addr - PI_CPU1_START, value)
+			elif PI_CPU2_START <= addr < PI_CPU2_END: self.pi[2].write(addr - PI_CPU2_START, value)
+			elif TCL_START <= addr < TCL_END: self.tcl.write(addr, value)
+			elif AHMN_START <= addr < AHMN_END: self.ahmn.write(addr, value)
+			elif MEM_START <= addr < MEM_END: self.mem.write(addr, value)
+			elif EXI_START <= addr < EXI_END: self.exi.write(addr, value)
+			elif DI2SATA_START <= addr < DI2SATA_END: self.di2sata.write(addr, value)
+			elif EHCI0_START <= addr < EHCI0_END: self.ehci0.write(addr - EHCI0_START, value)
+			elif EHCI1_START <= addr < EHCI1_END: self.ehci1.write(addr - EHCI1_START, value)
+			elif EHCI2_START <= addr < EHCI2_END: self.ehci2.write(addr - EHCI2_START, value)
+			elif OHCI00_START <= addr < OHCI00_END: self.ohci00.write(addr - OHCI00_START, value)
+			elif OHCI01_START <= addr < OHCI01_END: self.ohci01.write(addr - OHCI01_START, value)
+			elif OHCI1_START <= addr < OHCI1_END: self.ohci1.write(addr - OHCI1_START, value)
+			elif OHCI2_START <= addr < OHCI2_END: self.ohci2.write(addr - OHCI2_START, value)
+			elif AHCI_START <= addr < AHCI_END: self.ahci.write(addr, value)
+			elif SDIO0_START <= addr < SDIO0_END: self.sdio0.write(addr - SDIO0_START, value)
+			elif SDIO1_START <= addr < SDIO1_END: self.sdio1.write(addr - SDIO1_START, value)
+			elif SDIO2_START <= addr < SDIO2_END: self.sdio2.write(addr - SDIO2_START, value)
+			elif WIFI_START <= addr < WIFI_END: self.wifi.write(addr - WIFI_START, value)
+			elif NAND_START <= addr < NAND_END: self.nand.write(addr, value)
+			elif AES_START <= addr < AES_END: self.aes.write(addr - AES_START, value)
+			elif AESS_START <= addr < AESS_END: self.aess.write(addr - AESS_START, value)
+			elif SHA_START <= addr < SHA_END: self.sha.write(addr - SHA_START, value)
+			elif SHAS_START <= addr < SHAS_END: self.shas.write(addr - SHAS_START, value)
+			else:
+				print("HW WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
+				
 		else:
-			print("HW WRITE 0x%X 0x%08X at %08X" %(addr, value, self.scheduler.pc()))
+			raise RuntimeError("Invalid HW write length: %i" %len(data))
