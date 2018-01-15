@@ -2,6 +2,7 @@
 #include "class_ppcinstr.h"
 #include "class_ppcinterp.h"
 #include "class_ppccore.h"
+#include "class_endian.h"
 #include "errors.h"
 
 /********** HELPER FUNCTIONS **********/
@@ -602,6 +603,16 @@ bool PPCInstr_lwzx(PPCInterpreter *cpu, PPCInstruction instr) {
 	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr.rD()]);
 }
 
+bool PPCInstr_lwbrx(PPCInterpreter *cpu, PPCInstruction instr) {
+	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr.rB()];
+	
+	uint32_t value;
+	if (!cpu->read<uint32_t>(addr, &value)) return false;
+	cpu->core->regs[instr.rD()] = Endian::swap32(value);
+	return true;
+}
+
 bool PPCInstr_stbx(PPCInterpreter *cpu, PPCInstruction instr) {
 	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
 	uint32_t addr = base + cpu->core->regs[instr.rB()];
@@ -618,6 +629,18 @@ bool PPCInstr_stwx(PPCInterpreter *cpu, PPCInstruction instr) {
 	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
 	uint32_t addr = base + cpu->core->regs[instr.rB()];
 	return cpu->write<uint32_t>(addr, cpu->core->regs[instr.rS()]);
+}
+
+bool PPCInstr_stfsx(PPCInterpreter *cpu, PPCInstruction instr) {
+	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr.rB()];
+	return cpu->write<float>(addr, cpu->core->fprs[instr.rS()].ps0);
+}
+
+bool PPCInstr_stfiwx(PPCInterpreter *cpu, PPCInstruction instr) {
+	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr.rB()];
+	return cpu->write<int32_t>(addr, cpu->core->fprs[instr.rS()].iw1);
 }
 
 bool PPCInstr_lbzux(PPCInterpreter *cpu, PPCInstruction instr) {
@@ -780,13 +803,81 @@ bool PPCInstr_icbi(PPCInterpreter *cpu, PPCInstruction instr) {
 
 /********** FLOATING POINT INSTRUCTIONS **********/
 
+bool PPCInstr_fmr(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rB()].ps0;
+	return true;
+}
+
 bool PPCInstr_frsp(PPCInterpreter *cpu, PPCInstruction instr) {
 	cpu->core->fprs[instr.rD()].ps0 = (float)cpu->core->fprs[instr.rB()].dbl;
 	return true;
 }
 
+bool PPCInstr_fctiwz(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].iw1 = (int32_t)cpu->core->fprs[instr.rB()].ps0;
+	return true;
+}
+
+bool PPCInstr_fabs(PPCInterpreter *cpu, PPCInstruction instr) {
+	float value = cpu->core->fprs[instr.rB()].ps0;
+	if (value < 0) value = -value;
+	cpu->core->fprs[instr.rD()].ps0 = value;
+	return true;
+}
+
 bool PPCInstr_fmuls(PPCInterpreter *cpu, PPCInstruction instr) {
 	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 * cpu->core->fprs[instr.rC()].ps0;
+	return true;
+}
+
+bool PPCInstr_fmul(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].dbl = cpu->core->fprs[instr.rA()].dbl * cpu->core->fprs[instr.rC()].dbl;
+	return true;
+}
+
+bool PPCInstr_fmadds(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 * 
+		cpu->core->fprs[instr.rC()].ps0 + cpu->core->fprs[instr.rB()].ps0;
+	return true;
+}
+
+bool PPCInstr_fmsubs(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 * 
+		cpu->core->fprs[instr.rC()].ps0 - cpu->core->fprs[instr.rB()].ps0;
+	return true;
+}
+
+bool PPCInstr_fdivs(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 / cpu->core->fprs[instr.rB()].ps0;
+	return true;
+}
+
+bool PPCInstr_fdiv(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].dbl = cpu->core->fprs[instr.rA()].dbl / cpu->core->fprs[instr.rB()].dbl;
+	return true;
+}
+
+bool PPCInstr_fadds(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 + cpu->core->fprs[instr.rB()].ps0;
+	return true;
+}
+
+bool PPCInstr_fsubs(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 - cpu->core->fprs[instr.rB()].ps0;
+	return true;
+}
+
+bool PPCInstr_fsub(PPCInterpreter *cpu, PPCInstruction instr) {
+	cpu->core->fprs[instr.rD()].dbl = cpu->core->fprs[instr.rA()].dbl - cpu->core->fprs[instr.rB()].dbl;
+	return true;
+}
+
+bool PPCInstr_fcmpu(PPCInterpreter *cpu, PPCInstruction instr) {
+	float left = cpu->core->fprs[instr.rA()].ps0;
+	float right = cpu->core->fprs[instr.rB()].ps1;
+	cpu->core->cr.set(PPCCore::LT >> (4 * instr.crfD()), left < right);
+	cpu->core->cr.set(PPCCore::GT >> (4 * instr.crfD()), left > right);
+	cpu->core->cr.set(PPCCore::EQ >> (4 * instr.crfD()), left == right);
 	return true;
 }
 
@@ -908,15 +999,18 @@ PPCInstrCallback PPCInstruction::decode() {
 				case 467: return PPCInstr_mtspr;
 				case 470: return PPCInstr_dcbi;
 				case 491: return PPCInstr_divw;
+				case 534: return PPCInstr_lwbrx;
 				case 536: return PPCInstr_srw;
 				case 595: return PPCInstr_mfsr;
 				case 598: return PPCInstr_sync;
+				case 663: return PPCInstr_stfsx;
 				case 792: return PPCInstr_sraw;
 				case 824: return PPCInstr_srawi;
 				case 854: return PPCInstr_eieio;
 				case 922: return PPCInstr_extsh;
 				case 954: return PPCInstr_extsb;
 				case 982: return PPCInstr_icbi;
+				case 983: return PPCInstr_stfiwx;
 				case 1014: return PPCInstr_dcbz;
 				default:
 					NotImplementedError("PPC opcode 31: %i", opcode2());
@@ -944,15 +1038,29 @@ PPCInstrCallback PPCInstruction::decode() {
 		case 56: return PPCInstr_psq_l;
 		case 59:
 			switch(opcode3()) {
+				case 18: return PPCInstr_fdivs;
+				case 20: return PPCInstr_fsubs;
+				case 21: return PPCInstr_fadds;
 				case 25: return PPCInstr_fmuls;
+				case 28: return PPCInstr_fmsubs;
+				case 29: return PPCInstr_fmadds;
 				default:
 					NotImplementedError("PPC opcode 59: %i", opcode3());
 					return NULL;
 			}
 		case 63:
 			switch(opcode2()) {
+				case 0: return PPCInstr_fcmpu;
 				case 12: return PPCInstr_frsp;
+				case 15: return PPCInstr_fctiwz;
+				case 18: return PPCInstr_fdiv;
+				case 20: return PPCInstr_fsub;
+				case 72: return PPCInstr_fmr;
+				case 264: return PPCInstr_fabs;
 				default:
+					switch(opcode3()) {
+						case 25: return PPCInstr_fmul;
+					}
 					NotImplementedError("PPC opcode 63: %i", opcode2());
 					return NULL;
 			}
