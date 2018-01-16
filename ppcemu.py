@@ -224,9 +224,9 @@ class PPCEmulator:
 		self.logger.write(data)
 		
 	def update_timer(self):
-		self.core.settb((self.core.tb() + 400) & (0xFFFFFFFFFFFFFFFF))
+		self.core.settb((self.core.tb() + 2000) & (0xFFFFFFFFFFFFFFFF))
 		
-		self.spr_handler.dec -= 400
+		self.spr_handler.dec -= 2000
 		if self.spr_handler.dec < 0:
 			self.spr_handler.dec += 0x100000000
 			self.core.trigger_exception(self.core.DECREMENTER)
