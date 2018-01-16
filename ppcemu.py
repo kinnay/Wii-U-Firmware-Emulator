@@ -7,7 +7,8 @@ class SPRHandler:
 
 	pvr = 0x70010201
 
-	def __init__(self, core, mmu, breakpoints):
+	def __init__(self, emulator, core, mmu, breakpoints):
+		self.emulator = emulator
 		self.core = core
 		self.mmu = mmu
 		self.breakpoints = breakpoints
@@ -96,7 +97,12 @@ class SPRHandler:
 		elif spr == 920: self.hid2 = value
 		elif spr == 921: self.wpar = value
 		elif spr == 944: self.hid5 = value
-		elif spr == 947: self.scr = value
+		elif spr == 947:
+			target = value & ~(1 << (20 - self.core.spr(self.core.UPIR)))
+			if target & 0x00100000: self.emulator.ppcemu[0].core.trigger_exception(pyemu.PPCCore.ICI)
+			if target & 0x00080000: self.emulator.ppcemu[1].core.trigger_exception(pyemu.PPCCore.ICI)
+			if target & 0x00040000: self.emulator.ppcemu[2].core.trigger_exception(pyemu.PPCCore.ICI)
+			self.scr = value
 		elif spr == 948: self.car = value
 		elif spr == 949: self.bcr = value
 		elif spr == 952: self.mmcr0 = value
@@ -167,7 +173,7 @@ class ExceptionHandler:
 
 
 class PPCEmulator:
-	def __init__(self, physmem, hw, reservation, core_id):
+	def __init__(self, emulator, physmem, hw, reservation, core_id):
 		self.core = pyemu.PPCCore(reservation)
 		self.core.setspr(self.core.UPIR, core_id)
 		self.translator = pyemu.VirtualMemory()
@@ -186,7 +192,7 @@ class PPCEmulator:
 		self.logger = log.ConsoleLogger("PPC")
 		self.breakpoints = debug.BreakpointHandler(self.interpreter)
 		self.breakpoints.add(0xFFF1AB34, self.handle_log)
-		self.spr_handler = SPRHandler(self.core, self.virtmem, self.breakpoints)
+		self.spr_handler = SPRHandler(emulator, self.core, self.virtmem, self.breakpoints)
 		self.msr_handler = MSRHandler(self.virtmem)
 		self.exc_handler = ExceptionHandler(self.core)
 

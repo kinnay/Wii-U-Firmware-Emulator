@@ -203,7 +203,7 @@ PyObject *PPCCore_triggerException(PPCCoreObj *self, PyObject *arg) {
 	
 	if (type != PPCCore::DSI && type != PPCCore::ISI &&
 		type != PPCCore::ExternalInterrupt && type != PPCCore::Decrementer &&
-		type != PPCCore::SystemCall) {
+		type != PPCCore::SystemCall && type != PPCCore::ICI) {
 		ValueError("Invalid exception type");
 		return NULL;
 	}
@@ -497,6 +497,7 @@ bool PPCCoreType_Init() {
 	PyDict_SetItemString(dict, "EXTERNAL_INTERRUPT", PyLong_FromLong(PPCCore::ExternalInterrupt));
 	PyDict_SetItemString(dict, "DECREMENTER", PyLong_FromLong(PPCCore::Decrementer));
 	PyDict_SetItemString(dict, "SYSTEM_CALL", PyLong_FromLong(PPCCore::SystemCall));
+	PyDict_SetItemString(dict, "ICI", PyLong_FromLong(PPCCore::ICI));
 	
 	PPCCoreType.tp_dict = dict;
 	return PyType_Ready(&PPCCoreType) == 0;

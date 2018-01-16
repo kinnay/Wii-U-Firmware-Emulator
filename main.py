@@ -98,7 +98,7 @@ class Emulator:
 		reservation = pyemu.PPCLockMgr()
 
 		self.armemu = armemu.ARMEmulator(self, self.physmem, self.hw)
-		self.ppcemu = [ppcemu.PPCEmulator(self.physmem, self.hw, reservation, core) for core in range(3)]
+		self.ppcemu = [ppcemu.PPCEmulator(self, self.physmem, self.hw, reservation, core) for core in range(3)]
 
 		self.scheduler.add(self.armemu, 1000)
 		self.scheduler.add(self.ppcemu[0], 500)

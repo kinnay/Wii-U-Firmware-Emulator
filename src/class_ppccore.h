@@ -73,7 +73,8 @@ class PPCCore {
 		ISI,
 		ExternalInterrupt,
 		Decrementer,
-		SystemCall
+		SystemCall,
+		ICI
 	};
 	
 	typedef std::function<bool(SPR spr, uint32_t *value)> SPRReadCB;
@@ -132,4 +133,5 @@ class PPCCore {
 	SRWriteCB srWriteCB;
 	
 	bool decrementerPending;
+	bool iciPending;
 };
