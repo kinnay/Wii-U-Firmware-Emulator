@@ -2177,6 +2177,45 @@ class PADController:
 		print("PAD WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 
 
+class PM4Processor:
+
+	STATE_NEXT = 0
+	STATE_BODY = 1
+
+	def __init__(self, scheduler):
+		self.scheduler = scheduler
+
+		self.state = self.STATE_NEXT
+		self.count = 0
+		self.body = []
+		
+	def write(self, value):
+		if self.state == self.STATE_NEXT:
+			type = value >> 30
+			if type == 1: raise RuntimeError("Invalid PM4 packet type: 1")
+			elif type == 2: pass #Filler packet
+			else:
+				self.body = [value]
+				self.count = ((value >> 16) & 0x3FFF) + 1
+				self.state = self.STATE_BODY
+				
+		elif self.state == self.STATE_BODY:
+			self.body.append(value)
+			self.count -= 1
+			if self.count == 0:
+				self.process()
+				self.state = self.STATE_NEXT
+				
+	def process(self):
+		type = self.body[0] >> 30
+		if type == 0:
+			base_index = self.body[0] & 0xFFFF
+			print("PM4 packet type 0:%04X at %08X" %(base_index, self.scheduler.pc()))
+		else:
+			opcode = (self.body[0] >> 8) & 0xFF
+			print("PM4 packet type 3:%02X at %08X" %(opcode, self.scheduler.pc()))
+		
+		
 #Interrupt handling
 GPU_IH_RB_BASE = 0xC203E04
 GPU_IH_RB_RPTR = 0xC203E08
@@ -2207,6 +2246,8 @@ GPU_CP_ME_RAM_DATA = 0xC20C160
 GPU_DMA_RB_RPTR = 0xC20D008
 GPU_DMA_RB_WPTR = 0xC20D00C
 
+GPU_PM4_DATA = 0xC2C0000
+
 GPU_START = 0xC200000
 GPU_END = 0xC300000
 
@@ -2215,6 +2256,8 @@ class GPUController:
 		self.scheduler = scheduler
 		self.scheduler.add_alarm(5000000, self.trigger_vsync)
 		self.physmem = physmem
+		
+		self.pm4 = PM4Processor(scheduler)
 
 		self.ih_rb_base = 0
 		self.ih_rb_rptr = 0
@@ -2289,6 +2332,8 @@ class GPUController:
 			self.cp_me_ram_data[self.cp_me_ram_waddr] = value
 			self.cp_me_ram_waddr += 1
 		elif addr == GPU_DMA_RB_WPTR: self.dma_rb_wptr = value
+		
+		elif addr == GPU_PM4_DATA: self.pm4.write(value)
 		else:
 			print("GPU WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 			
