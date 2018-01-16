@@ -44,7 +44,8 @@ class SPRHandler:
 		self.l2cr = 0
 
 	def read(self, spr):
-		if spr == 287: return self.pvr
+		if spr == 22: return self.dec
+		elif spr == 287: return self.pvr
 		elif 528 <= spr <= 535:
 			if spr % 2: return self.mmu.get_ibatl((spr - 528) // 2)
 			else: return self.mmu.get_ibatu((spr - 528) // 2)

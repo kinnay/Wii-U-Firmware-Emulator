@@ -257,14 +257,14 @@ class PPCDebugger:
 		
 	def state(self):
 		core = self.core
-		print("r0 = %08X r1 = %08X r2 = %08X r3 = %08X r4 = %08X" %(core.reg(0), core.reg(1), core.reg(2), core.reg(3), core.reg(4)))
-		print("r5 = %08X r6 = %08X r7 = %08X r8 = %08X r9 = %08X" %(core.reg(5), core.reg(6), core.reg(7), core.reg(8), core.reg(9)))
-		print("r10= %08X r11= %08X r12= %08X r13= %08X r14= %08X" %(core.reg(10), core.reg(11), core.reg(12), core.reg(13), core.reg(14)))
-		print("r15= %08X r16= %08X r17= %08X r18= %08X r19= %08X" %(core.reg(15), core.reg(16), core.reg(17), core.reg(18), core.reg(19)))
-		print("r20= %08X r21= %08X r22= %08X r23= %08X r24= %08X" %(core.reg(20), core.reg(21), core.reg(22), core.reg(23), core.reg(24)))
-		print("r25= %08X r26= %08X r27= %08X r28= %08X r29= %08X" %(core.reg(25), core.reg(26), core.reg(27), core.reg(28), core.reg(29)))
-		print("r30= %08X r31= %08X pc = %08X lr = %08X ctr= %08X" %(core.reg(30), core.reg(31), core.pc(), core.spr(core.LR), core.spr(core.CTR)))
-		print("cr = %08X" %(core.cr()))
+		print("r0  = %08X r1  = %08X r2  = %08X r3  = %08X r4  = %08X" %(core.reg(0), core.reg(1), core.reg(2), core.reg(3), core.reg(4)))
+		print("r5  = %08X r6  = %08X r7  = %08X r8  = %08X r9  = %08X" %(core.reg(5), core.reg(6), core.reg(7), core.reg(8), core.reg(9)))
+		print("r10 = %08X r11 = %08X r12 = %08X r13 = %08X r14 = %08X" %(core.reg(10), core.reg(11), core.reg(12), core.reg(13), core.reg(14)))
+		print("r15 = %08X r16 = %08X r17 = %08X r18 = %08X r19 = %08X" %(core.reg(15), core.reg(16), core.reg(17), core.reg(18), core.reg(19)))
+		print("r20 = %08X r21 = %08X r22 = %08X r23 = %08X r24 = %08X" %(core.reg(20), core.reg(21), core.reg(22), core.reg(23), core.reg(24)))
+		print("r25 = %08X r26 = %08X r27 = %08X r28 = %08X r29 = %08X" %(core.reg(25), core.reg(26), core.reg(27), core.reg(28), core.reg(29)))
+		print("r30 = %08X r31 = %08X pc  = %08X lr  = %08X ctr = %08X" %(core.reg(30), core.reg(31), core.pc(), core.spr(core.LR), core.spr(core.CTR)))
+		print("cr  = %08X dec = %08X srr0= %08X srr1= %08X" %(core.cr(), core.spr(22), core.spr(26), core.spr(27)))
 		
 	def getspr(self, spr):
 		value = self.core.spr(int(spr))
