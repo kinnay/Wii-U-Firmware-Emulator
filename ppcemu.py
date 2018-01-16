@@ -195,7 +195,11 @@ class PPCEmulator:
 		self.interpreter.on_breakpoint(self.breakpoints.handle)
 		self.interpreter.on_watchpoint(False, self.breakpoints.handle_watch)
 		self.interpreter.on_watchpoint(True, self.breakpoints.handle_watch)
-		self.interpreter.set_alarm(5000, self.update_timer)
+
+		if core_id == 1:
+			self.interpreter.set_alarm(5000, self.update_timer)
+		else:
+			self.interpreter.set_alarm(1250, self.update_timer)
 		
 		self.core.on_spr_read(self.spr_handler.read)
 		self.core.on_spr_write(self.spr_handler.write)
