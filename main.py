@@ -75,8 +75,7 @@ class Emulator:
 		self.init_hardware()
 		self.init_cpu()
 		self.init_elffile(filename)
-		
-		#Fix these hacks
+
 		self.armemu.breakpoints.add(0x5015E70, lambda addr: self.armemu.core.setreg(0, 0))
 		self.armemu.breakpoints.add(0x503409C, lambda addr: self.reset_ppc())
 		

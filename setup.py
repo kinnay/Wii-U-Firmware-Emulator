@@ -4,6 +4,7 @@ import shutil
 import sys
 import os
 
+#Force a rebuild since distutils doesn't seem to detect header changes
 with open("src/module_main.cpp", "rb") as f: data = f.read()
 with open("src/module_main.cpp", "wb") as f: f.write(data)
 

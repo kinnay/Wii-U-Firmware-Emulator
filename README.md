@@ -16,7 +16,7 @@ Before running this, you need to update the path to fw.img in main.py and the pa
 Pass "noprint" as a command line argument to disable print messages on unimplemented hardware reads/writes. Pass "logall" to enable hack that sets the COS log level to the highest possible value. Pass "logsys" to enable IOSU syscall logging. This generates ipc.txt (ipc requests like ioctls), messages.txt (message queue operations) and files.txt (files openend by IOSU). It slows down the code a lot however.
 
 ## Debugger
-Using this emulator you can actually see what IOSU and the PowerPC kernel/loader look like at runtime (at least, the parts that this emulator is able to emulate accurately), and even perform some debugging operations on them. To enable the debugger, pass "break" as command line argument. Here's a list of commands:
+Using this emulator you can actually see what IOSU and the PowerPC kernel/loader look like at runtime (at least, the parts that this emulator is able to emulate accurately), and even perform some debugging operations on them. To enable the debugger, pass "break" as command line argument. You can stop execution and show the debugger by pressing Ctrl+C at any point, but sometimes this causes an instruction to be executed only partially, which might put the emulator into a broken state. Here's a list of commands:
 
 ### General
 | Command | Description |
