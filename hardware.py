@@ -2213,7 +2213,7 @@ GPU_END = 0xC300000
 class GPUController:
 	def __init__(self, scheduler, physmem):
 		self.scheduler = scheduler
-		self.scheduler.add_alarm(50000000, self.trigger_vsync)
+		self.scheduler.add_alarm(5000000, self.trigger_vsync)
 		self.physmem = physmem
 
 		self.ih_rb_base = 0
