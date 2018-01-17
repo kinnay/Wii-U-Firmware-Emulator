@@ -30,16 +30,16 @@ int cntlzw(uint32_t value) {
 	return zeroes;
 }
 
-bool PPC_CheckCondition(PPCInterpreter *cpu, PPCInstruction instr) {
-	int bo = instr.bo();
+bool PPC_CheckCondition(PPCInstruction *instr, PPCInterpreter *cpu) {
+	int bo = instr->bo();
 	if (!(bo & 4)) {
 		cpu->core->ctr--;
 		if ((bo & 2) && cpu->core->ctr != 0) return false;
 		else if (cpu->core->ctr == 0) return false;
 	}
 	if (bo & 0x10) return true;
-	if (bo & 8) return (cpu->core->cr >> (31 - instr.bi())) & 1;
-	return !((cpu->core->cr >> (31 - instr.bi())) & 1);
+	if (bo & 8) return (cpu->core->cr >> (31 - instr->bi())) & 1;
+	return !((cpu->core->cr >> (31 - instr->bi())) & 1);
 }
 
 void PPC_UpdateConditions(PPCCore *core, uint32_t result) {
@@ -50,270 +50,270 @@ void PPC_UpdateConditions(PPCCore *core, uint32_t result) {
 
 /********** NORMAL INSTRUCTIONS **********/
 
-bool PPCInstr_addi(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t source = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	cpu->core->regs[instr.rD()] = source + instr.simm();
+bool PPCInstr_addi(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t source = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	cpu->core->regs[instr->rD()] = source + instr->simm();
 	return true;
 }
 
-bool PPCInstr_addis(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t source = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	cpu->core->regs[instr.rD()] = source + (instr.simm() << 16);
+bool PPCInstr_addis(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t source = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	cpu->core->regs[instr->rD()] = source + (instr->simm() << 16);
 	return true;
 }
 
-bool PPCInstr_mulli(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->regs[instr.rD()] = cpu->core->regs[instr.rA()] * instr.simm();
+bool PPCInstr_mulli(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->regs[instr->rD()] = cpu->core->regs[instr->rA()] * instr->simm();
 	return true;
 }
 
-bool PPCInstr_ori(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->regs[instr.rA()] = cpu->core->regs[instr.rS()] | instr.uimm();
+bool PPCInstr_ori(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->regs[instr->rA()] = cpu->core->regs[instr->rS()] | instr->uimm();
 	return true;
 }
 
-bool PPCInstr_oris(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->regs[instr.rA()] = cpu->core->regs[instr.rS()] | (instr.uimm() << 16);
+bool PPCInstr_oris(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->regs[instr->rA()] = cpu->core->regs[instr->rS()] | (instr->uimm() << 16);
 	return true;
 }
 
-bool PPCInstr_andi(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = cpu->core->regs[instr.rS()] & instr.uimm();
+bool PPCInstr_andi(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = cpu->core->regs[instr->rS()] & instr->uimm();
 	PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_andis(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = cpu->core->regs[instr.rS()] & (instr.uimm() << 16);
+bool PPCInstr_andis(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = cpu->core->regs[instr->rS()] & (instr->uimm() << 16);
 	PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_xori(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->regs[instr.rA()] = cpu->core->regs[instr.rS()] ^ instr.uimm();
+bool PPCInstr_xori(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->regs[instr->rA()] = cpu->core->regs[instr->rS()] ^ instr->uimm();
 	return true;
 }
 
-bool PPCInstr_xoris(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->regs[instr.rA()] = cpu->core->regs[instr.rS()] ^ (instr.uimm() << 16);
+bool PPCInstr_xoris(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->regs[instr->rA()] = cpu->core->regs[instr->rS()] ^ (instr->uimm() << 16);
 	return true;
 }
 
-bool PPCInstr_addic(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t left = cpu->core->regs[instr.rA()];
-	uint32_t right = instr.simm();
+bool PPCInstr_addic(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t left = cpu->core->regs[instr->rA()];
+	uint32_t right = instr->simm();
 	uint64_t result = (uint64_t)left + right;
 	cpu->core->xer.set(PPCCore::CA, result >> 32);
-	cpu->core->regs[instr.rD()] = (uint32_t)result;
+	cpu->core->regs[instr->rD()] = (uint32_t)result;
 	return true;
 }
 
-bool PPCInstr_addic_rc(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t left = cpu->core->regs[instr.rA()];
-	uint32_t right = instr.simm();
+bool PPCInstr_addic_rc(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t left = cpu->core->regs[instr->rA()];
+	uint32_t right = instr->simm();
 	uint64_t result = (uint64_t)left + right;
 	cpu->core->xer.set(PPCCore::CA, result >> 32);
 	PPC_UpdateConditions(cpu->core, (uint32_t)result);
-	cpu->core->regs[instr.rD()] = (uint32_t)result;
+	cpu->core->regs[instr->rD()] = (uint32_t)result;
 	return true;
 }
 
-bool PPCInstr_subfic(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t left = cpu->core->regs[instr.rA()];
-	uint32_t right = instr.simm();
+bool PPCInstr_subfic(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t left = cpu->core->regs[instr->rA()];
+	uint32_t right = instr->simm();
 	uint64_t result = (uint64_t)~left + right + 1;
 	cpu->core->xer.set(PPCCore::CA, result >> 32);
-	cpu->core->regs[instr.rD()] = (uint32_t)result;
+	cpu->core->regs[instr->rD()] = (uint32_t)result;
 	return true;
 }
 
-bool PPCInstr_srawi(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t value = cpu->core->regs[instr.rS()];
-	uint32_t result = (int32_t)value >> instr.sh();
+bool PPCInstr_srawi(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t value = cpu->core->regs[instr->rS()];
+	uint32_t result = (int32_t)value >> instr->sh();
 
-	if (instr.sh() && (value >> 31)) {
-		cpu->core->xer.set(PPCCore::CA, value & genmask(32 - instr.sh(), 31));
+	if (instr->sh() && (value >> 31)) {
+		cpu->core->xer.set(PPCCore::CA, value & genmask(32 - instr->sh(), 31));
 	}
 	else {
 		cpu->core->xer.set(PPCCore::CA, 0);
 	}
 
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_add(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = cpu->core->regs[instr.rA()] + cpu->core->regs[instr.rB()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rD()] = result;
+bool PPCInstr_add(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = cpu->core->regs[instr->rA()] + cpu->core->regs[instr->rB()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rD()] = result;
 	return true;
 }
 
-bool PPCInstr_addc(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t left = cpu->core->regs[instr.rA()];
-	uint32_t right = cpu->core->regs[instr.rB()];
+bool PPCInstr_addc(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t left = cpu->core->regs[instr->rA()];
+	uint32_t right = cpu->core->regs[instr->rB()];
 	uint64_t result = (uint64_t)left + right;
 	cpu->core->xer.set(PPCCore::CA, result >> 32);
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
-	cpu->core->regs[instr.rD()] = (uint32_t)result;
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
+	cpu->core->regs[instr->rD()] = (uint32_t)result;
 	return true;
 }
 
-bool PPCInstr_adde(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint64_t result = (uint64_t)cpu->core->regs[instr.rA()] + cpu->core->regs[instr.rB()] + cpu->core->xer.get(PPCCore::CA);
+bool PPCInstr_adde(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint64_t result = (uint64_t)cpu->core->regs[instr->rA()] + cpu->core->regs[instr->rB()] + cpu->core->xer.get(PPCCore::CA);
 	cpu->core->xer.set(PPCCore::CA, result >> 32);
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
-	cpu->core->regs[instr.rD()] = (uint32_t)result;
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
+	cpu->core->regs[instr->rD()] = (uint32_t)result;
 	return true;
 }
 
-bool PPCInstr_addze(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint64_t result = (uint64_t)cpu->core->regs[instr.rA()] + cpu->core->xer.get(PPCCore::CA);
+bool PPCInstr_addze(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint64_t result = (uint64_t)cpu->core->regs[instr->rA()] + cpu->core->xer.get(PPCCore::CA);
 	cpu->core->xer.set(PPCCore::CA, result >> 32);
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
-	cpu->core->regs[instr.rD()] = (uint32_t)result;
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
+	cpu->core->regs[instr->rD()] = (uint32_t)result;
 	return true;
 }
 
-bool PPCInstr_subf(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = cpu->core->regs[instr.rB()] - cpu->core->regs[instr.rA()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rD()] = result;
+bool PPCInstr_subf(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = cpu->core->regs[instr->rB()] - cpu->core->regs[instr->rA()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rD()] = result;
 	return true;
 }
 
-bool PPCInstr_subfc(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t left = cpu->core->regs[instr.rA()];
-	uint32_t right = cpu->core->regs[instr.rB()];
+bool PPCInstr_subfc(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t left = cpu->core->regs[instr->rA()];
+	uint32_t right = cpu->core->regs[instr->rB()];
 	uint64_t result = (uint64_t)~left + right + 1;
 	cpu->core->xer.set(PPCCore::CA, result >> 32);
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
-	cpu->core->regs[instr.rD()] = (uint32_t)result;
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
+	cpu->core->regs[instr->rD()] = (uint32_t)result;
 	return true;
 }
 
-bool PPCInstr_subfe(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint64_t result = (uint64_t)~cpu->core->regs[instr.rA()] + cpu->core->regs[instr.rB()] + cpu->core->xer.get(PPCCore::CA);
+bool PPCInstr_subfe(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint64_t result = (uint64_t)~cpu->core->regs[instr->rA()] + cpu->core->regs[instr->rB()] + cpu->core->xer.get(PPCCore::CA);
 	cpu->core->xer.set(PPCCore::CA, result >> 32);
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
-	cpu->core->regs[instr.rD()] = (uint32_t)result;
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
+	cpu->core->regs[instr->rD()] = (uint32_t)result;
 	return true;
 }
 
-bool PPCInstr_subfze(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint64_t result = (uint64_t)~cpu->core->regs[instr.rA()] + cpu->core->xer.get(PPCCore::CA);
+bool PPCInstr_subfze(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint64_t result = (uint64_t)~cpu->core->regs[instr->rA()] + cpu->core->xer.get(PPCCore::CA);
 	cpu->core->xer.set(PPCCore::CA, result >> 32);
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
-	cpu->core->regs[instr.rD()] = (uint32_t)result;
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, (uint32_t)result);
+	cpu->core->regs[instr->rD()] = (uint32_t)result;
 	return true;
 }
 
-bool PPCInstr_mullw(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = cpu->core->regs[instr.rA()] * cpu->core->regs[instr.rB()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rD()] = result;
+bool PPCInstr_mullw(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = cpu->core->regs[instr->rA()] * cpu->core->regs[instr->rB()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rD()] = result;
 	return true;
 }
 
-bool PPCInstr_mulhw(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint64_t result = (int64_t)cpu->core->regs[instr.rA()] * (int64_t)cpu->core->regs[instr.rB()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result >> 32);
-	cpu->core->regs[instr.rD()] = result >> 32;
+bool PPCInstr_mulhw(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint64_t result = (int64_t)cpu->core->regs[instr->rA()] * (int64_t)cpu->core->regs[instr->rB()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result >> 32);
+	cpu->core->regs[instr->rD()] = result >> 32;
 	return true;
 }
 
-bool PPCInstr_mulhwu(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint64_t result = (uint64_t)cpu->core->regs[instr.rA()] * cpu->core->regs[instr.rB()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result >> 32);
-	cpu->core->regs[instr.rD()] = result >> 32;
+bool PPCInstr_mulhwu(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint64_t result = (uint64_t)cpu->core->regs[instr->rA()] * cpu->core->regs[instr->rB()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result >> 32);
+	cpu->core->regs[instr->rD()] = result >> 32;
 	return true;
 }
 
-bool PPCInstr_divwu(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t dividend = cpu->core->regs[instr.rA()];
-	uint32_t divisor = cpu->core->regs[instr.rB()];
+bool PPCInstr_divwu(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t dividend = cpu->core->regs[instr->rA()];
+	uint32_t divisor = cpu->core->regs[instr->rB()];
 	if (divisor != 0) {
 		uint32_t result = dividend / divisor;
-		if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-		cpu->core->regs[instr.rD()] = result;
+		if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+		cpu->core->regs[instr->rD()] = result;
 	}
 	return true;
 }
 
-bool PPCInstr_divw(PPCInterpreter *cpu, PPCInstruction instr) {
-	int32_t dividend = cpu->core->regs[instr.rA()];
-	int32_t divisor = cpu->core->regs[instr.rB()];
+bool PPCInstr_divw(PPCInstruction *instr, PPCInterpreter *cpu) {
+	int32_t dividend = cpu->core->regs[instr->rA()];
+	int32_t divisor = cpu->core->regs[instr->rB()];
 	if (divisor != 0) {
 		int32_t result = dividend / divisor;
-		if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-		cpu->core->regs[instr.rD()] = result;
+		if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+		cpu->core->regs[instr->rD()] = result;
 	}
 	return true;
 }
 
-bool PPCInstr_or(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = cpu->core->regs[instr.rS()] | cpu->core->regs[instr.rB()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+bool PPCInstr_or(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = cpu->core->regs[instr->rS()] | cpu->core->regs[instr->rB()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_and(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = cpu->core->regs[instr.rS()] & cpu->core->regs[instr.rB()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+bool PPCInstr_and(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = cpu->core->regs[instr->rS()] & cpu->core->regs[instr->rB()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_xor(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = cpu->core->regs[instr.rS()] ^ cpu->core->regs[instr.rB()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+bool PPCInstr_xor(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = cpu->core->regs[instr->rS()] ^ cpu->core->regs[instr->rB()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_nor(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = ~(cpu->core->regs[instr.rS()] | cpu->core->regs[instr.rB()]);
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+bool PPCInstr_nor(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = ~(cpu->core->regs[instr->rS()] | cpu->core->regs[instr->rB()]);
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_andc(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = cpu->core->regs[instr.rS()] & ~cpu->core->regs[instr.rB()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+bool PPCInstr_andc(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = cpu->core->regs[instr->rS()] & ~cpu->core->regs[instr->rB()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_slw(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t bits = cpu->core->regs[instr.rB()] & 0x3F;
+bool PPCInstr_slw(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t bits = cpu->core->regs[instr->rB()] & 0x3F;
 	uint32_t result = 0;
 	if (!(bits & 0x20)) {
-		result = cpu->core->regs[instr.rS()] << bits;
+		result = cpu->core->regs[instr->rS()] << bits;
 	}
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_srw(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t bits = cpu->core->regs[instr.rB()] & 0x3F;
+bool PPCInstr_srw(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t bits = cpu->core->regs[instr->rB()] & 0x3F;
 	uint32_t result = 0;
 	if (!(bits & 0x20)) {
-		result = cpu->core->regs[instr.rS()] >> bits;
+		result = cpu->core->regs[instr->rS()] >> bits;
 	}
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_sraw(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t value = cpu->core->regs[instr.rS()];
-	uint32_t bits = cpu->core->regs[instr.rB()] & 0x3F;
+bool PPCInstr_sraw(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t value = cpu->core->regs[instr->rS()];
+	uint32_t bits = cpu->core->regs[instr->rB()] & 0x3F;
 	
 	uint32_t result;
 	if (!(bits & 0x20)) {
@@ -330,111 +330,111 @@ bool PPCInstr_sraw(PPCInterpreter *cpu, PPCInstruction instr) {
 		cpu->core->xer.set(PPCCore::CA, value >> 31);
 	}
 	
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_rlwinm(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = rotl(cpu->core->regs[instr.rS()], instr.sh()) & genmask(instr.mb(), instr.me());
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+bool PPCInstr_rlwinm(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = rotl(cpu->core->regs[instr->rS()], instr->sh()) & genmask(instr->mb(), instr->me());
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_rlwimi(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t mask = genmask(instr.mb(), instr.me());
-	uint32_t temp = rotl(cpu->core->regs[instr.rS()], instr.sh()) & mask;
-	uint32_t result = (cpu->core->regs[instr.rA()] & ~mask) | temp;
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+bool PPCInstr_rlwimi(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t mask = genmask(instr->mb(), instr->me());
+	uint32_t temp = rotl(cpu->core->regs[instr->rS()], instr->sh()) & mask;
+	uint32_t result = (cpu->core->regs[instr->rA()] & ~mask) | temp;
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_neg(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = -(int32_t)cpu->core->regs[instr.rA()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rD()] = result;
+bool PPCInstr_neg(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = -(int32_t)cpu->core->regs[instr->rA()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rD()] = result;
 	return true;
 }
 
-bool PPCInstr_extsb(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = (int8_t)cpu->core->regs[instr.rS()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+bool PPCInstr_extsb(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = (int8_t)cpu->core->regs[instr->rS()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_extsh(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = (int16_t)cpu->core->regs[instr.rS()];
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+bool PPCInstr_extsh(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = (int16_t)cpu->core->regs[instr->rS()];
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_cntlzw(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t result = cntlzw(cpu->core->regs[instr.rS()]);
-	if (instr.rc()) PPC_UpdateConditions(cpu->core, result);
-	cpu->core->regs[instr.rA()] = result;
+bool PPCInstr_cntlzw(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t result = cntlzw(cpu->core->regs[instr->rS()]);
+	if (instr->rc()) PPC_UpdateConditions(cpu->core, result);
+	cpu->core->regs[instr->rA()] = result;
 	return true;
 }
 
-bool PPCInstr_cmpli(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t left = cpu->core->regs[instr.rA()];
-	uint32_t right = instr.uimm();
-	cpu->core->cr.set(PPCCore::LT >> (4 * instr.crfD()), left < right);
-	cpu->core->cr.set(PPCCore::GT >> (4 * instr.crfD()), left > right);
-	cpu->core->cr.set(PPCCore::EQ >> (4 * instr.crfD()), left == right);
+bool PPCInstr_cmpli(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t left = cpu->core->regs[instr->rA()];
+	uint32_t right = instr->uimm();
+	cpu->core->cr.set(PPCCore::LT >> (4 * instr->crfD()), left < right);
+	cpu->core->cr.set(PPCCore::GT >> (4 * instr->crfD()), left > right);
+	cpu->core->cr.set(PPCCore::EQ >> (4 * instr->crfD()), left == right);
 	return true;
 }
 
-bool PPCInstr_cmpi(PPCInterpreter *cpu, PPCInstruction instr) {
-	int32_t left = cpu->core->regs[instr.rA()];
-	int32_t right = instr.simm();
-	cpu->core->cr.set(PPCCore::LT >> (4 * instr.crfD()), left < right);
-	cpu->core->cr.set(PPCCore::GT >> (4 * instr.crfD()), left > right);
-	cpu->core->cr.set(PPCCore::EQ >> (4 * instr.crfD()), left == right);
+bool PPCInstr_cmpi(PPCInstruction *instr, PPCInterpreter *cpu) {
+	int32_t left = cpu->core->regs[instr->rA()];
+	int32_t right = instr->simm();
+	cpu->core->cr.set(PPCCore::LT >> (4 * instr->crfD()), left < right);
+	cpu->core->cr.set(PPCCore::GT >> (4 * instr->crfD()), left > right);
+	cpu->core->cr.set(PPCCore::EQ >> (4 * instr->crfD()), left == right);
 	return true;
 }
 
-bool PPCInstr_cmpl(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t left = cpu->core->regs[instr.rA()];
-	uint32_t right = cpu->core->regs[instr.rB()];
-	cpu->core->cr.set(PPCCore::LT >> (4 * instr.crfD()), left < right);
-	cpu->core->cr.set(PPCCore::GT >> (4 * instr.crfD()), left > right);
-	cpu->core->cr.set(PPCCore::EQ >> (4 * instr.crfD()), left == right);
+bool PPCInstr_cmpl(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t left = cpu->core->regs[instr->rA()];
+	uint32_t right = cpu->core->regs[instr->rB()];
+	cpu->core->cr.set(PPCCore::LT >> (4 * instr->crfD()), left < right);
+	cpu->core->cr.set(PPCCore::GT >> (4 * instr->crfD()), left > right);
+	cpu->core->cr.set(PPCCore::EQ >> (4 * instr->crfD()), left == right);
 	return true;
 }
 
-bool PPCInstr_cmp(PPCInterpreter *cpu, PPCInstruction instr) {
-	int32_t left = cpu->core->regs[instr.rA()];
-	int32_t right = cpu->core->regs[instr.rB()];
-	cpu->core->cr.set(PPCCore::LT >> (4 * instr.crfD()), left < right);
-	cpu->core->cr.set(PPCCore::GT >> (4 * instr.crfD()), left > right);
-	cpu->core->cr.set(PPCCore::EQ >> (4 * instr.crfD()), left == right);
+bool PPCInstr_cmp(PPCInstruction *instr, PPCInterpreter *cpu) {
+	int32_t left = cpu->core->regs[instr->rA()];
+	int32_t right = cpu->core->regs[instr->rB()];
+	cpu->core->cr.set(PPCCore::LT >> (4 * instr->crfD()), left < right);
+	cpu->core->cr.set(PPCCore::GT >> (4 * instr->crfD()), left > right);
+	cpu->core->cr.set(PPCCore::EQ >> (4 * instr->crfD()), left == right);
 	return true;
 }
 
-bool PPCInstr_b(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t target = instr.li();
-	if (!instr.aa()) {
+bool PPCInstr_b(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t target = instr->li();
+	if (!instr->aa()) {
 		target += cpu->core->pc - 4;
 	}
-	if (instr.lk()) {
+	if (instr->lk()) {
 		cpu->core->lr = cpu->core->pc;
 	}
 	cpu->core->pc = target;
 	return true;
 }
 
-bool PPCInstr_bc(PPCInterpreter *cpu, PPCInstruction instr) {
-	if (PPC_CheckCondition(cpu, instr)) {
-		if (instr.lk()) {
+bool PPCInstr_bc(PPCInstruction *instr, PPCInterpreter *cpu) {
+	if (PPC_CheckCondition(instr, cpu)) {
+		if (instr->lk()) {
 			cpu->core->lr = cpu->core->pc;
 		}
 		
-		uint32_t target = instr.bd();
-		if (!instr.aa()) {
+		uint32_t target = instr->bd();
+		if (!instr->aa()) {
 			target += cpu->core->pc - 4;
 		}
 		cpu->core->pc = target;
@@ -442,10 +442,10 @@ bool PPCInstr_bc(PPCInterpreter *cpu, PPCInstruction instr) {
 	return true;
 }
 
-bool PPCInstr_bclr(PPCInterpreter *cpu, PPCInstruction instr) {
-	if (PPC_CheckCondition(cpu, instr)) {
+bool PPCInstr_bclr(PPCInstruction *instr, PPCInterpreter *cpu) {
+	if (PPC_CheckCondition(instr, cpu)) {
 		uint32_t target = cpu->core->lr;
-		if (instr.lk()) {
+		if (instr->lk()) {
 			cpu->core->lr = cpu->core->pc;
 		}
 		cpu->core->pc = target;
@@ -453,9 +453,9 @@ bool PPCInstr_bclr(PPCInterpreter *cpu, PPCInstruction instr) {
 	return true;
 }
 
-bool PPCInstr_bcctr(PPCInterpreter *cpu, PPCInstruction instr) {
-	if (PPC_CheckCondition(cpu, instr)) {
-		if (instr.lk()) {
+bool PPCInstr_bcctr(PPCInstruction *instr, PPCInterpreter *cpu) {
+	if (PPC_CheckCondition(instr, cpu)) {
+		if (instr->lk()) {
 			cpu->core->lr = cpu->core->pc;
 		}
 		cpu->core->pc = cpu->core->ctr;
@@ -463,260 +463,260 @@ bool PPCInstr_bcctr(PPCInterpreter *cpu, PPCInstruction instr) {
 	return true;
 }
 
-bool PPCInstr_lbz(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
+bool PPCInstr_lbz(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
 	
 	uint8_t value;
 	if (!cpu->read<uint8_t>(addr, &value)) return false;
-	cpu->core->regs[instr.rD()] = value;
+	cpu->core->regs[instr->rD()] = value;
 	return true;
 }
 
-bool PPCInstr_lhz(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
+bool PPCInstr_lhz(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
 	
 	uint16_t value;
 	if (!cpu->read<uint16_t>(addr, &value)) return false;
-	cpu->core->regs[instr.rD()] = value;
+	cpu->core->regs[instr->rD()] = value;
 	return true;
 }
 
-bool PPCInstr_lha(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
+bool PPCInstr_lha(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
 	
 	int16_t value;
 	if (!cpu->read<int16_t>(addr, &value)) return false;
-	cpu->core->regs[instr.rD()] = value;
+	cpu->core->regs[instr->rD()] = value;
 	return true;
 }
 
-bool PPCInstr_lwz(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
-	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr.rD()]);
+bool PPCInstr_lwz(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
+	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr->rD()]);
 }
 
-bool PPCInstr_lfs(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
-	return cpu->read<float>(addr, &cpu->core->fprs[instr.rD()].ps0);
+bool PPCInstr_lfs(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
+	return cpu->read<float>(addr, &cpu->core->fprs[instr->rD()].ps0);
 }
 
-bool PPCInstr_lfd(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
-	return cpu->read<double>(addr, &cpu->core->fprs[instr.rD()].dbl);
+bool PPCInstr_lfd(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
+	return cpu->read<double>(addr, &cpu->core->fprs[instr->rD()].dbl);
 }
 
-bool PPCInstr_stb(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
-	return cpu->write<uint8_t>(addr, cpu->core->regs[instr.rS()]);
+bool PPCInstr_stb(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
+	return cpu->write<uint8_t>(addr, cpu->core->regs[instr->rS()]);
 }
 
-bool PPCInstr_sth(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
-	return cpu->write<uint16_t>(addr, cpu->core->regs[instr.rS()]);
+bool PPCInstr_sth(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
+	return cpu->write<uint16_t>(addr, cpu->core->regs[instr->rS()]);
 }
 
-bool PPCInstr_stw(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
-	return cpu->write<uint32_t>(addr, cpu->core->regs[instr.rS()]);
+bool PPCInstr_stw(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
+	return cpu->write<uint32_t>(addr, cpu->core->regs[instr->rS()]);
 }
 
-bool PPCInstr_stfs(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
-	return cpu->write<float>(addr, cpu->core->fprs[instr.rS()].ps0);
+bool PPCInstr_stfs(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
+	return cpu->write<float>(addr, cpu->core->fprs[instr->rS()].ps0);
 }
 
-bool PPCInstr_stfd(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
-	return cpu->write<double>(addr, cpu->core->fprs[instr.rS()].dbl);
+bool PPCInstr_stfd(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
+	return cpu->write<double>(addr, cpu->core->fprs[instr->rS()].dbl);
 }
 
-bool PPCInstr_lbzu(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = cpu->core->regs[instr.rA()] + instr.d();
+bool PPCInstr_lbzu(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + instr->d();
 	
 	uint8_t value;
 	if (!cpu->read<uint8_t>(addr, &value)) return false;
-	cpu->core->regs[instr.rD()] = value;
-	cpu->core->regs[instr.rA()] = addr;
+	cpu->core->regs[instr->rD()] = value;
+	cpu->core->regs[instr->rA()] = addr;
 	return true;
 }
 
-bool PPCInstr_lhzu(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = cpu->core->regs[instr.rA()] + instr.d();
+bool PPCInstr_lhzu(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + instr->d();
 	
 	uint16_t value;
 	if (!cpu->read<uint16_t>(addr, &value)) return false;
-	cpu->core->regs[instr.rD()] = value;
-	cpu->core->regs[instr.rA()] = addr;
+	cpu->core->regs[instr->rD()] = value;
+	cpu->core->regs[instr->rA()] = addr;
 	return true;
 }
 
-bool PPCInstr_lwzu(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = cpu->core->regs[instr.rA()] + instr.d();
-	cpu->core->regs[instr.rA()] = addr;
-	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr.rD()]);
+bool PPCInstr_lwzu(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + instr->d();
+	cpu->core->regs[instr->rA()] = addr;
+	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr->rD()]);
 }
 
-bool PPCInstr_stbu(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = cpu->core->regs[instr.rA()] + instr.d();
-	if (!cpu->write<uint8_t>(addr, cpu->core->regs[instr.rS()])) return false;
-	cpu->core->regs[instr.rA()] = addr;
+bool PPCInstr_stbu(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + instr->d();
+	if (!cpu->write<uint8_t>(addr, cpu->core->regs[instr->rS()])) return false;
+	cpu->core->regs[instr->rA()] = addr;
 	return true;
 }
 
-bool PPCInstr_sthu(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = cpu->core->regs[instr.rA()] + instr.d();
-	if (!cpu->write<uint16_t>(addr, cpu->core->regs[instr.rS()])) return false;
-	cpu->core->regs[instr.rA()] = addr;
+bool PPCInstr_sthu(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + instr->d();
+	if (!cpu->write<uint16_t>(addr, cpu->core->regs[instr->rS()])) return false;
+	cpu->core->regs[instr->rA()] = addr;
 	return true;
 }
 
-bool PPCInstr_stwu(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = cpu->core->regs[instr.rA()] + instr.d();
-	if (!cpu->write<uint32_t>(addr, cpu->core->regs[instr.rS()])) return false;
-	cpu->core->regs[instr.rA()] = addr;
+bool PPCInstr_stwu(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + instr->d();
+	if (!cpu->write<uint32_t>(addr, cpu->core->regs[instr->rS()])) return false;
+	cpu->core->regs[instr->rA()] = addr;
 	return true;
 }
 
-bool PPCInstr_lbzx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
+bool PPCInstr_lbzx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
 	
 	uint8_t value;
 	if (!cpu->read<uint8_t>(addr, &value)) return false;
-	cpu->core->regs[instr.rD()] = value;
+	cpu->core->regs[instr->rD()] = value;
 	return true;
 }
 
-bool PPCInstr_lhzx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
+bool PPCInstr_lhzx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
 	
 	uint16_t value;
 	if (!cpu->read<uint16_t>(addr, &value)) return false;
-	cpu->core->regs[instr.rD()] = value;
+	cpu->core->regs[instr->rD()] = value;
 	return true;
 }
 
-bool PPCInstr_lwzx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
-	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr.rD()]);
+bool PPCInstr_lwzx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
+	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr->rD()]);
 }
 
-bool PPCInstr_lwbrx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
+bool PPCInstr_lwbrx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
 	
 	uint32_t value;
 	if (!cpu->read<uint32_t>(addr, &value)) return false;
-	cpu->core->regs[instr.rD()] = Endian::swap32(value);
+	cpu->core->regs[instr->rD()] = Endian::swap32(value);
 	return true;
 }
 
-bool PPCInstr_stbx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
-	return cpu->write<uint8_t>(addr, cpu->core->regs[instr.rS()]);
+bool PPCInstr_stbx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
+	return cpu->write<uint8_t>(addr, cpu->core->regs[instr->rS()]);
 }
 
-bool PPCInstr_sthx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
-	return cpu->write<uint16_t>(addr, cpu->core->regs[instr.rS()]);
+bool PPCInstr_sthx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
+	return cpu->write<uint16_t>(addr, cpu->core->regs[instr->rS()]);
 }
 
-bool PPCInstr_stwx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
-	return cpu->write<uint32_t>(addr, cpu->core->regs[instr.rS()]);
+bool PPCInstr_stwx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
+	return cpu->write<uint32_t>(addr, cpu->core->regs[instr->rS()]);
 }
 
-bool PPCInstr_stwbrx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
-	uint32_t value = Endian::swap32(cpu->core->regs[instr.rS()]);
+bool PPCInstr_stwbrx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
+	uint32_t value = Endian::swap32(cpu->core->regs[instr->rS()]);
 	return cpu->write<uint32_t>(addr, value);
 }
 
-bool PPCInstr_stfsx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
-	return cpu->write<float>(addr, cpu->core->fprs[instr.rS()].ps0);
+bool PPCInstr_stfsx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
+	return cpu->write<float>(addr, cpu->core->fprs[instr->rS()].ps0);
 }
 
-bool PPCInstr_stfiwx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
-	return cpu->write<int32_t>(addr, cpu->core->fprs[instr.rS()].iw1);
+bool PPCInstr_stfiwx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
+	return cpu->write<int32_t>(addr, cpu->core->fprs[instr->rS()].iw1);
 }
 
-bool PPCInstr_lbzux(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = cpu->core->regs[instr.rA()] + cpu->core->regs[instr.rB()];
-	cpu->core->regs[instr.rA()] = addr;
+bool PPCInstr_lbzux(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + cpu->core->regs[instr->rB()];
+	cpu->core->regs[instr->rA()] = addr;
 	
 	uint8_t value;
 	if (!cpu->read<uint8_t>(addr, &value)) return false;
-	cpu->core->regs[instr.rD()] = value;
+	cpu->core->regs[instr->rD()] = value;
 	return true;
 }
 
-bool PPCInstr_lwzux(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = cpu->core->regs[instr.rA()] + cpu->core->regs[instr.rB()];
-	cpu->core->regs[instr.rA()] = addr;
-	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr.rD()]);
+bool PPCInstr_lwzux(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + cpu->core->regs[instr->rB()];
+	cpu->core->regs[instr->rA()] = addr;
+	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr->rD()]);
 }
 
-bool PPCInstr_stbux(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = cpu->core->regs[instr.rA()] + cpu->core->regs[instr.rB()];
-	if (!cpu->write<uint8_t>(addr, cpu->core->regs[instr.rS()])) return false;
-	cpu->core->regs[instr.rA()] = addr;
+bool PPCInstr_stbux(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + cpu->core->regs[instr->rB()];
+	if (!cpu->write<uint8_t>(addr, cpu->core->regs[instr->rS()])) return false;
+	cpu->core->regs[instr->rA()] = addr;
 	return true;
 }
 
-bool PPCInstr_sthux(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = cpu->core->regs[instr.rA()] + cpu->core->regs[instr.rB()];
-	if (!cpu->write<uint16_t>(addr, cpu->core->regs[instr.rS()])) return false;
-	cpu->core->regs[instr.rA()] = addr;
+bool PPCInstr_sthux(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + cpu->core->regs[instr->rB()];
+	if (!cpu->write<uint16_t>(addr, cpu->core->regs[instr->rS()])) return false;
+	cpu->core->regs[instr->rA()] = addr;
 	return true;
 }
 
-bool PPCInstr_stwux(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = cpu->core->regs[instr.rA()] + cpu->core->regs[instr.rB()];
-	if (!cpu->write<uint32_t>(addr, cpu->core->regs[instr.rS()])) return false;
-	cpu->core->regs[instr.rA()] = addr;
+bool PPCInstr_stwux(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + cpu->core->regs[instr->rB()];
+	if (!cpu->write<uint32_t>(addr, cpu->core->regs[instr->rS()])) return false;
+	cpu->core->regs[instr->rA()] = addr;
 	return true;
 }
 
-bool PPCInstr_lmw(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
-	for (int reg = instr.rD(); reg < 32; reg++) {
+bool PPCInstr_lmw(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
+	for (int reg = instr->rD(); reg < 32; reg++) {
 		if (!cpu->read<uint32_t>(addr, &cpu->core->regs[reg])) return false;
 		addr += 4;
 	}
 	return true;
 }
 
-bool PPCInstr_stmw(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.d();
-	for (int reg = instr.rS(); reg < 32; reg++) {
+bool PPCInstr_stmw(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->d();
+	for (int reg = instr->rS(); reg < 32; reg++) {
 		if (!cpu->write<uint32_t>(addr, cpu->core->regs[reg])) return false;
 		addr += 4;
 	}
 	return true;
 }
 
-bool PPCInstr_lwarx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
+bool PPCInstr_lwarx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
 	cpu->core->lockMgr->reserve(cpu->core, addr);
-	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr.rD()]);
+	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr->rD()]);
 }
 
-bool PPCInstr_stwcx(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = base + cpu->core->regs[instr.rB()];
+bool PPCInstr_stwcx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
 	if (cpu->core->lockMgr->isReserved(cpu->core, addr)) {
-		if (!cpu->write<uint32_t>(addr, cpu->core->regs[instr.rS()])) return false;
+		if (!cpu->write<uint32_t>(addr, cpu->core->regs[instr->rS()])) return false;
 		cpu->core->cr.set(PPCCore::EQ, true);
 		cpu->core->lockMgr->reset();
 	}
@@ -727,73 +727,73 @@ bool PPCInstr_stwcx(PPCInterpreter *cpu, PPCInstruction instr) {
 	return true;
 }
 
-bool PPCInstr_crxor(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->cr.set(1 << instr.crbD(),
-		cpu->core->cr.get(1 << instr.crbA()) ^ cpu->core->cr.get(1 << instr.crbB())
+bool PPCInstr_crxor(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->cr.set(1 << instr->crbD(),
+		cpu->core->cr.get(1 << instr->crbA()) ^ cpu->core->cr.get(1 << instr->crbB())
 	);
 	return true;
 }
 
-bool PPCInstr_mfcr(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->regs[instr.rD()] = cpu->core->cr;
+bool PPCInstr_mfcr(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->regs[instr->rD()] = cpu->core->cr;
 	return true;
 }
 
-bool PPCInstr_mtcrf(PPCInterpreter *cpu, PPCInstruction instr) {
+bool PPCInstr_mtcrf(PPCInstruction *instr, PPCInterpreter *cpu) {
 	uint32_t mask = 0;
 	for (int i = 7; i >= 0; i--) {
 		mask <<= 4;
-		if (instr.crm() & (1 << i)) {
+		if (instr->crm() & (1 << i)) {
 			mask |= 0xF;
 		}
 	}
 	
-	uint32_t value = cpu->core->regs[instr.rS()] & mask;
+	uint32_t value = cpu->core->regs[instr->rS()] & mask;
 	cpu->core->cr.value = (cpu->core->cr.value & ~mask) | value;
 	return true;
 }
 
-bool PPCInstr_mftb(PPCInterpreter *cpu, PPCInstruction instr) {
-	return cpu->core->getSpr((PPCCore::SPR)instr.spr(), &cpu->core->regs[instr.rD()]);
+bool PPCInstr_mftb(PPCInstruction *instr, PPCInterpreter *cpu) {
+	return cpu->core->getSpr((PPCCore::SPR)instr->spr(), &cpu->core->regs[instr->rD()]);
 }
 
-bool PPCInstr_mfspr(PPCInterpreter *cpu, PPCInstruction instr) {
-	return cpu->core->getSpr((PPCCore::SPR)instr.spr(), &cpu->core->regs[instr.rD()]);
+bool PPCInstr_mfspr(PPCInstruction *instr, PPCInterpreter *cpu) {
+	return cpu->core->getSpr((PPCCore::SPR)instr->spr(), &cpu->core->regs[instr->rD()]);
 }
 
-bool PPCInstr_mtspr(PPCInterpreter *cpu, PPCInstruction instr) {
-	return cpu->core->setSpr((PPCCore::SPR)instr.spr(), cpu->core->regs[instr.rS()]);
+bool PPCInstr_mtspr(PPCInstruction *instr, PPCInterpreter *cpu) {
+	return cpu->core->setSpr((PPCCore::SPR)instr->spr(), cpu->core->regs[instr->rS()]);
 }
 
-bool PPCInstr_sc(PPCInterpreter *cpu, PPCInstruction instr) {
+bool PPCInstr_sc(PPCInstruction *instr, PPCInterpreter *cpu) {
 	return cpu->core->triggerException(PPCCore::SystemCall);
 }
 
 /********** SUPERVISOR INSTRUCTIONS **********/
 
-bool PPCInstr_mfmsr(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->regs[instr.rD()] = cpu->core->msr;
+bool PPCInstr_mfmsr(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->regs[instr->rD()] = cpu->core->msr;
 	return true;
 }
 
-bool PPCInstr_mtmsr(PPCInterpreter *cpu, PPCInstruction instr) {
-	return cpu->core->setMsr(cpu->core->regs[instr.rS()]);
+bool PPCInstr_mtmsr(PPCInstruction *instr, PPCInterpreter *cpu) {
+	return cpu->core->setMsr(cpu->core->regs[instr->rS()]);
 }
 
-bool PPCInstr_mfsr(PPCInterpreter *cpu, PPCInstruction instr) {
-	return cpu->core->getSr(instr.sr(), &cpu->core->regs[instr.rD()]);
+bool PPCInstr_mfsr(PPCInstruction *instr, PPCInterpreter *cpu) {
+	return cpu->core->getSr(instr->sr(), &cpu->core->regs[instr->rD()]);
 }
 
-bool PPCInstr_mtsr(PPCInterpreter *cpu, PPCInstruction instr) {
-	return cpu->core->setSr(instr.sr(), cpu->core->regs[instr.rS()]);
+bool PPCInstr_mtsr(PPCInstruction *instr, PPCInterpreter *cpu) {
+	return cpu->core->setSr(instr->sr(), cpu->core->regs[instr->rS()]);
 }
 
-bool PPCInstr_tlbie(PPCInterpreter *cpu, PPCInstruction instr) {
+bool PPCInstr_tlbie(PPCInstruction *instr, PPCInterpreter *cpu) {
 	cpu->invalidateMMUCache();
 	return true;
 }
 
-bool PPCInstr_rfi(PPCInterpreter *cpu, PPCInstruction instr) {
+bool PPCInstr_rfi(PPCInstruction *instr, PPCInterpreter *cpu) {
 	cpu->core->pc = cpu->core->srr0;
 	if (!cpu->core->setMsr(cpu->core->srr1)) return false;
 	return true;
@@ -801,104 +801,104 @@ bool PPCInstr_rfi(PPCInterpreter *cpu, PPCInstruction instr) {
 
 /********** CACHE AND SYNCHRONIZATION INSTRUCTIONS **********/
 
-bool PPCInstr_sync(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
-bool PPCInstr_isync(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
-bool PPCInstr_eieio(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
-bool PPCInstr_dcbf(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
-bool PPCInstr_dcbi(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
-bool PPCInstr_dcbz(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t base = instr.rA() ? cpu->core->regs[instr.rA()] : 0;
-	uint32_t addr = (base + cpu->core->regs[instr.rB()]) & ~0x1F;
+bool PPCInstr_sync(PPCInstruction *instr, PPCInterpreter *cpu) { return true; }
+bool PPCInstr_isync(PPCInstruction *instr, PPCInterpreter *cpu) { return true; }
+bool PPCInstr_eieio(PPCInstruction *instr, PPCInterpreter *cpu) { return true; }
+bool PPCInstr_dcbf(PPCInstruction *instr, PPCInterpreter *cpu) { return true; }
+bool PPCInstr_dcbi(PPCInstruction *instr, PPCInterpreter *cpu) { return true; }
+bool PPCInstr_dcbz(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = (base + cpu->core->regs[instr->rB()]) & ~0x1F;
 	for (int i = 0; i < 4; i++) {
 		if (!cpu->write<uint64_t>(addr, 0)) return false;
 		addr += 8;
 	}
 	return true;
 }
-bool PPCInstr_dcbz_l(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
-bool PPCInstr_dcbst(PPCInterpreter *cpu, PPCInstruction instr) { return true; }
-bool PPCInstr_icbi(PPCInterpreter *cpu, PPCInstruction instr) {
+bool PPCInstr_dcbz_l(PPCInstruction *instr, PPCInterpreter *cpu) { return true; }
+bool PPCInstr_dcbst(PPCInstruction *instr, PPCInterpreter *cpu) { return true; }
+bool PPCInstr_icbi(PPCInstruction *instr, PPCInterpreter *cpu) {
 	cpu->invalidateICache();
 	return true;
 }
 
 /********** FLOATING POINT INSTRUCTIONS **********/
 
-bool PPCInstr_fmr(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rB()].ps0;
+bool PPCInstr_fmr(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rB()].ps0;
 	return true;
 }
 
-bool PPCInstr_frsp(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].ps0 = (float)cpu->core->fprs[instr.rB()].dbl;
+bool PPCInstr_frsp(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = (float)cpu->core->fprs[instr->rB()].dbl;
 	return true;
 }
 
-bool PPCInstr_fctiwz(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].iw1 = (int32_t)cpu->core->fprs[instr.rB()].ps0;
+bool PPCInstr_fctiwz(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].iw1 = (int32_t)cpu->core->fprs[instr->rB()].ps0;
 	return true;
 }
 
-bool PPCInstr_fabs(PPCInterpreter *cpu, PPCInstruction instr) {
-	float value = cpu->core->fprs[instr.rB()].ps0;
+bool PPCInstr_fabs(PPCInstruction *instr, PPCInterpreter *cpu) {
+	float value = cpu->core->fprs[instr->rB()].ps0;
 	if (value < 0) value = -value;
-	cpu->core->fprs[instr.rD()].ps0 = value;
+	cpu->core->fprs[instr->rD()].ps0 = value;
 	return true;
 }
 
-bool PPCInstr_fmuls(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 * cpu->core->fprs[instr.rC()].ps0;
+bool PPCInstr_fmuls(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0 * cpu->core->fprs[instr->rC()].ps0;
 	return true;
 }
 
-bool PPCInstr_fmul(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].dbl = cpu->core->fprs[instr.rA()].dbl * cpu->core->fprs[instr.rC()].dbl;
+bool PPCInstr_fmul(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].dbl = cpu->core->fprs[instr->rA()].dbl * cpu->core->fprs[instr->rC()].dbl;
 	return true;
 }
 
-bool PPCInstr_fmadds(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 * 
-		cpu->core->fprs[instr.rC()].ps0 + cpu->core->fprs[instr.rB()].ps0;
+bool PPCInstr_fmadds(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0 * 
+		cpu->core->fprs[instr->rC()].ps0 + cpu->core->fprs[instr->rB()].ps0;
 	return true;
 }
 
-bool PPCInstr_fmsubs(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 * 
-		cpu->core->fprs[instr.rC()].ps0 - cpu->core->fprs[instr.rB()].ps0;
+bool PPCInstr_fmsubs(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0 * 
+		cpu->core->fprs[instr->rC()].ps0 - cpu->core->fprs[instr->rB()].ps0;
 	return true;
 }
 
-bool PPCInstr_fdivs(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 / cpu->core->fprs[instr.rB()].ps0;
+bool PPCInstr_fdivs(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0 / cpu->core->fprs[instr->rB()].ps0;
 	return true;
 }
 
-bool PPCInstr_fdiv(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].dbl = cpu->core->fprs[instr.rA()].dbl / cpu->core->fprs[instr.rB()].dbl;
+bool PPCInstr_fdiv(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].dbl = cpu->core->fprs[instr->rA()].dbl / cpu->core->fprs[instr->rB()].dbl;
 	return true;
 }
 
-bool PPCInstr_fadds(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 + cpu->core->fprs[instr.rB()].ps0;
+bool PPCInstr_fadds(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0 + cpu->core->fprs[instr->rB()].ps0;
 	return true;
 }
 
-bool PPCInstr_fsubs(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].ps0 = cpu->core->fprs[instr.rA()].ps0 - cpu->core->fprs[instr.rB()].ps0;
+bool PPCInstr_fsubs(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0 - cpu->core->fprs[instr->rB()].ps0;
 	return true;
 }
 
-bool PPCInstr_fsub(PPCInterpreter *cpu, PPCInstruction instr) {
-	cpu->core->fprs[instr.rD()].dbl = cpu->core->fprs[instr.rA()].dbl - cpu->core->fprs[instr.rB()].dbl;
+bool PPCInstr_fsub(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].dbl = cpu->core->fprs[instr->rA()].dbl - cpu->core->fprs[instr->rB()].dbl;
 	return true;
 }
 
-bool PPCInstr_fcmpu(PPCInterpreter *cpu, PPCInstruction instr) {
-	float left = cpu->core->fprs[instr.rA()].ps0;
-	float right = cpu->core->fprs[instr.rB()].ps1;
-	cpu->core->cr.set(PPCCore::LT >> (4 * instr.crfD()), left < right);
-	cpu->core->cr.set(PPCCore::GT >> (4 * instr.crfD()), left > right);
-	cpu->core->cr.set(PPCCore::EQ >> (4 * instr.crfD()), left == right);
+bool PPCInstr_fcmpu(PPCInstruction *instr, PPCInterpreter *cpu) {
+	float left = cpu->core->fprs[instr->rA()].ps0;
+	float right = cpu->core->fprs[instr->rB()].ps1;
+	cpu->core->cr.set(PPCCore::LT >> (4 * instr->crfD()), left < right);
+	cpu->core->cr.set(PPCCore::GT >> (4 * instr->crfD()), left > right);
+	cpu->core->cr.set(PPCCore::EQ >> (4 * instr->crfD()), left == right);
 	return true;
 }
 
@@ -934,162 +934,162 @@ bool PSQ_Load(PPCInterpreter *cpu, uint32_t addr, int rD, int i, int w) {
 	return true;
 }
 
-bool PPCInstr_psq_l(PPCInterpreter *cpu, PPCInstruction instr) {
-	uint32_t addr = (instr.rA() ? cpu->core->regs[instr.rA()] : 0) + instr.ps_d();
-	return PSQ_Load(cpu, addr, instr.rD(), instr.ps_i(), instr.ps_w());
+bool PPCInstr_psq_l(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->ps_d();
+	return PSQ_Load(cpu, addr, instr->rD(), instr->ps_i(), instr->ps_w());
 }
 
-PPCInstrCallback PPCInstruction::decode() {
+bool PPCInstruction::execute(PPCInterpreter *cpu) {
 	switch(opcode()) {
-		case 4: return PPCInstr_dcbz_l;
-		case 7: return PPCInstr_mulli;
-		case 8: return PPCInstr_subfic;
-		case 10: return PPCInstr_cmpli;
-		case 11: return PPCInstr_cmpi;
-		case 12: return PPCInstr_addic;
-		case 13: return PPCInstr_addic_rc;
-		case 14: return PPCInstr_addi;
-		case 15: return PPCInstr_addis;
-		case 16: return PPCInstr_bc;
-		case 17: return PPCInstr_sc;
-		case 18: return PPCInstr_b;
+		case 4: return PPCInstr_dcbz_l(this, cpu);
+		case 7: return PPCInstr_mulli(this, cpu);
+		case 8: return PPCInstr_subfic(this, cpu);
+		case 10: return PPCInstr_cmpli(this, cpu);
+		case 11: return PPCInstr_cmpi(this, cpu);
+		case 12: return PPCInstr_addic(this, cpu);
+		case 13: return PPCInstr_addic_rc(this, cpu);
+		case 14: return PPCInstr_addi(this, cpu);
+		case 15: return PPCInstr_addis(this, cpu);
+		case 16: return PPCInstr_bc(this, cpu);
+		case 17: return PPCInstr_sc(this, cpu);
+		case 18: return PPCInstr_b(this, cpu);
 		case 19:
 			switch(opcode2()) {
-				case 16: return PPCInstr_bclr;
-				case 50: return PPCInstr_rfi;
-				case 150: return PPCInstr_isync;
-				case 193: return PPCInstr_crxor;
-				case 528: return PPCInstr_bcctr;
+				case 16: return PPCInstr_bclr(this, cpu);
+				case 50: return PPCInstr_rfi(this, cpu);
+				case 150: return PPCInstr_isync(this, cpu);
+				case 193: return PPCInstr_crxor(this, cpu);
+				case 528: return PPCInstr_bcctr(this, cpu);
 				default:
 					NotImplementedError("PPC opcode 19: %i", opcode2());
-					return NULL;
+					return false;
 			}
-		case 20: return PPCInstr_rlwimi;
-		case 21: return PPCInstr_rlwinm;
-		case 24: return PPCInstr_ori;
-		case 25: return PPCInstr_oris;
-		case 26: return PPCInstr_xori;
-		case 27: return PPCInstr_xoris;
-		case 28: return PPCInstr_andi;
-		case 29: return PPCInstr_andis;
+		case 20: return PPCInstr_rlwimi(this, cpu);
+		case 21: return PPCInstr_rlwinm(this, cpu);
+		case 24: return PPCInstr_ori(this, cpu);
+		case 25: return PPCInstr_oris(this, cpu);
+		case 26: return PPCInstr_xori(this, cpu);
+		case 27: return PPCInstr_xoris(this, cpu);
+		case 28: return PPCInstr_andi(this, cpu);
+		case 29: return PPCInstr_andis(this, cpu);
 		case 31:
 			switch(opcode2()) {
-				case 0: return PPCInstr_cmp;
-				case 8: return PPCInstr_subfc;
-				case 10: return PPCInstr_addc;
-				case 11: return PPCInstr_mulhwu;
-				case 19: return PPCInstr_mfcr;
-				case 20: return PPCInstr_lwarx;
-				case 23: return PPCInstr_lwzx;
-				case 24: return PPCInstr_slw;
-				case 26: return PPCInstr_cntlzw;
-				case 28: return PPCInstr_and;
-				case 32: return PPCInstr_cmpl;
-				case 40: return PPCInstr_subf;
-				case 54: return PPCInstr_dcbst;
-				case 55: return PPCInstr_lwzux;
-				case 60: return PPCInstr_andc;
-				case 75: return PPCInstr_mulhw;
-				case 83: return PPCInstr_mfmsr;
-				case 86: return PPCInstr_dcbf;
-				case 87: return PPCInstr_lbzx;
-				case 104: return PPCInstr_neg;
-				case 119: return PPCInstr_lbzux;
-				case 124: return PPCInstr_nor;
-				case 136: return PPCInstr_subfe;
-				case 138: return PPCInstr_adde;
-				case 144: return PPCInstr_mtcrf;
-				case 146: return PPCInstr_mtmsr;
-				case 150: return PPCInstr_stwcx;
-				case 151: return PPCInstr_stwx;
-				case 183: return PPCInstr_stwux;
-				case 200: return PPCInstr_subfze;
-				case 202: return PPCInstr_addze;
-				case 210: return PPCInstr_mtsr;
-				case 215: return PPCInstr_stbx;
-				case 235: return PPCInstr_mullw;
-				case 247: return PPCInstr_stbux;
-				case 266: return PPCInstr_add;
-				case 279: return PPCInstr_lhzx;
-				case 306: return PPCInstr_tlbie;
-				case 316: return PPCInstr_xor;
-				case 339: return PPCInstr_mfspr;
-				case 371: return PPCInstr_mftb;
-				case 407: return PPCInstr_sthx;
-				case 439: return PPCInstr_sthux;
-				case 444: return PPCInstr_or;
-				case 459: return PPCInstr_divwu;
-				case 467: return PPCInstr_mtspr;
-				case 470: return PPCInstr_dcbi;
-				case 491: return PPCInstr_divw;
-				case 534: return PPCInstr_lwbrx;
-				case 536: return PPCInstr_srw;
-				case 595: return PPCInstr_mfsr;
-				case 598: return PPCInstr_sync;
-				case 662: return PPCInstr_stwbrx;
-				case 663: return PPCInstr_stfsx;
-				case 792: return PPCInstr_sraw;
-				case 824: return PPCInstr_srawi;
-				case 854: return PPCInstr_eieio;
-				case 922: return PPCInstr_extsh;
-				case 954: return PPCInstr_extsb;
-				case 982: return PPCInstr_icbi;
-				case 983: return PPCInstr_stfiwx;
-				case 1014: return PPCInstr_dcbz;
+				case 0: return PPCInstr_cmp(this, cpu);
+				case 8: return PPCInstr_subfc(this, cpu);
+				case 10: return PPCInstr_addc(this, cpu);
+				case 11: return PPCInstr_mulhwu(this, cpu);
+				case 19: return PPCInstr_mfcr(this, cpu);
+				case 20: return PPCInstr_lwarx(this, cpu);
+				case 23: return PPCInstr_lwzx(this, cpu);
+				case 24: return PPCInstr_slw(this, cpu);
+				case 26: return PPCInstr_cntlzw(this, cpu);
+				case 28: return PPCInstr_and(this, cpu);
+				case 32: return PPCInstr_cmpl(this, cpu);
+				case 40: return PPCInstr_subf(this, cpu);
+				case 54: return PPCInstr_dcbst(this, cpu);
+				case 55: return PPCInstr_lwzux(this, cpu);
+				case 60: return PPCInstr_andc(this, cpu);
+				case 75: return PPCInstr_mulhw(this, cpu);
+				case 83: return PPCInstr_mfmsr(this, cpu);
+				case 86: return PPCInstr_dcbf(this, cpu);
+				case 87: return PPCInstr_lbzx(this, cpu);
+				case 104: return PPCInstr_neg(this, cpu);
+				case 119: return PPCInstr_lbzux(this, cpu);
+				case 124: return PPCInstr_nor(this, cpu);
+				case 136: return PPCInstr_subfe(this, cpu);
+				case 138: return PPCInstr_adde(this, cpu);
+				case 144: return PPCInstr_mtcrf(this, cpu);
+				case 146: return PPCInstr_mtmsr(this, cpu);
+				case 150: return PPCInstr_stwcx(this, cpu);
+				case 151: return PPCInstr_stwx(this, cpu);
+				case 183: return PPCInstr_stwux(this, cpu);
+				case 200: return PPCInstr_subfze(this, cpu);
+				case 202: return PPCInstr_addze(this, cpu);
+				case 210: return PPCInstr_mtsr(this, cpu);
+				case 215: return PPCInstr_stbx(this, cpu);
+				case 235: return PPCInstr_mullw(this, cpu);
+				case 247: return PPCInstr_stbux(this, cpu);
+				case 266: return PPCInstr_add(this, cpu);
+				case 279: return PPCInstr_lhzx(this, cpu);
+				case 306: return PPCInstr_tlbie(this, cpu);
+				case 316: return PPCInstr_xor(this, cpu);
+				case 339: return PPCInstr_mfspr(this, cpu);
+				case 371: return PPCInstr_mftb(this, cpu);
+				case 407: return PPCInstr_sthx(this, cpu);
+				case 439: return PPCInstr_sthux(this, cpu);
+				case 444: return PPCInstr_or(this, cpu);
+				case 459: return PPCInstr_divwu(this, cpu);
+				case 467: return PPCInstr_mtspr(this, cpu);
+				case 470: return PPCInstr_dcbi(this, cpu);
+				case 491: return PPCInstr_divw(this, cpu);
+				case 534: return PPCInstr_lwbrx(this, cpu);
+				case 536: return PPCInstr_srw(this, cpu);
+				case 595: return PPCInstr_mfsr(this, cpu);
+				case 598: return PPCInstr_sync(this, cpu);
+				case 662: return PPCInstr_stwbrx(this, cpu);
+				case 663: return PPCInstr_stfsx(this, cpu);
+				case 792: return PPCInstr_sraw(this, cpu);
+				case 824: return PPCInstr_srawi(this, cpu);
+				case 854: return PPCInstr_eieio(this, cpu);
+				case 922: return PPCInstr_extsh(this, cpu);
+				case 954: return PPCInstr_extsb(this, cpu);
+				case 982: return PPCInstr_icbi(this, cpu);
+				case 983: return PPCInstr_stfiwx(this, cpu);
+				case 1014: return PPCInstr_dcbz(this, cpu);
 				default:
 					NotImplementedError("PPC opcode 31: %i", opcode2());
-					return NULL;
+					return false;
 			}
-		case 32: return PPCInstr_lwz;
-		case 33: return PPCInstr_lwzu;
-		case 34: return PPCInstr_lbz;
-		case 35: return PPCInstr_lbzu;
-		case 36: return PPCInstr_stw;
-		case 37: return PPCInstr_stwu;
-		case 38: return PPCInstr_stb;
-		case 39: return PPCInstr_stbu;
-		case 40: return PPCInstr_lhz;
-		case 41: return PPCInstr_lhzu;
-		case 42: return PPCInstr_lha;
-		case 44: return PPCInstr_sth;
-		case 45: return PPCInstr_sthu;
-		case 46: return PPCInstr_lmw;
-		case 47: return PPCInstr_stmw;
-		case 48: return PPCInstr_lfs;
-		case 50: return PPCInstr_lfd;
-		case 52: return PPCInstr_stfs;
-		case 54: return PPCInstr_stfd;
-		case 56: return PPCInstr_psq_l;
+		case 32: return PPCInstr_lwz(this, cpu);
+		case 33: return PPCInstr_lwzu(this, cpu);
+		case 34: return PPCInstr_lbz(this, cpu);
+		case 35: return PPCInstr_lbzu(this, cpu);
+		case 36: return PPCInstr_stw(this, cpu);
+		case 37: return PPCInstr_stwu(this, cpu);
+		case 38: return PPCInstr_stb(this, cpu);
+		case 39: return PPCInstr_stbu(this, cpu);
+		case 40: return PPCInstr_lhz(this, cpu);
+		case 41: return PPCInstr_lhzu(this, cpu);
+		case 42: return PPCInstr_lha(this, cpu);
+		case 44: return PPCInstr_sth(this, cpu);
+		case 45: return PPCInstr_sthu(this, cpu);
+		case 46: return PPCInstr_lmw(this, cpu);
+		case 47: return PPCInstr_stmw(this, cpu);
+		case 48: return PPCInstr_lfs(this, cpu);
+		case 50: return PPCInstr_lfd(this, cpu);
+		case 52: return PPCInstr_stfs(this, cpu);
+		case 54: return PPCInstr_stfd(this, cpu);
+		case 56: return PPCInstr_psq_l(this, cpu);
 		case 59:
 			switch(opcode3()) {
-				case 18: return PPCInstr_fdivs;
-				case 20: return PPCInstr_fsubs;
-				case 21: return PPCInstr_fadds;
-				case 25: return PPCInstr_fmuls;
-				case 28: return PPCInstr_fmsubs;
-				case 29: return PPCInstr_fmadds;
+				case 18: return PPCInstr_fdivs(this, cpu);
+				case 20: return PPCInstr_fsubs(this, cpu);
+				case 21: return PPCInstr_fadds(this, cpu);
+				case 25: return PPCInstr_fmuls(this, cpu);
+				case 28: return PPCInstr_fmsubs(this, cpu);
+				case 29: return PPCInstr_fmadds(this, cpu);
 				default:
 					NotImplementedError("PPC opcode 59: %i", opcode3());
-					return NULL;
+					return false;
 			}
 		case 63:
 			switch(opcode2()) {
-				case 0: return PPCInstr_fcmpu;
-				case 12: return PPCInstr_frsp;
-				case 15: return PPCInstr_fctiwz;
-				case 18: return PPCInstr_fdiv;
-				case 20: return PPCInstr_fsub;
-				case 72: return PPCInstr_fmr;
-				case 264: return PPCInstr_fabs;
+				case 0: return PPCInstr_fcmpu(this, cpu);
+				case 12: return PPCInstr_frsp(this, cpu);
+				case 15: return PPCInstr_fctiwz(this, cpu);
+				case 18: return PPCInstr_fdiv(this, cpu);
+				case 20: return PPCInstr_fsub(this, cpu);
+				case 72: return PPCInstr_fmr(this, cpu);
+				case 264: return PPCInstr_fabs(this, cpu);
 				default:
 					switch(opcode3()) {
-						case 25: return PPCInstr_fmul;
+						case 25: return PPCInstr_fmul(this, cpu);
 					}
 					NotImplementedError("PPC opcode 63: %i", opcode2());
-					return NULL;
+					return false;
 			}
 		default:
 			NotImplementedError("PPC opcode %i", opcode());
-			return NULL;
+			return false;
 	}
 }

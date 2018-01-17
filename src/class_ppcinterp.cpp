@@ -15,9 +15,5 @@ bool PPCInterpreter::step() {
 
 	core->pc += 4;
 	
-	PPCInstrCallback func = instr.decode();
-	if (func) {
-		return func(this, instr);
-	}
-	return false;
+	return instr.execute(this);
 }

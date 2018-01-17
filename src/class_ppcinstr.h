@@ -5,7 +5,6 @@
 
 struct PPCInstruction;
 class PPCInterpreter;
-typedef bool (*PPCInstrCallback)(PPCInterpreter *, PPCInstruction);
 
 struct PPCInstruction {
 	uint32_t value;
@@ -69,5 +68,5 @@ struct PPCInstruction {
 	}
 	inline bool ps_i() { return (value >> 12) & 7; }
 	
-	PPCInstrCallback decode();
+	bool execute(PPCInterpreter *cpu);
 };
