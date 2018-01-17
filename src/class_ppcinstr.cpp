@@ -1015,7 +1015,13 @@ bool PPCInstr_psq_st(PPCInstruction *instr, PPCInterpreter *cpu) {
 
 bool PPCInstruction::execute(PPCInterpreter *cpu) {
 	switch(opcode()) {
-		case 4: return PPCInstr_dcbz_l(this, cpu);
+		case 4:
+			switch(opcode2()) {
+				case 1014: return PPCInstr_dcbz_l(this, cpu);
+				default:
+					NotImplementedError("PPC opcode 4: %i", opcode2());
+					return false;
+			}
 		case 7: return PPCInstr_mulli(this, cpu);
 		case 8: return PPCInstr_subfic(this, cpu);
 		case 10: return PPCInstr_cmpli(this, cpu);
