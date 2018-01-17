@@ -2182,12 +2182,21 @@ class PM4Processor:
 	STATE_NEXT = 0
 	STATE_BODY = 1
 
-	def __init__(self, scheduler):
+	def __init__(self, scheduler, physmem):
 		self.scheduler = scheduler
+		self.physmem = physmem
 
 		self.state = self.STATE_NEXT
 		self.count = 0
 		self.body = []
+		
+		self.opcode_handlers = {
+			0x3C: self.opcode_wait_reg_mem,
+			0x3D: self.opcode_mem_write,
+			0x43: self.opcode_surface_sync,
+			0x68: self.opcode_set_config_reg,
+			0x69: self.opcode_set_context_reg
+		}
 		
 	def write(self, value):
 		if self.state == self.STATE_NEXT:
@@ -2213,8 +2222,27 @@ class PM4Processor:
 			print("PM4 packet type 0:%04X at %08X" %(base_index, self.scheduler.pc()))
 		else:
 			opcode = (self.body[0] >> 8) & 0xFF
-			print("PM4 packet type 3:%02X at %08X" %(opcode, self.scheduler.pc()))
-		
+			if opcode in self.opcode_handlers:
+				self.opcode_handlers[opcode]()
+			else:
+				print("PM4 packet type 3:%02X at %08X" %(opcode, self.scheduler.pc()))
+				
+	def print_opcode(self, opcode):
+		args = ", ".join(["%08X" %x for x in self.body[1:]])
+		print("PM4: %s(%s) at %08X" %(opcode, args, self.scheduler.pc()))
+				
+	def opcode_wait_reg_mem(self): self.print_opcode("WAIT_REG_MEM")
+	def opcode_surface_sync(self): self.print_opcode("SURFACE_SYNC")
+	def opcode_set_config_reg(self): self.print_opcode("SET_CONFIG_REG")
+	def opcode_set_context_reg(self): self.print_opcode("SET_CONTEXT_REG")
+	
+	def opcode_mem_write(self):
+		addr = self.body[1] & ~3
+		if self.body[2] & 0x40000:
+			self.physmem.write(addr, struct.pack(">I", self.body[3]))
+		else:
+			self.physmem.write(addr, struct.pack(">II", self.body[4], self.body[3]))
+
 		
 #Interrupt handling
 GPU_IH_RB_BASE = 0xC203E04
@@ -2258,7 +2286,7 @@ class GPUController:
 		self.scheduler.add_alarm(5000000, self.trigger_vsync)
 		self.physmem = physmem
 		
-		self.pm4 = PM4Processor(scheduler)
+		self.pm4 = PM4Processor(scheduler, physmem)
 
 		self.ih_rb_base = 0
 		self.ih_rb_rptr = 0
