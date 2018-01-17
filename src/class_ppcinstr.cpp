@@ -556,6 +556,12 @@ bool PPCInstr_lwzu(PPCInstruction *instr, PPCInterpreter *cpu) {
 	return cpu->read<uint32_t>(addr, &cpu->core->regs[instr->rD()]);
 }
 
+bool PPCInstr_lfsu(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + instr->d();
+	cpu->core->regs[instr->rA()] = addr;
+	return cpu->read<float>(addr, &cpu->core->fprs[instr->rD()].ps0);
+}
+
 bool PPCInstr_stbu(PPCInstruction *instr, PPCInterpreter *cpu) {
 	uint32_t addr = cpu->core->regs[instr->rA()] + instr->d();
 	if (!cpu->write<uint8_t>(addr, cpu->core->regs[instr->rS()])) return false;
@@ -573,6 +579,13 @@ bool PPCInstr_sthu(PPCInstruction *instr, PPCInterpreter *cpu) {
 bool PPCInstr_stwu(PPCInstruction *instr, PPCInterpreter *cpu) {
 	uint32_t addr = cpu->core->regs[instr->rA()] + instr->d();
 	if (!cpu->write<uint32_t>(addr, cpu->core->regs[instr->rS()])) return false;
+	cpu->core->regs[instr->rA()] = addr;
+	return true;
+}
+
+bool PPCInstr_stfsu(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[instr->rA()] + instr->d();
+	if (!cpu->write<float>(addr, cpu->core->fprs[instr->rS()].ps0)) return false;
 	cpu->core->regs[instr->rA()] = addr;
 	return true;
 }
@@ -932,6 +945,12 @@ bool PSQ_LoadTmpl(PPCInterpreter *cpu, uint32_t addr, int rD, int scale, int w) 
 	return false;
 }
 
+template <class T>
+bool PSQ_StoreTmpl(PPCInterpreter *cpu, uint32_t addr, int rD, int scale, int w) {
+	NotImplementedError("PSQ_StoreTmpl");
+	return false;
+}
+
 bool PSQ_Load(PPCInterpreter *cpu, uint32_t addr, int rD, int i, int w) {
 	uint32_t config = cpu->core->gqrs[i];
 	int scale = (config >> 24) & 0x3F;
@@ -956,9 +975,36 @@ bool PSQ_Load(PPCInterpreter *cpu, uint32_t addr, int rD, int i, int w) {
 	return true;
 }
 
+bool PSQ_Store(PPCInterpreter *cpu, uint32_t addr, int rS, int i, int w) {
+	uint32_t config = cpu->core->gqrs[i];
+	int scale = (config >> 8) & 0x3F;
+	int type = config & 7;
+	if (type & 4) { //Quantize
+		if (type & 2) { //Signed
+			if (type & 1) return PSQ_StoreTmpl<int16_t>(cpu, addr, rS, scale, w);
+			return PSQ_StoreTmpl<int8_t>(cpu, addr, rS, scale, w);
+		}
+		if (type & 1) return PSQ_StoreTmpl<uint16_t>(cpu, addr, rS, scale, w);
+		return PSQ_StoreTmpl<uint8_t>(cpu, addr, rS, scale, w);
+	}
+	
+	if (w) {
+		return cpu->write<float>(addr, cpu->core->fprs[i].ps0);
+	}
+	else {
+		if (!cpu->write<float>(addr, cpu->core->fprs[i].ps0)) return false;
+		return cpu->write<float>(addr+4, cpu->core->fprs[i].ps1);
+	}
+}
+
 bool PPCInstr_psq_l(PPCInstruction *instr, PPCInterpreter *cpu) {
 	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->ps_d();
 	return PSQ_Load(cpu, addr, instr->rD(), instr->ps_i(), instr->ps_w());
+}
+
+bool PPCInstr_psq_st(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t addr = (instr->rA() ? cpu->core->regs[instr->rA()] : 0) + instr->ps_d();
+	return PSQ_Store(cpu, addr, instr->rS(), instr->ps_i(), instr->ps_w());
 }
 
 bool PPCInstruction::execute(PPCInterpreter *cpu) {
@@ -1080,8 +1126,10 @@ bool PPCInstruction::execute(PPCInterpreter *cpu) {
 		case 46: return PPCInstr_lmw(this, cpu);
 		case 47: return PPCInstr_stmw(this, cpu);
 		case 48: return PPCInstr_lfs(this, cpu);
+		case 49: return PPCInstr_lfsu(this, cpu);
 		case 50: return PPCInstr_lfd(this, cpu);
 		case 52: return PPCInstr_stfs(this, cpu);
+		case 53: return PPCInstr_stfsu(this, cpu);
 		case 54: return PPCInstr_stfd(this, cpu);
 		case 56: return PPCInstr_psq_l(this, cpu);
 		case 59:
@@ -1096,6 +1144,7 @@ bool PPCInstruction::execute(PPCInterpreter *cpu) {
 					NotImplementedError("PPC opcode 59: %i", opcode3());
 					return false;
 			}
+		case 60: return PPCInstr_psq_st(this, cpu);
 		case 63:
 			switch(opcode2()) {
 				case 0: return PPCInstr_fcmpu(this, cpu);
