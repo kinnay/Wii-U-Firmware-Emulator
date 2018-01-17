@@ -887,8 +887,14 @@ bool PPCInstr_fmul(PPCInstruction *instr, PPCInterpreter *cpu) {
 }
 
 bool PPCInstr_fmadds(PPCInstruction *instr, PPCInterpreter *cpu) {
-	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0 * 
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0 *
 		cpu->core->fprs[instr->rC()].ps0 + cpu->core->fprs[instr->rB()].ps0;
+	return true;
+}
+
+bool PPCInstr_fmadd(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].dbl = cpu->core->fprs[instr->rA()].dbl *
+		cpu->core->fprs[instr->rC()].dbl + cpu->core->fprs[instr->rB()].dbl;
 	return true;
 }
 
@@ -1159,6 +1165,7 @@ bool PPCInstruction::execute(PPCInterpreter *cpu) {
 				default:
 					switch(opcode3()) {
 						case 25: return PPCInstr_fmul(this, cpu);
+						case 29: return PPCInstr_fmadd(this, cpu);
 					}
 					NotImplementedError("PPC opcode 63: %i", opcode2());
 					return false;
