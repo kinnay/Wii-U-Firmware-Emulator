@@ -2406,6 +2406,42 @@ class GPUController:
 
 	def check_interrupts(self):
 		return self.get_ih_rb_wptr() != self.ih_rb_rptr
+		
+
+AI_CONTROL = 0xD006C00
+AI_VOLUME = 0xD006C04
+AI_AISCNT = 0xD006C08
+AI_AIIT = 0xD006C0C
+
+AI_START = 0xD006C00
+AI_END = 0xD006C10
+
+class AIController:
+	def __init__(self, scheduler):
+		self.scheduler = scheduler
+
+		self.control = 0
+		self.volume = 0
+		self.sample_count = 0
+		
+	def read(self, addr):
+		if addr == AI_CONTROL: return self.control
+		elif addr == AI_VOLUME: return self.volume
+		elif addr == AI_AISCNT:
+			if self.control & 1:
+				self.sample_count += 1000
+			return self.sample_count
+		print("AI READ 0x%X at %08X" %(addr, self.scheduler.pc()))
+		return 0
+		
+	def write(self, addr, value):
+		if addr == AI_CONTROL:
+			if value & 0x20:
+				self.sample_count = 0
+			self.control = value
+		elif addr == AI_VOLUME: self.volume = value
+		else:
+			print("AI WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 
 		
 TCL_D0000000 = 0xD0000000
@@ -2416,6 +2452,7 @@ class HardwareController:
 
 		self.pad = PADController(scheduler)
 		self.gpu = GPUController(scheduler, physmem)
+		self.ai = AIController(scheduler)
 		self.pi = [PIController(scheduler, self.latte.irq_ppc[i], self.gpu, i) for i in range(3)]
 		
 		armirq = self.latte.irq_arm
@@ -2461,6 +2498,7 @@ class HardwareController:
 			elif PI_CPU1_START <= addr < PI_CPU1_END: value = self.pi[1].read(addr - PI_CPU1_START)
 			elif PI_CPU2_START <= addr < PI_CPU2_END: value = self.pi[2].read(addr - PI_CPU2_START)
 			elif GPU_START <= addr < GPU_END: value = self.gpu.read(addr)
+			elif AI_START <= addr < AI_END: value = self.ai.read(addr)
 			elif AHMN_START <= addr < AHMN_END: value = self.ahmn.read(addr)
 			elif EXI_START <= addr < EXI_END: value = self.exi.read(addr)
 			elif DI2SATA_START <= addr < DI2SATA_END: value = self.di2sata.read(addr)
@@ -2508,6 +2546,7 @@ class HardwareController:
 			elif PI_CPU1_START <= addr < PI_CPU1_END: self.pi[1].write(addr - PI_CPU1_START, value)
 			elif PI_CPU2_START <= addr < PI_CPU2_END: self.pi[2].write(addr - PI_CPU2_START, value)
 			elif GPU_START <= addr < GPU_END: self.gpu.write(addr, value)
+			elif AI_START <= addr < AI_END: self.ai.write(addr, value)
 			elif AHMN_START <= addr < AHMN_END: self.ahmn.write(addr, value)
 			elif MEM_START <= addr < MEM_END: self.mem.write(addr, value)
 			elif EXI_START <= addr < EXI_END: self.exi.write(addr, value)
