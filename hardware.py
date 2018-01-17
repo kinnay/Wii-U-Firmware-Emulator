@@ -2227,6 +2227,7 @@ GPU_RLC_UCODE_DATA = 0xC203F30
 
 #Unknown
 GPU_DC_C206070 = 0xC206070
+GPU_DC_C20609C = 0xC20609C
 GPU_DC0_INT_MASK = 0xC2060DC
 GPU_DC_C2064A0 = 0xC2064A0
 GPU_DC1_INT_MASK = 0xC2068DC
@@ -2287,6 +2288,7 @@ class GPUController:
 			return value
 
 		elif addr == GPU_DC_C206070: return 0x10000
+		elif addr == GPU_DC_C20609C: return 1
 		elif addr == GPU_DC_C2064A0: return 2
 		elif addr == GPU_FLUSH:
 			#Process command buffers here?
