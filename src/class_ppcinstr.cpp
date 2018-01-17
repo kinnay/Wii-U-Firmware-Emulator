@@ -613,6 +613,12 @@ bool PPCInstr_lwbrx(PPCInstruction *instr, PPCInterpreter *cpu) {
 	return true;
 }
 
+bool PPCInstr_lfdx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
+	return cpu->read<double>(addr, &cpu->core->fprs[instr->rD()].dbl);
+}
+
 bool PPCInstr_stbx(PPCInstruction *instr, PPCInterpreter *cpu) {
 	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
 	uint32_t addr = base + cpu->core->regs[instr->rB()];
@@ -642,6 +648,12 @@ bool PPCInstr_stfsx(PPCInstruction *instr, PPCInterpreter *cpu) {
 	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
 	uint32_t addr = base + cpu->core->regs[instr->rB()];
 	return cpu->write<float>(addr, cpu->core->fprs[instr->rS()].ps0);
+}
+
+bool PPCInstr_stfdx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
+	return cpu->write<double>(addr, cpu->core->fprs[instr->rS()].dbl);
 }
 
 bool PPCInstr_stfiwx(PPCInstruction *instr, PPCInterpreter *cpu) {
@@ -839,6 +851,11 @@ bool PPCInstr_fctiwz(PPCInstruction *instr, PPCInterpreter *cpu) {
 	return true;
 }
 
+bool PPCInstr_fneg(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].dbl = -cpu->core->fprs[instr->rB()].dbl;
+	return true;
+}
+
 bool PPCInstr_fabs(PPCInstruction *instr, PPCInterpreter *cpu) {
 	float value = cpu->core->fprs[instr->rB()].ps0;
 	if (value < 0) value = -value;
@@ -880,6 +897,11 @@ bool PPCInstr_fdiv(PPCInstruction *instr, PPCInterpreter *cpu) {
 
 bool PPCInstr_fadds(PPCInstruction *instr, PPCInterpreter *cpu) {
 	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0 + cpu->core->fprs[instr->rB()].ps0;
+	return true;
+}
+
+bool PPCInstr_fadd(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].dbl = cpu->core->fprs[instr->rA()].dbl + cpu->core->fprs[instr->rB()].dbl;
 	return true;
 }
 
@@ -1026,8 +1048,10 @@ bool PPCInstruction::execute(PPCInterpreter *cpu) {
 				case 536: return PPCInstr_srw(this, cpu);
 				case 595: return PPCInstr_mfsr(this, cpu);
 				case 598: return PPCInstr_sync(this, cpu);
+				case 599: return PPCInstr_lfdx(this, cpu);
 				case 662: return PPCInstr_stwbrx(this, cpu);
 				case 663: return PPCInstr_stfsx(this, cpu);
+				case 727: return PPCInstr_stfdx(this, cpu);
 				case 792: return PPCInstr_sraw(this, cpu);
 				case 824: return PPCInstr_srawi(this, cpu);
 				case 854: return PPCInstr_eieio(this, cpu);
@@ -1079,6 +1103,8 @@ bool PPCInstruction::execute(PPCInterpreter *cpu) {
 				case 15: return PPCInstr_fctiwz(this, cpu);
 				case 18: return PPCInstr_fdiv(this, cpu);
 				case 20: return PPCInstr_fsub(this, cpu);
+				case 21: return PPCInstr_fadd(this, cpu);
+				case 40: return PPCInstr_fneg(this, cpu);
 				case 72: return PPCInstr_fmr(this, cpu);
 				case 264: return PPCInstr_fabs(this, cpu);
 				default:
