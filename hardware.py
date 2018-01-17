@@ -2442,6 +2442,32 @@ class AIController:
 		elif addr == AI_VOLUME: self.volume = value
 		else:
 			print("AI WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
+			
+
+DSP_MAILBOX_OUT_H = 0xC280004
+DSP_MAILBOX_OUT_L = 0xC280006
+DSP_CONTROL_STATUS = 0xC28000A
+			
+DSP_START = 0xC280000
+DSP_END = 0xC2A0000
+
+class DSPController:
+	def __init__(self, scheduler):
+		self.scheduler = scheduler
+		
+		self.mailbox_out = 0x80000000
+		self.control = 0
+		
+	def read(self, addr):
+		if addr == DSP_MAILBOX_OUT_H: return self.mailbox_out >> 16
+		elif addr == DSP_MAILBOX_OUT_L: return self.mailbox_out & 0xFFFF
+		elif addr == DSP_CONTROL_STATUS: return self.control
+		print("DSP READ 0x%X at %08X" %(addr, self.scheduler.pc()))
+		return 0
+		
+	def write(self, addr, value):
+		if addr == DSP_CONTROL_STATUS: self.control = value
+		print("DSP WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 
 		
 TCL_D0000000 = 0xD0000000
@@ -2453,6 +2479,7 @@ class HardwareController:
 		self.pad = PADController(scheduler)
 		self.gpu = GPUController(scheduler, physmem)
 		self.ai = AIController(scheduler)
+		self.dsp = DSPController(scheduler)
 		self.pi = [PIController(scheduler, self.latte.irq_ppc[i], self.gpu, i) for i in range(3)]
 		
 		armirq = self.latte.irq_arm
@@ -2486,6 +2513,7 @@ class HardwareController:
 		if length == 2:
 			if MEM_START <= addr < MEM_END: value = self.mem.read(addr)
 			elif PAD_START <= addr < PAD_END: value = self.pad.read(addr)
+			elif DSP_START <= addr < DSP_END: value = self.dsp.read(addr)
 			else:
 				print("HW READ(2) 0x%X at %08X" %(addr, self.scheduler.pc()))
 				value = 0
@@ -2536,6 +2564,7 @@ class HardwareController:
 			value = struct.unpack(">H", data)[0]
 			if MEM_START <= addr < MEM_END: self.mem.write(addr, value)
 			elif PAD_START <= addr < PAD_END: self.pad.write(addr, value)
+			elif DSP_START <= addr < DSP_END: self.dsp.write(addr, value)
 			else:
 				print("HW WRITE 0x%X %04X at %08X" %(addr, value, self.scheduler.pc()))
 				
