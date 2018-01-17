@@ -626,6 +626,12 @@ bool PPCInstr_lwbrx(PPCInstruction *instr, PPCInterpreter *cpu) {
 	return true;
 }
 
+bool PPCInstr_lfsx(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
+	uint32_t addr = base + cpu->core->regs[instr->rB()];
+	return cpu->read<float>(addr, &cpu->core->fprs[instr->rD()].ps0);
+}
+
 bool PPCInstr_lfdx(PPCInstruction *instr, PPCInterpreter *cpu) {
 	uint32_t base = instr->rA() ? cpu->core->regs[instr->rA()] : 0;
 	uint32_t addr = base + cpu->core->regs[instr->rB()];
@@ -1013,10 +1019,45 @@ bool PPCInstr_psq_st(PPCInstruction *instr, PPCInterpreter *cpu) {
 	return PSQ_Store(cpu, addr, instr->rS(), instr->ps_i(), instr->ps_w());
 }
 
+bool PPCInstr_ps_merge00(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0;
+	cpu->core->fprs[instr->rD()].ps1 = cpu->core->fprs[instr->rB()].ps0;
+	return true;
+}
+
+bool PPCInstr_ps_merge01(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0;
+	cpu->core->fprs[instr->rD()].ps1 = cpu->core->fprs[instr->rB()].ps1;
+	return true;
+}
+
+bool PPCInstr_ps_merge10(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps1;
+	cpu->core->fprs[instr->rD()].ps1 = cpu->core->fprs[instr->rB()].ps0;
+	return true;
+}
+
+bool PPCInstr_ps_merge11(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps1;
+	cpu->core->fprs[instr->rD()].ps1 = cpu->core->fprs[instr->rB()].ps1;
+	return true;
+}
+
+bool PPCInstr_ps_sub(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].ps0 = cpu->core->fprs[instr->rA()].ps0 - cpu->core->fprs[instr->rB()].ps0;
+	cpu->core->fprs[instr->rD()].ps1 = cpu->core->fprs[instr->rA()].ps1 - cpu->core->fprs[instr->rB()].ps1;
+	return true;
+}
+
 bool PPCInstruction::execute(PPCInterpreter *cpu) {
 	switch(opcode()) {
 		case 4:
 			switch(opcode2()) {
+				case 20: return PPCInstr_ps_sub(this, cpu);
+				case 528: return PPCInstr_ps_merge00(this, cpu);
+				case 560: return PPCInstr_ps_merge01(this, cpu);
+				case 592: return PPCInstr_ps_merge10(this, cpu);
+				case 624: return PPCInstr_ps_merge11(this, cpu);
 				case 1014: return PPCInstr_dcbz_l(this, cpu);
 				default:
 					NotImplementedError("PPC opcode 4: %i", opcode2());
@@ -1103,6 +1144,7 @@ bool PPCInstruction::execute(PPCInterpreter *cpu) {
 				case 470: return PPCInstr_dcbi(this, cpu);
 				case 491: return PPCInstr_divw(this, cpu);
 				case 534: return PPCInstr_lwbrx(this, cpu);
+				case 535: return PPCInstr_lfsx(this, cpu);
 				case 536: return PPCInstr_srw(this, cpu);
 				case 595: return PPCInstr_mfsr(this, cpu);
 				case 598: return PPCInstr_sync(this, cpu);
