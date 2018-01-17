@@ -2177,6 +2177,38 @@ class PADController:
 		print("PAD WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 
 
+GPU_START = 0xC200000
+GPU_END = 0xC300000
+
+DC0_START = 0xC206000
+DC0_END = 0xC206800
+DC1_START = 0xC206800
+DC1_END = 0xC207000
+		
+#From dc.rpl
+DC_70 = 0x70
+DC_9C = 0x9C
+DC_INT_MASK = 0xDC
+DC_4A0 = 0x4A0
+
+class DCController:
+	def __init__(self, scheduler):
+		self.scheduler = scheduler
+		self.int_mask = 0
+	
+	def read(self, addr):
+		if addr == DC_70: return 0x10000
+		elif addr == DC_9C: return 1
+		elif addr == DC_4A0: return 2
+		print("DC READ 0x%X at %08X" %(addr, self.scheduler.pc()))
+		return 0
+		
+	def write(self, addr, value):
+		if addr == DC_INT_MASK: self.int_mask = value
+		else:
+			print("DC WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
+		
+
 class PM4Processor:
 
 	STATE_NEXT = 0
@@ -2243,7 +2275,7 @@ class PM4Processor:
 		else:
 			self.physmem.write(addr, struct.pack(">II", self.body[4], self.body[3]))
 
-		
+
 #Interrupt handling
 GPU_IH_RB_BASE = 0xC203E04
 GPU_IH_RB_RPTR = 0xC203E08
@@ -2253,12 +2285,6 @@ GPU_IH_RB_WPTR_ADDR_LO = 0xC203E14
 GPU_RLC_UCODE_ADDR = 0xC203F2C
 GPU_RLC_UCODE_DATA = 0xC203F30
 
-#Unknown
-GPU_DC_C206070 = 0xC206070
-GPU_DC_C20609C = 0xC20609C
-GPU_DC0_INT_MASK = 0xC2060DC
-GPU_DC_C2064A0 = 0xC2064A0
-GPU_DC1_INT_MASK = 0xC2068DC
 GPU_CP_RESET = 0xC208020
 GPU_FLUSH = 0xC208500
 
@@ -2276,10 +2302,7 @@ GPU_DMA_RB_RPTR = 0xC20D008
 GPU_DMA_RB_WPTR = 0xC20D00C
 
 GPU_PM4_DATA = 0xC2C0000
-
-GPU_START = 0xC200000
-GPU_END = 0xC300000
-
+			
 class GPUController:
 	def __init__(self, scheduler, physmem):
 		self.scheduler = scheduler
@@ -2287,6 +2310,8 @@ class GPUController:
 		self.physmem = physmem
 		
 		self.pm4 = PM4Processor(scheduler, physmem)
+		self.dc0 = DCController(scheduler)
+		self.dc1 = DCController(scheduler)
 
 		self.ih_rb_base = 0
 		self.ih_rb_rptr = 0
@@ -2294,9 +2319,6 @@ class GPUController:
 
 		self.rlc_ucode_data = [0] * 0x400
 		self.rlc_ucode_addr = 0
-
-		self.dc0_int_mask = 0
-		self.dc1_int_mask = 0
 
 		self.cp_rb_base = 0
 		self.cp_rb_rptr_addr = 0
@@ -2315,9 +2337,9 @@ class GPUController:
 			self.rlc_ucode_addr += 1
 			return value
 
-		elif addr == GPU_DC_C206070: return 0x10000
-		elif addr == GPU_DC_C20609C: return 1
-		elif addr == GPU_DC_C2064A0: return 2
+		elif DC0_START <= addr < DC0_END: return self.dc0.read(addr - DC0_START)
+		elif DC1_START <= addr < DC1_END: return self.dc1.read(addr - DC1_START)
+			
 		elif addr == GPU_FLUSH:
 			#Process command buffers here?
 			self.physmem.write(self.cp_rb_rptr_addr, struct.pack(">H", self.cp_rb_wptr))
@@ -2346,8 +2368,9 @@ class GPUController:
 			self.rlc_ucode_data[self.rlc_ucode_addr] = value
 			self.rlc_ucode_addr += 1
 
-		elif addr == GPU_DC0_INT_MASK: self.dc0_int_mask = value
-		elif addr == GPU_DC1_INT_MASK: self.dc1_int_mask = value
+		elif DC0_START <= addr < DC0_END: self.dc0.write(addr - DC0_START, value)
+		elif DC1_START <= addr < DC1_END: self.dc1.write(addr - DC1_START, value)
+			
 		elif addr == GPU_CP_RESET: pass
 
 		elif addr == GPU_CP_RB_BASE: self.cp_rb_base = value << 8
@@ -2378,8 +2401,8 @@ class GPUController:
 	def trigger_vsync(self):
 		#avm.rpl seems to be signalling vsync on 'DVOCap' and 'TrigA' instead
 		#of the real vsync interrupt, we're triggering 'TrigA' here
-		if self.dc0_int_mask & 0x01000000: self.trigger_interrupt(2, 3)
-		if self.dc1_int_mask & 0x01000000: self.trigger_interrupt(6, 3)
+		if self.dc0.int_mask & 0x01000000: self.trigger_interrupt(2, 3)
+		if self.dc1.int_mask & 0x01000000: self.trigger_interrupt(6, 3)
 
 	def check_interrupts(self):
 		return self.get_ih_rb_wptr() != self.ih_rb_rptr
