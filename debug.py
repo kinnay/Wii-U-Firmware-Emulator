@@ -338,7 +338,11 @@ class PPCDebugger:
 				name = reader.string(nameptr)
 				print("%08X: %s" %(thread, name))
 			else:
-				print("%08X: <no name>" %thread)
+				module = self.get_module_by_addr(thread)
+				if module:
+					print("%08X: <no name:%s>" %(thread, module.name))
+				else:
+					print("%08X: <no name>" %thread)
 			thread = reader.u32(thread + 0x38C)
 			
 	def thread(self, thread):
