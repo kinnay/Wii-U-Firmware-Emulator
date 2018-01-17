@@ -333,8 +333,12 @@ class PPCDebugger:
 		reader = self.emulator.mem_reader
 		thread = reader.u32(0x100567F8)
 		while thread:
-			name = reader.string(reader.u32(thread + 0x5C0))
-			print("%08X: %s" %(thread, name))
+			nameptr = reader.u32(thread + 0x5C0)
+			if nameptr:
+				name = reader.string(nameptr)
+				print("%08X: %s" %(thread, name))
+			else:
+				print("%08X: <no name>" %thread)
 			thread = reader.u32(thread + 0x38C)
 			
 	def thread(self, thread):
