@@ -76,14 +76,10 @@ bool ARMInterpreter::stepARM() {
 
 	core->regs[ARMCore::PC] += 4;
 	
-	if (!checkCondition(instr.cond()))
+	if (!checkCondition(instr.cond())) {
 		return true;
-	
-	ARMInstrCallback func = instr.decode();
-	if (func) {
-		return func(this, instr);
 	}
-	return false;
+	return instr.execute(this);
 }
 
 bool ARMInterpreter::stepThumb() {
@@ -94,11 +90,7 @@ bool ARMInterpreter::stepThumb() {
 	
 	core->regs[ARMCore::PC] += 2;
 	
-	ThumbInstrCallback func = instr.decode();
-	if (func) {
-		return func(this, instr);
-	}
-	return false;
+	return instr.execute(this);
 }
 
 bool ARMInterpreter::step() {

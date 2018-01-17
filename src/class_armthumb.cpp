@@ -52,18 +52,18 @@ uint32_t SubWithCarry(ARMCore *core, uint32_t v1, uint32_t v2) {
 	return result;
 }
 
-bool Thumb_AddSubtract(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int regin = (instr.value >> 3) & 7;
-	int regout = instr.value & 7;
+bool Thumb_AddSubtract(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int regin = (instr->value >> 3) & 7;
+	int regout = instr->value & 7;
 	
 	uint32_t value = cpu->core->regs[regin];
 	
-	uint32_t imm = (instr.value >> 6) & 7;
-	if (!instr.i()) {
+	uint32_t imm = (instr->value >> 6) & 7;
+	if (!instr->i()) {
 		imm = cpu->core->regs[imm];
 	}
 
-	if (instr.value & 0x200) { //SUB
+	if (instr->value & 0x200) { //SUB
 		cpu->core->regs[regout] = SubWithFlags(cpu->core, value, imm); 
 	}
 	else { //ADD
@@ -72,11 +72,11 @@ bool Thumb_AddSubtract(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	return true;
 }
 
-bool Thumb_AddSubCmpMovImm(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int reg = (instr.value >> 8) & 7;
-	int imm = instr.value & 0xFF;
+bool Thumb_AddSubCmpMovImm(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int reg = (instr->value >> 8) & 7;
+	int imm = instr->value & 0xFF;
 	
-	int opcode = (instr.value >> 11) & 3;
+	int opcode = (instr->value >> 11) & 3;
 	if (opcode == 0) { //MOV
 		cpu->core->regs[reg] = imm;
 		cpu->core->cpsr.set(ARMCore::Z, imm == 0);
@@ -94,26 +94,26 @@ bool Thumb_AddSubCmpMovImm(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	return true;
 }
 
-bool Thumb_MoveShifted(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int imm = (instr.value >> 6) & 0x1F;
-	int opcode = (instr.value >> 11) & 3;
+bool Thumb_MoveShifted(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int imm = (instr->value >> 6) & 0x1F;
+	int opcode = (instr->value >> 11) & 3;
 	
-	uint32_t value = cpu->core->regs[(instr.value >> 3) & 7];
+	uint32_t value = cpu->core->regs[(instr->value >> 3) & 7];
 	if (opcode == 0) value <<= imm; //LSL
 	else if (opcode == 1) value >>= imm; //LSR
 	else if (opcode == 2) value = ((int32_t)value) >> imm; //ASR
 	
-	cpu->core->regs[instr.value & 7] = value;
+	cpu->core->regs[instr->value & 7] = value;
 	cpu->core->cpsr.set(ARMCore::Z, value == 0);
 	cpu->core->cpsr.set(ARMCore::N, value >> 31);
 	return true;
 }
 
-bool Thumb_DataProcessing(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int opcode = (instr.value >> 6) & 0xF;
-	int destreg = instr.value & 7;
+bool Thumb_DataProcessing(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int opcode = (instr->value >> 6) & 0xF;
+	int destreg = instr->value & 7;
 	uint32_t destval = cpu->core->regs[destreg];
-	uint32_t sourceval = cpu->core->regs[(instr.value >> 3) & 7];
+	uint32_t sourceval = cpu->core->regs[(instr->value >> 3) & 7];
 	
 	uint32_t result;
 	if (opcode == 0 || opcode == 8) result = destval & sourceval; //AND, TST
@@ -147,11 +147,11 @@ bool Thumb_DataProcessing(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	return true;
 }
 
-bool Thumb_SpecialDataProcessing(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int reg1 = (instr.value & 7) + ((instr.value >> 4) & 8);
-	int reg2 = (instr.value >> 3) & 0xF;
+bool Thumb_SpecialDataProcessing(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int reg1 = (instr->value & 7) + ((instr->value >> 4) & 8);
+	int reg2 = (instr->value >> 3) & 0xF;
 	
-	int opcode = (instr.value >> 8) & 3;
+	int opcode = (instr->value >> 8) & 3;
 	if (opcode == 0) { //ADD
 		cpu->core->regs[reg1] += cpu->core->regs[reg2];
 	}
@@ -164,16 +164,16 @@ bool Thumb_SpecialDataProcessing(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	return true;
 }
 
-bool Thumb_AddToSPOrPC(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	uint32_t value = instr.value & (1 << 11) ?
+bool Thumb_AddToSPOrPC(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	uint32_t value = instr->value & (1 << 11) ?
 		cpu->core->regs[ARMCore::SP] : cpu->core->regs[ARMCore::PC] + 2;
-	cpu->core->regs[(instr.value >> 8) & 7] = value + (instr.value & 0xFF) * 4;
+	cpu->core->regs[(instr->value >> 8) & 7] = value + (instr->value & 0xFF) * 4;
 	return true;
 }
 
-bool Thumb_AdjustStackPointer(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int offset = instr.value & 0x7F;
-	if (instr.value & 0x80) {
+bool Thumb_AdjustStackPointer(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int offset = instr->value & 0x7F;
+	if (instr->value & 0x80) {
 		cpu->core->regs[ARMCore::SP] -= offset * 4;
 	}
 	else {
@@ -182,17 +182,17 @@ bool Thumb_AdjustStackPointer(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	return true;
 }
 
-bool Thumb_PushPopRegisterList(ARMInterpreter *cpu, ARMThumbInstr instr) {
+bool Thumb_PushPopRegisterList(ARMThumbInstr *instr, ARMInterpreter *cpu) {
 	uint32_t addr = cpu->core->regs[ARMCore::SP];
 
-	if (instr.l()) {
+	if (instr->l()) {
 		for (int i = 0; i < 8; i++) {
-			if (instr.value & (1 << i)) {
+			if (instr->value & (1 << i)) {
 				if (!cpu->read<uint32_t>(addr, &cpu->core->regs[i])) return false;
 				addr += 4;
 			}
 		}
-		if (instr.r()) {
+		if (instr->r()) {
 			if (!cpu->read<uint32_t>(addr, &cpu->core->regs[ARMCore::PC])) return false;
 			if (!(cpu->core->regs[ARMCore::PC] & 1)) {
 				cpu->core->setThumb(false);
@@ -205,12 +205,12 @@ bool Thumb_PushPopRegisterList(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	}
 	
 	else {
-		if (instr.r()) {
+		if (instr->r()) {
 			addr -= 4;
 			if (!cpu->write<uint32_t>(addr, cpu->core->regs[ARMCore::LR])) return false;
 		}
 		for (int i = 7; i >= 0; i--) {
-			if (instr.value & (1 << i)) {
+			if (instr->value & (1 << i)) {
 				addr -= 4;
 				if (!cpu->write<uint32_t>(addr, cpu->core->regs[i])) return false;
 			}
@@ -221,28 +221,28 @@ bool Thumb_PushPopRegisterList(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	return true;
 }
 
-bool Thumb_LoadStoreStack(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int reg = (instr.value >> 8) & 7;
-	uint32_t addr = cpu->core->regs[ARMCore::SP] + (instr.value & 0xFF) * 4;
-	if (instr.l()) {
+bool Thumb_LoadStoreStack(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int reg = (instr->value >> 8) & 7;
+	uint32_t addr = cpu->core->regs[ARMCore::SP] + (instr->value & 0xFF) * 4;
+	if (instr->l()) {
 		return cpu->read<uint32_t>(addr, &cpu->core->regs[reg]);
 	}
 	return cpu->write<uint32_t>(addr, cpu->core->regs[reg]);
 }
 
-bool Thumb_LoadPCRelative(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	uint32_t addr = ((cpu->core->regs[ARMCore::PC] + 2) & ~3) + (instr.value & 0xFF) * 4;
-	return cpu->read<uint32_t>(addr, &cpu->core->regs[(instr.value >> 8) & 7]);
+bool Thumb_LoadPCRelative(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	uint32_t addr = ((cpu->core->regs[ARMCore::PC] + 2) & ~3) + (instr->value & 0xFF) * 4;
+	return cpu->read<uint32_t>(addr, &cpu->core->regs[(instr->value >> 8) & 7]);
 }
 
-bool Thumb_LoadStoreImmOffs(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int reg = instr.value & 7;
-	uint32_t addr = cpu->core->regs[(instr.value >> 3) & 7];
-	uint32_t offset = (instr.value >> 6) & 0x1F;
+bool Thumb_LoadStoreImmOffs(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int reg = instr->value & 7;
+	uint32_t addr = cpu->core->regs[(instr->value >> 3) & 7];
+	uint32_t offset = (instr->value >> 6) & 0x1F;
 	
-	if (instr.b()) {
+	if (instr->b()) {
 		addr += offset;
-		if (instr.l()) {
+		if (instr->l()) {
 			uint8_t value;
 			if (!cpu->read<uint8_t>(addr, &value)) return false;
 			cpu->core->regs[reg] = value;
@@ -252,19 +252,19 @@ bool Thumb_LoadStoreImmOffs(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	}
 	
 	addr += offset * 4;
-	if (instr.l()) {
+	if (instr->l()) {
 		return cpu->read<uint32_t>(addr, &cpu->core->regs[reg]);
 	}
 	return cpu->write<uint32_t>(addr, cpu->core->regs[reg]);
 }
 
-bool Thumb_LoadStoreRegOffs(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int reg = instr.value & 7;
-	uint32_t addr = cpu->core->regs[(instr.value >> 3) & 7];
-	addr += cpu->core->regs[(instr.value >> 6) & 7];
+bool Thumb_LoadStoreRegOffs(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int reg = instr->value & 7;
+	uint32_t addr = cpu->core->regs[(instr->value >> 3) & 7];
+	addr += cpu->core->regs[(instr->value >> 6) & 7];
 	
-	if ((instr.value >> 10) & 1) {
-		if (instr.l()) {
+	if ((instr->value >> 10) & 1) {
+		if (instr->l()) {
 			uint8_t value;
 			if (!cpu->read<uint8_t>(addr, &value)) return false;
 			cpu->core->regs[reg] = value;
@@ -273,19 +273,19 @@ bool Thumb_LoadStoreRegOffs(ARMInterpreter *cpu, ARMThumbInstr instr) {
 		return cpu->write<uint8_t>(addr, cpu->core->regs[reg]);
 	}
 	
-	if (instr.l()) {
+	if (instr->l()) {
 		return cpu->read<uint32_t>(addr, &cpu->core->regs[reg]);
 	}
 	return cpu->write<uint32_t>(addr, cpu->core->regs[reg]);
 }
 
-bool Thumb_LoadStoreSigned(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int reg = instr.value & 7;
-	uint32_t addr = cpu->core->regs[(instr.value >> 3) & 7];
-	addr += cpu->core->regs[(instr.value >> 6) & 7];
+bool Thumb_LoadStoreSigned(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int reg = instr->value & 7;
+	uint32_t addr = cpu->core->regs[(instr->value >> 3) & 7];
+	addr += cpu->core->regs[(instr->value >> 6) & 7];
 	
-	if (instr.h()) {
-		if (instr.s()) {
+	if (instr->h()) {
+		if (instr->s()) {
 			int16_t value;
 			if (!cpu->read<int16_t>(addr, &value)) return false;
 			cpu->core->regs[reg] = value;
@@ -297,7 +297,7 @@ bool Thumb_LoadStoreSigned(ARMInterpreter *cpu, ARMThumbInstr instr) {
 		return true;
 	}
 	else {
-		if (instr.s()) {
+		if (instr->s()) {
 			int8_t value;
 			if (!cpu->read<int8_t>(addr, &value)) return false;
 			cpu->core->regs[reg] = value;
@@ -310,25 +310,25 @@ bool Thumb_LoadStoreSigned(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	}
 }
 
-bool Thumb_LoadStoreHalf(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	uint32_t addr = cpu->core->regs[(instr.value >> 3) & 7];
-	addr += (instr.value >> 5) & 0x3E;
+bool Thumb_LoadStoreHalf(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	uint32_t addr = cpu->core->regs[(instr->value >> 3) & 7];
+	addr += (instr->value >> 5) & 0x3E;
 	
-	if (instr.l()) {
+	if (instr->l()) {
 		uint16_t value;
 		if (!cpu->read<uint16_t>(addr, &value)) return false;
-		cpu->core->regs[instr.value & 7] = value;
+		cpu->core->regs[instr->value & 7] = value;
 		return true;
 	}
-	return cpu->write<uint16_t>(addr, cpu->core->regs[instr.value & 7]);
+	return cpu->write<uint16_t>(addr, cpu->core->regs[instr->value & 7]);
 }
 
-bool Thumb_LoadStoreMultiple(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int reg = (instr.value >> 8) & 7;
+bool Thumb_LoadStoreMultiple(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int reg = (instr->value >> 8) & 7;
 	uint32_t addr = cpu->core->regs[reg];
 	for (int i = 0; i < 8; i++) {
-		if (instr.value & (1 << i)) {
-			if (instr.l()) {
+		if (instr->value & (1 << i)) {
+			if (instr->l()) {
 				if (!cpu->read<uint32_t>(addr, &cpu->core->regs[i])) return false;
 				addr += 4;
 			}
@@ -342,12 +342,12 @@ bool Thumb_LoadStoreMultiple(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	return true;
 }
 
-bool Thumb_BranchExchange(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int reg = (instr.value >> 3) & 0xF;
+bool Thumb_BranchExchange(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int reg = (instr->value >> 3) & 0xF;
 	uint32_t dest = cpu->core->regs[reg];
 	if (reg == ARMCore::PC) dest += 2;
 	
-	if ((instr.value >> 7) & 1) {
+	if ((instr->value >> 7) & 1) {
 		cpu->core->regs[ARMCore::LR] = cpu->core->regs[ARMCore::PC] | 1;
 	}
 
@@ -361,25 +361,25 @@ bool Thumb_BranchExchange(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	return true;
 }
 
-bool Thumb_UnconditionalBranch(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	int offset = instr.value & 0x7FF;
+bool Thumb_UnconditionalBranch(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	int offset = instr->value & 0x7FF;
 	if (offset & 0x400) offset -= 0x800;
 	cpu->core->regs[ARMCore::PC] += offset * 2 + 2;
 	return true;
 }
 
-bool Thumb_ConditionalBranch(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	if (cpu->checkCondition((instr.value >> 8) & 0xF)) {
-		int offset = instr.value & 0xFF;
+bool Thumb_ConditionalBranch(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	if (cpu->checkCondition((instr->value >> 8) & 0xF)) {
+		int offset = instr->value & 0xFF;
 		if (offset & 0x80) offset -= 0x100;
 		cpu->core->regs[ARMCore::PC] += offset * 2 + 2;
 	}
 	return true;
 }
 
-bool Thumb_LongBranchWithLink(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	uint32_t offset = instr.value & 0x7FF;
-	if (instr.h()) { //Instruction 2
+bool Thumb_LongBranchWithLink(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	uint32_t offset = instr->value & 0x7FF;
+	if (instr->h()) { //Instruction 2
 		uint32_t target = cpu->core->regs[ARMCore::LR] + (offset << 1);
 		cpu->core->regs[ARMCore::LR] = cpu->core->regs[ARMCore::PC] | 1;
 		cpu->core->regs[ARMCore::PC] = target;
@@ -391,57 +391,55 @@ bool Thumb_LongBranchWithLink(ARMInterpreter *cpu, ARMThumbInstr instr) {
 	return true;
 }
 
-bool Thumb_SoftwareInterrupt(ARMInterpreter *cpu, ARMThumbInstr instr) {
-	return cpu->handleSoftwareInterrupt(instr.value & 0xFF);
+bool Thumb_SoftwareInterrupt(ARMThumbInstr *instr, ARMInterpreter *cpu) {
+	return cpu->handleSoftwareInterrupt(instr->value & 0xFF);
 }
 
-ThumbInstrCallback ARMThumbInstr::decode() {
+bool ARMThumbInstr::execute(ARMInterpreter *cpu) {
 	if (!(value >> 13)) {
-		if (((value >> 11) & 3) == 3) return Thumb_AddSubtract;
-		return Thumb_MoveShifted;
+		if (((value >> 11) & 3) == 3) return Thumb_AddSubtract(this, cpu);
+		return Thumb_MoveShifted(this, cpu);
 	}
-	if ((value >> 13) == 1) return Thumb_AddSubCmpMovImm;
-	if ((value >> 10) == 0x10) return Thumb_DataProcessing;
-	if ((value >> 8) == 0x47) return Thumb_BranchExchange;
-	if ((value >> 10) == 0x11) return Thumb_SpecialDataProcessing;
-	if ((value >> 11) == 9) return Thumb_LoadPCRelative;
+	if ((value >> 13) == 1) return Thumb_AddSubCmpMovImm(this, cpu);
+	if ((value >> 10) == 0x10) return Thumb_DataProcessing(this, cpu);
+	if ((value >> 8) == 0x47) return Thumb_BranchExchange(this, cpu);
+	if ((value >> 10) == 0x11) return Thumb_SpecialDataProcessing(this, cpu);
+	if ((value >> 11) == 9) return Thumb_LoadPCRelative(this, cpu);
 	if ((value >> 12) == 5) {
 		if (value & 0x200) {
-			return Thumb_LoadStoreSigned;
+			return Thumb_LoadStoreSigned(this, cpu);
 		}
-		else {
-			return Thumb_LoadStoreRegOffs;
-		}
+		return Thumb_LoadStoreRegOffs(this, cpu);
 	}
-	if ((value >> 13) == 3) return Thumb_LoadStoreImmOffs;
-	if ((value >> 12) == 8) return Thumb_LoadStoreHalf;
-	if ((value >> 12) == 9) return Thumb_LoadStoreStack;
-	if ((value >> 12) == 10) return Thumb_AddToSPOrPC;
+	if ((value >> 13) == 3) return Thumb_LoadStoreImmOffs(this, cpu);
+	if ((value >> 12) == 8) return Thumb_LoadStoreHalf(this, cpu);
+	if ((value >> 12) == 9) return Thumb_LoadStoreStack(this, cpu);
+	if ((value >> 12) == 10) return Thumb_AddToSPOrPC(this, cpu);
 	if ((value >> 12) == 11) {
-		if (((value >> 8) & 0xF) == 0) return Thumb_AdjustStackPointer;
+		if (((value >> 8) & 0xF) == 0) return Thumb_AdjustStackPointer(this, cpu);
 		if (((value >> 8) & 0xF) == 0xE) {
 			NotImplementedError("Thumb software breakpoint");
-			return NULL;
+			return false;
 		}
-		return Thumb_PushPopRegisterList;
+		return Thumb_PushPopRegisterList(this, cpu);
 	}
-	if ((value >> 12) == 12) return Thumb_LoadStoreMultiple;
+	if ((value >> 12) == 12) return Thumb_LoadStoreMultiple(this, cpu);
 	if ((value >> 12) == 13) {
 		if (((value >> 8) & 0xF) == 14) {
 			NotImplementedError("Thumb undefined instruction");
-			return NULL;
+			return false;
 		}
-		if (((value >> 8) & 0xF) == 15) return Thumb_SoftwareInterrupt;
-		return Thumb_ConditionalBranch;
+		if (((value >> 8) & 0xF) == 15) return Thumb_SoftwareInterrupt(this, cpu);
+		return Thumb_ConditionalBranch(this, cpu);
 	}
-	if ((value >> 11) == 0x1C) return Thumb_UnconditionalBranch;
+	if ((value >> 11) == 0x1C) return Thumb_UnconditionalBranch(this, cpu);
 	if ((value >> 11) == 0x1D) {
 		if (value & 1) {
 			NotImplementedError("Thumb undefined instruction");
-			return NULL;
+			return false;
 		}
 		NotImplementedError("Thumb BLX suffix");
-		return NULL;
+		return false;
 	}
-	return Thumb_LongBranchWithLink;
+	return Thumb_LongBranchWithLink(this, cpu);
 }

@@ -5,7 +5,6 @@
 
 struct ARMInstruction;
 class ARMInterpreter;
-typedef bool (*ARMInstrCallback)(ARMInterpreter *, ARMInstruction);
 
 struct ARMInstruction {
 	enum Cond {
@@ -47,5 +46,5 @@ struct ARMInstruction {
 	inline bool s() { return (value >> 20) & 1; }
 	inline bool h() { return (value >> 5) & 1; }
 	
-	ARMInstrCallback decode();
+	bool execute(ARMInterpreter *cpu);
 };

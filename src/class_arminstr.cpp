@@ -117,10 +117,10 @@ uint32_t ARM_SubtractWithCarry(ARMCore *core, uint32_t v1, uint32_t v2, bool s) 
 	return result;
 }
 
-bool ARMInstr_DataProcessing(ARMInterpreter *cpu, ARMInstruction instr) {
-	uint32_t opnd1 = cpu->core->regs[instr.r0()];
-	if (instr.r0() == ARMCore::PC) {
-		if (instr.shift() & 1) {
+bool ARMInstr_DataProcessing(ARMInstruction *instr, ARMInterpreter *cpu) {
+	uint32_t opnd1 = cpu->core->regs[instr->r0()];
+	if (instr->r0() == ARMCore::PC) {
+		if (instr->shift() & 1) {
 			opnd1 += 8;
 		}
 		else {
@@ -129,46 +129,46 @@ bool ARMInstr_DataProcessing(ARMInterpreter *cpu, ARMInstruction instr) {
 	}
 	
 	uint32_t opnd2;
-	if (instr.i()) {
-		int rot = instr.rotate() * 2;
-		opnd2 = instr.value & 0xFF;
+	if (instr->i()) {
+		int rot = instr->rotate() * 2;
+		opnd2 = instr->value & 0xFF;
 		if (rot) {
 			uint32_t rotmask = (1 << rot) - 1;
 			opnd2 = (opnd2 >> rot) | ((opnd2 & rotmask) << (32 - rot));
 		}
 	}
 	else {
-		opnd2 = getShifted(cpu->core, instr.shift(), instr.r3(), instr.s());
+		opnd2 = getShifted(cpu->core, instr->shift(), instr->r3(), instr->s());
 	}
 	
 	uint32_t result;
-	int opcode = instr.opcode();
+	int opcode = instr->opcode();
 	if (opcode == 0 || opcode == 8) result = opnd1 & opnd2; //AND, TST
 	else if (opcode == 1 || opcode == 9) result = opnd1 ^ opnd2;
-	else if (opcode == 2 || opcode == 10) result = ARM_Subtract(cpu->core, opnd1, opnd2, instr.s()); //SUB, CMP
-	else if (opcode == 3) result = ARM_Subtract(cpu->core, opnd2, opnd1, instr.s()); //RSB
-	else if (opcode == 4 || opcode == 11) result = ARM_Add(cpu->core, opnd1, opnd2, instr.s()); //ADD, CMN
+	else if (opcode == 2 || opcode == 10) result = ARM_Subtract(cpu->core, opnd1, opnd2, instr->s()); //SUB, CMP
+	else if (opcode == 3) result = ARM_Subtract(cpu->core, opnd2, opnd1, instr->s()); //RSB
+	else if (opcode == 4 || opcode == 11) result = ARM_Add(cpu->core, opnd1, opnd2, instr->s()); //ADD, CMN
 	else if (opcode == 5) { //ADC
 		bool carry = cpu->core->cpsr.get(ARMCore::C);
-		result = ARM_Add(cpu->core, opnd1, opnd2, instr.s());
+		result = ARM_Add(cpu->core, opnd1, opnd2, instr->s());
 		if (carry) {
-			if (instr.s()) {
+			if (instr->s()) {
 				if (result == 0xFFFFFFFF) cpu->core->cpsr.set(ARMCore::C, true);
 				else if (result == 0x7FFFFFFF) cpu->core->cpsr.set(ARMCore::V, true);
 			}
 			result++;
 		}
 	}
-	else if (opcode == 6) { result = ARM_SubtractWithCarry(cpu->core, opnd1, opnd2, instr.s()); } //SBC
-	else if (opcode == 7) { result = ARM_SubtractWithCarry(cpu->core, opnd2, opnd1, instr.s()); } //RSC
+	else if (opcode == 6) { result = ARM_SubtractWithCarry(cpu->core, opnd1, opnd2, instr->s()); } //SBC
+	else if (opcode == 7) { result = ARM_SubtractWithCarry(cpu->core, opnd2, opnd1, instr->s()); } //RSC
 	else if (opcode == 12) result = opnd1 | opnd2; //ORR
 	else if (opcode == 13) result = opnd2; //MOV
 	else if (opcode == 14) result = opnd1 & ~opnd2; //BIC
 	else result = ~opnd2; //MVN
 	
 	if (opcode < 8 || opcode >= 12) {
-		cpu->core->regs[instr.r1()] = result;
-		if (instr.r1() == ARMCore::PC) {
+		cpu->core->regs[instr->r1()] = result;
+		if (instr->r1() == ARMCore::PC) {
 			if (result & 1) {
 				cpu->core->setThumb(true);
 				cpu->core->regs[ARMCore::PC] &= ~1;
@@ -176,8 +176,8 @@ bool ARMInstr_DataProcessing(ARMInterpreter *cpu, ARMInstruction instr) {
 		}
 	}
 	
-	if (instr.s()) {
-		if (instr.r1() == ARMCore::PC) {
+	if (instr->s()) {
+		if (instr->r1() == ARMCore::PC) {
 			cpu->core->cpsr = cpu->core->spsr;
 			cpu->core->setMode((ARMCore::Mode)(cpu->core->cpsr & 0x1F));
 			cpu->core->setThumb(cpu->core->cpsr.get(ARMCore::T));
@@ -191,68 +191,68 @@ bool ARMInstr_DataProcessing(ARMInterpreter *cpu, ARMInstruction instr) {
 	return true;
 }
 
-bool ARMInstr_MultiplyAccumulate(ARMInterpreter *cpu, ARMInstruction instr) {
-	uint32_t result = cpu->core->regs[instr.r2()] * cpu->core->regs[instr.r3()];
-	if (instr.a())
-		result += cpu->core->regs[instr.r1()];
+bool ARMInstr_MultiplyAccumulate(ARMInstruction *instr, ARMInterpreter *cpu) {
+	uint32_t result = cpu->core->regs[instr->r2()] * cpu->core->regs[instr->r3()];
+	if (instr->a())
+		result += cpu->core->regs[instr->r1()];
 
-	if (instr.s()) {
+	if (instr->s()) {
 		cpu->core->cpsr.set(ARMCore::Z, result == 0);
 		cpu->core->cpsr.set(ARMCore::N, result >> 31);
 	}
-	cpu->core->regs[instr.r0()] = result;
+	cpu->core->regs[instr->r0()] = result;
 	return true;
 }
 
-bool ARMInstr_MultiplyAccumulateLong(ARMInterpreter *cpu, ARMInstruction instr) {
-	if (instr.a()) {
+bool ARMInstr_MultiplyAccumulateLong(ARMInstruction *instr, ARMInterpreter *cpu) {
+	if (instr->a()) {
 		NotImplementedError("ARM multiply long with accumulate 0x%08x", cpu->core->regs[15]);
 		return false;
 	}
 	
 	uint64_t result;
-	if ((instr.value >> 22) & 1) {
-		result = (int64_t)(int32_t)cpu->core->regs[instr.r2()] * (int32_t)cpu->core->regs[instr.r3()];
+	if ((instr->value >> 22) & 1) {
+		result = (int64_t)(int32_t)cpu->core->regs[instr->r2()] * (int32_t)cpu->core->regs[instr->r3()];
 	}
 	else {
-		result = (uint64_t)cpu->core->regs[instr.r2()] * cpu->core->regs[instr.r3()];
+		result = (uint64_t)cpu->core->regs[instr->r2()] * cpu->core->regs[instr->r3()];
 	}
 	
-	if (instr.s()) {
+	if (instr->s()) {
 		cpu->core->cpsr.set(ARMCore::Z, result == 0);
 		cpu->core->cpsr.set(ARMCore::N, result >> 63);
 	}
-	cpu->core->regs[instr.r0()] = result >> 32;
-	cpu->core->regs[instr.r1()] = result & 0xFFFFFFFF;
+	cpu->core->regs[instr->r0()] = result >> 32;
+	cpu->core->regs[instr->r1()] = result & 0xFFFFFFFF;
 	return true;
 }
 
-bool ARMInstr_SingleDataTransfer(ARMInterpreter *cpu, ARMInstruction instr) {
-	uint32_t base = cpu->core->regs[instr.r0()];
-	if (instr.r0() == ARMCore::PC) {
+bool ARMInstr_SingleDataTransfer(ARMInstruction *instr, ARMInterpreter *cpu) {
+	uint32_t base = cpu->core->regs[instr->r0()];
+	if (instr->r0() == ARMCore::PC) {
 		base += 4;
 	}
 	
 	uint32_t offset;
-	if (instr.i()) {
-		offset = getShifted(cpu->core, instr.shift(), instr.r3(), false);
+	if (instr->i()) {
+		offset = getShifted(cpu->core, instr->shift(), instr->r3(), false);
 	}
 	else {
-		offset = instr.value & 0xFFF;
+		offset = instr->value & 0xFFF;
 	}
 	
-	uint32_t indexed = instr.u() ? base + offset : base - offset;
-	uint32_t addr = instr.p() ? indexed : base;
+	uint32_t indexed = instr->u() ? base + offset : base - offset;
+	uint32_t addr = instr->p() ? indexed : base;
 	
-	if (instr.l()) { //Load
-		if (instr.b()) {
+	if (instr->l()) { //Load
+		if (instr->b()) {
 			uint8_t value;
 			if (!cpu->read<uint8_t>(addr, &value)) return false;
-			cpu->core->regs[instr.r1()] = value;
+			cpu->core->regs[instr->r1()] = value;
 		}
 		else {
-			if (!cpu->read<uint32_t>(addr, &cpu->core->regs[instr.r1()])) return false;
-			if (instr.r1() == ARMCore::PC) {
+			if (!cpu->read<uint32_t>(addr, &cpu->core->regs[instr->r1()])) return false;
+			if (instr->r1() == ARMCore::PC) {
 				if (cpu->core->regs[ARMCore::PC] & 1) {
 					cpu->core->setThumb(true);
 					cpu->core->regs[ARMCore::PC] &= ~1;
@@ -261,12 +261,12 @@ bool ARMInstr_SingleDataTransfer(ARMInterpreter *cpu, ARMInstruction instr) {
 		}
 	}
 	else { //Store
-		uint32_t value = cpu->core->regs[instr.r1()];
-		if (instr.r1() == ARMCore::PC) {
+		uint32_t value = cpu->core->regs[instr->r1()];
+		if (instr->r1() == ARMCore::PC) {
 			value += 8;
 		}
 		
-		if (instr.b()) {
+		if (instr->b()) {
 			if (!cpu->write<uint8_t>(addr, value)) return false;
 		}
 		else {
@@ -274,56 +274,56 @@ bool ARMInstr_SingleDataTransfer(ARMInterpreter *cpu, ARMInstruction instr) {
 		}
 	}
 	
-	if (instr.w() || !instr.p()) {
-		cpu->core->regs[instr.r0()] = indexed;
+	if (instr->w() || !instr->p()) {
+		cpu->core->regs[instr->r0()] = indexed;
 	}
 	
 	return true;
 }
 
-bool ARMInstr_LoadStoreHalfSigned(ARMInterpreter *cpu, ARMInstruction instr) {
-	uint32_t base = cpu->core->regs[instr.r0()];
-	if (instr.r0() == ARMCore::PC) {
+bool ARMInstr_LoadStoreHalfSigned(ARMInstruction *instr, ARMInterpreter *cpu) {
+	uint32_t base = cpu->core->regs[instr->r0()];
+	if (instr->r0() == ARMCore::PC) {
 		base += 4;
 	}
 	
 	uint32_t offset;
-	if ((instr.value >> 22) & 1) {
-		offset = (instr.value & 0xF) | ((instr.value >> 4) & 0xF0);
+	if ((instr->value >> 22) & 1) {
+		offset = (instr->value & 0xF) | ((instr->value >> 4) & 0xF0);
 	}
 	else {
-		offset = cpu->core->regs[instr.r3()];
+		offset = cpu->core->regs[instr->r3()];
 	}
 	
-	uint32_t indexed = instr.u() ? base + offset : base - offset;
-	uint32_t addr = instr.p() ? indexed : base;
+	uint32_t indexed = instr->u() ? base + offset : base - offset;
+	uint32_t addr = instr->p() ? indexed : base;
 	
-	if (instr.l()) { //Load
-		if (instr.h()) {
-			if ((instr.value >> 6) & 1) {
+	if (instr->l()) { //Load
+		if (instr->h()) {
+			if ((instr->value >> 6) & 1) {
 				int16_t value;
 				if (!cpu->read<int16_t>(addr, &value)) return false;
-				cpu->core->regs[instr.r1()] = value;
+				cpu->core->regs[instr->r1()] = value;
 			}
 			else {
 				uint16_t value;
 				if (!cpu->read<uint16_t>(addr, &value)) return false;
-				cpu->core->regs[instr.r1()] = value;
+				cpu->core->regs[instr->r1()] = value;
 			}
 		}
 		else {
 			int8_t value;
 			if (!cpu->read<int8_t>(addr, &value)) return false;
-			cpu->core->regs[instr.r1()] = value;
+			cpu->core->regs[instr->r1()] = value;
 		}
 	}
 	else { //Store
-		uint32_t value = cpu->core->regs[instr.r1()];
-		if (instr.r1() == ARMCore::PC) {
+		uint32_t value = cpu->core->regs[instr->r1()];
+		if (instr->r1() == ARMCore::PC) {
 			value += 8;
 		}
 		
-		if (instr.h()) {
+		if (instr->h()) {
 			if (!cpu->write<uint16_t>(addr, value)) return false;
 		}
 		else {
@@ -331,26 +331,26 @@ bool ARMInstr_LoadStoreHalfSigned(ARMInterpreter *cpu, ARMInstruction instr) {
 		}
 	}
 	
-	if (instr.w() || !instr.p()) {
-		cpu->core->regs[instr.r0()] = indexed;
+	if (instr->w() || !instr->p()) {
+		cpu->core->regs[instr->r0()] = indexed;
 	}
 	
 	return true;
 }
 
-bool ARMInstr_LoadStoreMultiple(ARMInterpreter *cpu, ARMInstruction instr) {
-	if (instr.value & (1 << 22) && instr.l() && instr.value & (1 << 15)) {
+bool ARMInstr_LoadStoreMultiple(ARMInstruction *instr, ARMInterpreter *cpu) {
+	if (instr->value & (1 << 22) && instr->l() && instr->value & (1 << 15)) {
 		NotImplementedError("Load/store multiple with S bit and PC at 0x%08x", cpu->core->regs[ARMCore::PC]);
 		return false;
 	}
 	
-	uint32_t addr = cpu->core->regs[instr.r0()];
-	int adder = instr.u() ? 4 : -4;
-	int reg = instr.u() ? 0 : 15;
-	int inc = instr.u() ? 1 : -1;
+	uint32_t addr = cpu->core->regs[instr->r0()];
+	int adder = instr->u() ? 4 : -4;
+	int reg = instr->u() ? 0 : 15;
+	int inc = instr->u() ? 1 : -1;
 
 	uint32_t *regs;
-	if (instr.value & (1 << 22)) {
+	if (instr->value & (1 << 22)) {
 		cpu->core->writeModeRegs(); //Update regs
 		regs = cpu->core->regsUser;
 	}
@@ -359,17 +359,17 @@ bool ARMInstr_LoadStoreMultiple(ARMInterpreter *cpu, ARMInstruction instr) {
 	}
 
 	for (int i = 0; i < 16; i++) {
-		if (instr.value & (1 << reg)) {
-			if (instr.p()) {
+		if (instr->value & (1 << reg)) {
+			if (instr->p()) {
 				addr += adder;
 			}
-			if (instr.l()) {
+			if (instr->l()) {
 				if (!cpu->read<uint32_t>(addr, &regs[reg])) return false;
 			}
 			else {
 				if (!cpu->write<uint32_t>(addr, regs[reg])) return false;
 			}
-			if (!instr.p()) {
+			if (!instr->p()) {
 				addr += adder;
 			}
 		}
@@ -382,38 +382,38 @@ bool ARMInstr_LoadStoreMultiple(ARMInterpreter *cpu, ARMInstruction instr) {
 		cpu->core->regs[ARMCore::PC] &= ~1;
 	}
 	
-	if (instr.value & (1 << 22)) {
+	if (instr->value & (1 << 22)) {
 		cpu->core->readModeRegs(); //Update regs
 	}
 	
-	if (instr.w()) {
-		cpu->core->regs[instr.r0()] = addr;
+	if (instr->w()) {
+		cpu->core->regs[instr->r0()] = addr;
 	}
 	return true;
 }
 
-bool ARMInstr_Swap(ARMInterpreter *cpu, ARMInstruction instr) {
+bool ARMInstr_Swap(ARMInstruction *instr, ARMInterpreter *cpu) {
 	uint32_t memvalue;
-	if (!cpu->read<uint32_t>(cpu->core->regs[instr.r0()], &memvalue)) return false;
-	if (!cpu->write<uint32_t>(cpu->core->regs[instr.r0()], cpu->core->regs[instr.r3()])) return false;
-	cpu->core->regs[instr.r1()] = memvalue;
+	if (!cpu->read<uint32_t>(cpu->core->regs[instr->r0()], &memvalue)) return false;
+	if (!cpu->write<uint32_t>(cpu->core->regs[instr->r0()], cpu->core->regs[instr->r3()])) return false;
+	cpu->core->regs[instr->r1()] = memvalue;
 	return true;
 }
 
-bool ARMInstr_Branch(ARMInterpreter *cpu, ARMInstruction instr) {
-	if (instr.link()) {
+bool ARMInstr_Branch(ARMInstruction *instr, ARMInterpreter *cpu) {
+	if (instr->link()) {
 		cpu->core->regs[ARMCore::LR] = cpu->core->regs[ARMCore::PC];
 	}
-	cpu->core->regs[ARMCore::PC] += instr.offset() + 4;
+	cpu->core->regs[ARMCore::PC] += instr->offset() + 4;
 	return true;
 }
 
-bool ARMInstr_BranchAndExchange(ARMInterpreter *cpu, ARMInstruction instr) {
-	if (instr.value & 0x20) {
+bool ARMInstr_BranchAndExchange(ARMInstruction *instr, ARMInterpreter *cpu) {
+	if (instr->value & 0x20) {
 		cpu->core->regs[ARMCore::LR] = cpu->core->regs[ARMCore::PC];
 	}
 	
-	uint32_t dest = cpu->core->regs[instr.r3()];
+	uint32_t dest = cpu->core->regs[instr->r3()];
 	if (dest & 1) {
 		cpu->core->setThumb(true);
 		dest &= ~1;
@@ -422,37 +422,37 @@ bool ARMInstr_BranchAndExchange(ARMInterpreter *cpu, ARMInstruction instr) {
 	return true;
 }
 
-bool ARMInstr_PSRTransfer(ARMInterpreter *cpu, ARMInstruction instr) {
-	if (!(instr.value & 0x200000)) { //MRS
-		if (instr.r()) {
-			cpu->core->regs[instr.r1()] = cpu->core->spsr;
+bool ARMInstr_PSRTransfer(ARMInstruction *instr, ARMInterpreter *cpu) {
+	if (!(instr->value & 0x200000)) { //MRS
+		if (instr->r()) {
+			cpu->core->regs[instr->r1()] = cpu->core->spsr;
 		}
 		else {
-			cpu->core->regs[instr.r1()] = cpu->core->cpsr;
+			cpu->core->regs[instr->r1()] = cpu->core->cpsr;
 		}
 	}
 
 	else { //MSR
 		uint32_t value;
-		if (instr.i()) {
-			int rot = instr.rotate() * 2;
-			value = instr.value & 0xFF;
+		if (instr->i()) {
+			int rot = instr->rotate() * 2;
+			value = instr->value & 0xFF;
 			if (rot) {
 				uint32_t rotmask = (1 << rot) - 1;
 				value = (value >> rot) | ((value & rotmask) << (32 - rot));
 			}
 		}
 		else {
-			value = cpu->core->regs[instr.r3()];
+			value = cpu->core->regs[instr->r3()];
 		}
 		
 		uint32_t mask = 0;
-		if ((instr.value >> 19) & 1) mask |= 0xFF000000;
-		if ((instr.value >> 18) & 1) mask |= 0x00FF0000;
-		if ((instr.value >> 17) & 1) mask |= 0x0000FF00;
-		if ((instr.value >> 16) & 1) mask |= 0x000000FF;
+		if ((instr->value >> 19) & 1) mask |= 0xFF000000;
+		if ((instr->value >> 18) & 1) mask |= 0x00FF0000;
+		if ((instr->value >> 17) & 1) mask |= 0x0000FF00;
+		if ((instr->value >> 16) & 1) mask |= 0x000000FF;
 		
-		if (instr.r()) {
+		if (instr->r()) {
 			cpu->core->spsr = (cpu->core->spsr & ~mask) | (value & mask);
 		}
 		else {
@@ -466,115 +466,115 @@ bool ARMInstr_PSRTransfer(ARMInterpreter *cpu, ARMInstruction instr) {
 	return true;
 }
 
-bool ARMInstr_CoprocessorRegisterTransfer(ARMInterpreter *cpu, ARMInstruction instr) {
-	if (instr.l()) {
+bool ARMInstr_CoprocessorRegisterTransfer(ARMInstruction *instr, ARMInterpreter *cpu) {
+	if (instr->l()) {
 		uint32_t value;
-		if (!cpu->handleCoprocessorRead(instr.r2(), instr.cpopc(), &value, instr.r0(), instr.r3(), instr.cp())) {
+		if (!cpu->handleCoprocessorRead(instr->r2(), instr->cpopc(), &value, instr->r0(), instr->r3(), instr->cp())) {
 			return false;
 		}
-		if (instr.r1() == ARMCore::PC) {
+		if (instr->r1() == ARMCore::PC) {
 			cpu->core->cpsr = (cpu->core->cpsr & ~0xF0000000) | (value & 0xF0000000);
 		}
 		else {
-			cpu->core->regs[instr.r1()] = value;
+			cpu->core->regs[instr->r1()] = value;
 		}
 		return true;
 	}
 	else {
-		uint32_t value = cpu->core->regs[instr.r1()];
-		if (instr.r1() == ARMCore::PC) value += 8;
-		return cpu->handleCoprocessorWrite(instr.r2(), instr.cpopc(), value, instr.r0(), instr.r3(), instr.cp());
+		uint32_t value = cpu->core->regs[instr->r1()];
+		if (instr->r1() == ARMCore::PC) value += 8;
+		return cpu->handleCoprocessorWrite(instr->r2(), instr->cpopc(), value, instr->r0(), instr->r3(), instr->cp());
 	}
 }
 
-bool ARMInstr_Undefined(ARMInterpreter *cpu, ARMInstruction instr) {
+bool ARMInstr_Undefined(ARMInstruction *instr, ARMInterpreter *cpu) {
 	return cpu->handleUndefined();
 }
 
-ARMInstrCallback ARMInstruction::decode() {
+bool ARMInstruction::execute(ARMInterpreter *cpu) {
 	if ((value >> 28) == 0xF) {
 		if ((value & 0xE000000) == 0xA000000) {
 			//Branch and change to thumb
 			NotImplementedError("Branch and change to thumb");
-			return NULL;
+			return false;
 		}
-		return ARMInstr_Undefined;
+		return ARMInstr_Undefined(this, cpu);
 	}
 	
 	if ((value & 0x01900000) != 0x01000000 && (
 			(value & 0x0E000000) == 0x02000000 ||
 			(value & 0x0E000090) == 0x00000010 ||
 			!(value & 0x0E000010))
-		) return ARMInstr_DataProcessing;
+		) return ARMInstr_DataProcessing(this, cpu);
 	
 	if (!(value & 0x0E000000)) {
 		if ((value & 0x90) != 0x90) {
 			//Miscellaneous instructions
-			if (!(value & 0xF0)) return ARMInstr_PSRTransfer;
+			if (!(value & 0xF0)) return ARMInstr_PSRTransfer(this, cpu);
 			if ((value & 0xF0) == 0x10) {
 				if (value & 0x400000) {
 					NotImplementedError("Count leading zeros");
-					return NULL;
+					return false;
 				}
-				return ARMInstr_BranchAndExchange;
+				return ARMInstr_BranchAndExchange(this, cpu);
 			}
-			if ((value & 0xF0) == 0x30) return ARMInstr_BranchAndExchange;
+			if ((value & 0xF0) == 0x30) return ARMInstr_BranchAndExchange(this, cpu);
 			if (value & 0x80) {
 				NotImplementedError("Enhanced DSP multiplies");
-				return NULL;
+				return false;
 			}
 			if ((value & 0x60) == 0x60) {
 				NotImplementedError("Software breakpoint");
-				return NULL;
+				return false;
 			}
 			NotImplementedError("Enhanced DSP add/subtracts");
-			return NULL;
+			return false;
 		}
 		else {
 			//Multiplies, extra load/stores
 			if ((value & 0xD0) == 0xD0) {
-				if (value & 0x100000) return ARMInstr_LoadStoreHalfSigned;
+				if (value & 0x100000) return ARMInstr_LoadStoreHalfSigned(this, cpu);
 				if ((value & 0x500000) == 0x400000) {
 					NotImplementedError("Load/store two words imm offset");
-					return NULL;
+					return false;
 				}
 				else {
 					NotImplementedError("Load/store two words reg offset");
-					return NULL;
+					return false;
 				}
 			}
-			else if (value & 0x20) return ARMInstr_LoadStoreHalfSigned;
+			else if (value & 0x20) return ARMInstr_LoadStoreHalfSigned(this, cpu);
 			else {
-				if ((value >> 24) & 1) return ARMInstr_Swap;
-				if ((value >> 23) & 1) return ARMInstr_MultiplyAccumulateLong;
-				return ARMInstr_MultiplyAccumulate;
+				if ((value >> 24) & 1) return ARMInstr_Swap(this, cpu);
+				if ((value >> 23) & 1) return ARMInstr_MultiplyAccumulateLong(this, cpu);
+				return ARMInstr_MultiplyAccumulate(this, cpu);
 			}
 		}
 	}
 	
 	if ((value & 0x0E000010) == 0x06000010 ||
 		(value & 0x0FB00000) == 0x03000000)
-		return ARMInstr_Undefined;
+		return ARMInstr_Undefined(this, cpu);
 	if ((value & 0x0F000000) == 0x0F000000) {
 		//Software interrupt
 		NotImplementedError("Software interrupt");
-		return NULL;
+		return false;
 	}
 	if ((value & 0x0F000000) == 0x0E000000) {
-		if (value & 0x10) return ARMInstr_CoprocessorRegisterTransfer;
+		if (value & 0x10) return ARMInstr_CoprocessorRegisterTransfer(this, cpu);
 		else {
 			//Coprocessor data processing
 			NotImplementedError("Coprocessor data processing");
-			return NULL;
+			return false;
 		}
 	}
 	if ((value & 0x0E000000) == 0x0C000000) {
 		//Coprocessor load/store
 		NotImplementedError("Coprocessor load/store");
-		return NULL;
+		return false;
 	}
-	if ((value & 0x0E000000) == 0x0A000000) return ARMInstr_Branch;
-	if ((value & 0x0E000000) == 0x08000000) return ARMInstr_LoadStoreMultiple;
-	if ((value & 0x0C000000) == 0x04000000) return ARMInstr_SingleDataTransfer;
-	return ARMInstr_PSRTransfer;
+	if ((value & 0x0E000000) == 0x0A000000) return ARMInstr_Branch(this, cpu);
+	if ((value & 0x0E000000) == 0x08000000) return ARMInstr_LoadStoreMultiple(this, cpu);
+	if ((value & 0x0C000000) == 0x04000000) return ARMInstr_SingleDataTransfer(this, cpu);
+	return ARMInstr_PSRTransfer(this, cpu);
 }

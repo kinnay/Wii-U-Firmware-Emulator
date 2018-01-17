@@ -5,7 +5,6 @@
 
 struct ARMThumbInstr;
 class ARMInterpreter;
-typedef bool (*ThumbInstrCallback)(ARMInterpreter *, ARMThumbInstr);
 
 struct ARMThumbInstr {
 	public:
@@ -18,5 +17,5 @@ struct ARMThumbInstr {
 	inline bool i() { return (value >> 10) & 1; }
 	inline bool r() { return (value >> 8) & 1; }
 	
-	ThumbInstrCallback decode();
+	bool execute(ARMInterpreter *cpu);
 };
