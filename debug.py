@@ -336,13 +336,19 @@ class PPCDebugger:
 			nameptr = reader.u32(thread + 0x5C0)
 			if nameptr:
 				name = reader.string(nameptr)
-				print("%08X: %s" %(thread, name))
 			else:
 				module = self.get_module_by_addr(thread)
 				if module:
-					print("%08X: <no name:%s>" %(thread, module.name))
+					name = "<no name:%s>" %module.name
 				else:
-					print("%08X: <no name>" %thread)
+					name = "<no name>"
+
+			cores = [
+				"invalid", "core 0", "core 1", "core 0/1",
+				"core 2", "core 0/2", "core 1/2", "all cores"
+			][reader.u32(thread + 0x304) & 7]
+
+			print("%08X: [%s] %s" %(thread, cores, name))
 			thread = reader.u32(thread + 0x38C)
 			
 	def thread(self, thread):
