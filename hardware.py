@@ -2119,10 +2119,11 @@ PI_INTSR = 0
 PI_INTMR = 4
 
 class PIController:
-	def __init__(self, scheduler, irq, gpu, index):
+	def __init__(self, scheduler, irq, gpu, dsp, index):
 		self.scheduler = scheduler
 		self.irq = irq
 		self.gpu = gpu
+		self.dsp = dsp
 		self.index = index
 
 		self.intsr = 0
@@ -2145,21 +2146,15 @@ class PIController:
 			
 	def check_interrupts(self):
 		self.update_interrupts()
-		return self.intsr & self.intmr
+		return self.intsr & self.intmr# or self.dsp.check_interrupts()
 		
 	def update_interrupts(self):
 		if self.irq.check_interrupts():
 			self.trigger_irq(24)
 		if self.gpu.check_interrupts():
 			self.trigger_irq(23)
-
-		#Both GPIO/I2C? (see tve.rpl)
-		if self.irq.is_triggered_all(10):
-			self.trigger_irq(10)
-		if self.irq.is_triggered_lt(26 + self.index * 2):
-			self.trigger_irq(26 + self.index * 2)
-		if self.irq.is_triggered_lt(13):
-			self.trigger_irq(13)
+		if self.dsp.check_interrupts():
+			self.trigger_irq(6)
 			
 			
 PAD_START = 0xC1E0000
@@ -2444,6 +2439,8 @@ class AIController:
 			print("AI WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
 			
 
+DSP_MAILBOX_IN_H = 0xC280000
+DSP_MAILBOX_IN_L = 0xC280002
 DSP_MAILBOX_OUT_H = 0xC280004
 DSP_MAILBOX_OUT_L = 0xC280006
 DSP_CONTROL_STATUS = 0xC28000A
@@ -2452,22 +2449,68 @@ DSP_START = 0xC280000
 DSP_END = 0xC2A0000
 
 class DSPController:
+
+	STATE_NEXT = 0
+	STATE_ARG = 1
+
 	def __init__(self, scheduler):
 		self.scheduler = scheduler
 		
+		self.mailbox_in = 0
 		self.mailbox_out = 0x80000000
-		self.control = 0
+		self.dsp_int_status = 0
+		self.dsp_int_mask = 0
+		
+		self.state = self.STATE_NEXT
+		self.message = 0
 		
 	def read(self, addr):
-		if addr == DSP_MAILBOX_OUT_H: return self.mailbox_out >> 16
-		elif addr == DSP_MAILBOX_OUT_L: return self.mailbox_out & 0xFFFF
-		elif addr == DSP_CONTROL_STATUS: return self.control
 		print("DSP READ 0x%X at %08X" %(addr, self.scheduler.pc()))
+		if addr == DSP_MAILBOX_IN_H: return (self.mailbox_in >> 16) & 0x7FFF
+		elif addr == DSP_MAILBOX_OUT_H: return self.mailbox_out >> 16
+		elif addr == DSP_MAILBOX_OUT_L: return self.mailbox_out & 0xFFFF
+		elif addr == DSP_CONTROL_STATUS:
+			return (self.dsp_int_status << 7) | (self.dsp_int_mask << 8)
+		#print("DSP READ 0x%X at %08X" %(addr, self.scheduler.pc()))
 		return 0
 		
 	def write(self, addr, value):
-		if addr == DSP_CONTROL_STATUS: self.control = value
+		if addr == DSP_MAILBOX_IN_H: self.mailbox_in = (self.mailbox_in & 0xFFFF) | (value << 16)
+		elif addr == DSP_MAILBOX_IN_L:
+			self.mailbox_in = (self.mailbox_in & 0xFFFF0000) | value
+			self.handle_message(self.mailbox_in)
+		elif addr == DSP_CONTROL_STATUS:
+			if value & 0x80: self.dsp_int_status = 0
+			self.dsp_int_mask = (value >> 8) & 1
+		#else:
 		print("DSP WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
+		
+	def handle_message(self, value):
+		if self.state == self.STATE_NEXT:
+			self.message = value
+			self.state = self.STATE_ARG
+		else:
+			self.handle_request(self.message, value)
+			self.state = self.STATE_NEXT
+			
+	def handle_request(self, message, arg):
+		if message == 0x80F3A001: pass #Task field_C (slave data addr)
+		elif message == 0x80F3A002: pass #Task field_10 (slave length)
+		elif message == 0x80F3B001: pass #Task field_18 (some kind of physical addr)
+		elif message == 0x80F3B002: pass #Task field_1C
+		elif message == 0x80F3C001: pass #Task field_20
+		elif message == 0x80F3C002: pass #Task field_14
+		elif message == 0x80F3D001: #Task field_24
+			self.trigger_dsp_interrupt(0xDCD10000)
+		else:
+			print("DSP MESSAGE %08X %08X at %08X" %(message, arg, self.scheduler.pc()))
+			
+	def trigger_dsp_interrupt(self, message):
+		self.mailbox_out = message
+		self.dsp_int_status = 1
+		
+	def check_interrupts(self):
+		return self.dsp_int_status and self.dsp_int_mask
 
 		
 TCL_D0000000 = 0xD0000000
@@ -2480,7 +2523,7 @@ class HardwareController:
 		self.gpu = GPUController(scheduler, physmem)
 		self.ai = AIController(scheduler)
 		self.dsp = DSPController(scheduler)
-		self.pi = [PIController(scheduler, self.latte.irq_ppc[i], self.gpu, i) for i in range(3)]
+		self.pi = [PIController(scheduler, self.latte.irq_ppc[i], self.gpu, self.dsp, i) for i in range(3)]
 		
 		armirq = self.latte.irq_arm
 		self.ahmn = AHMNController(scheduler)
@@ -2567,7 +2610,7 @@ class HardwareController:
 			elif DSP_START <= addr < DSP_END: self.dsp.write(addr, value)
 			else:
 				print("HW WRITE 0x%X %04X at %08X" %(addr, value, self.scheduler.pc()))
-				
+
 		elif len(data) == 4:
 			value = struct.unpack(">I",  data)[0]
 			if LATTE_START <= addr < LATTE_END: self.latte.write(addr, value)
