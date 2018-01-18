@@ -3,6 +3,7 @@
 
 #include "interface_physmem.h"
 #include "interface_virtmem.h"
+#include "class_endian.h"
 #include "errors.h"
 
 #include <functional>

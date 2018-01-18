@@ -3,11 +3,9 @@
 
 #include "class_interpreter.h"
 #include "class_armcore.h"
-#include "class_endian.h"
 #include "interface_virtmem.h"
 #include "interface_physmem.h"
 #include <functional>
-#include <vector>
 
 class ARMInterpreter : public Interpreter {
 	public:

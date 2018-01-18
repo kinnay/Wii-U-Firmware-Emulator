@@ -3,11 +3,8 @@
 
 #include "class_interpreter.h"
 #include "class_ppccore.h"
-#include "class_endian.h"
 #include "interface_virtmem.h"
 #include "interface_physmem.h"
-#include <functional>
-#include <vector>
 
 class PPCInterpreter : public Interpreter {
 	public:
