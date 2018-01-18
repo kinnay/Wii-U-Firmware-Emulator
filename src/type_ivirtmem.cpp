@@ -33,6 +33,30 @@ PyObject *IVirtMem_translate(IVirtMemObj *self, PyObject *args) {
 	return PyLong_FromUnsignedLong(addr);
 }
 
+PyObject *IVirtMem_setEnabled(IVirtMemObj *self, PyObject *arg) {
+	CHECK_INIT(self->object);
+	self->object->setEnabled(PyObject_IsTrue(arg) != 0);
+	Py_RETURN_NONE;
+}
+
+PyObject *IVirtMem_setDataTranslation(IVirtMemObj *self, PyObject *arg) {
+	CHECK_INIT(self->object);
+	self->object->setDataTranslation(PyObject_IsTrue(arg) != 0);
+	Py_RETURN_NONE;
+}
+
+PyObject *IVirtMem_setInstructionTranslation(IVirtMemObj *self, PyObject *arg) {
+	CHECK_INIT(self->object);
+	self->object->setInstructionTranslation(PyObject_IsTrue(arg) != 0);
+	Py_RETURN_NONE;
+}
+
+PyObject *IVirtMem_setSupervisor(IVirtMemObj *self, PyObject *arg) {
+	CHECK_INIT(self->object);
+	self->object->setSupervisorMode(PyObject_IsTrue(arg) != 0);
+	Py_RETURN_NONE;
+}
+
 PyObject *IVirtMem_setCacheEnabled(IVirtMemObj *self, PyObject *arg) {
 	CHECK_INIT(self->object);
 	self->object->setCacheEnabled(PyObject_IsTrue(arg) != 0);
@@ -47,6 +71,10 @@ PyObject *IVirtMem_invalidateCache(IVirtMemObj *self, PyObject *arg) {
 
 PyMethodDef IVirtMem_methods[] = {
 	{"translate", (PyCFunction)IVirtMem_translate, METH_VARARGS, NULL},
+	{"set_enabled", (PyCFunction)IVirtMem_setEnabled, METH_O, NULL},
+	{"set_data_translation", (PyCFunction)IVirtMem_setDataTranslation, METH_O, NULL},
+	{"set_instruction_translation", (PyCFunction)IVirtMem_setInstructionTranslation, METH_O, NULL},
+	{"set_supervisor", (PyCFunction)IVirtMem_setSupervisor, METH_O, NULL},
 	{"set_cache_enabled", (PyCFunction)IVirtMem_setCacheEnabled, METH_O, NULL},
 	{"invalidate_cache", (PyCFunction)IVirtMem_invalidateCache, METH_NOARGS, NULL},
 	{NULL}

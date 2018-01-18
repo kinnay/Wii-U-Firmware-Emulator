@@ -9,10 +9,6 @@ class PPCMMU : public IVirtualMemory {
 	PPCMMU(IPhysicalMemory *phys, bool bigEndian);
 	bool translate(uint32_t *addr, uint32_t length, Access type);
 	
-	void setDataTranslation(bool enabled);
-	void setInstructionTranslation(bool enabled);
-	void setSupervisorMode(bool enabled);
-	
 	void setRpnSize(int bits);
 	
 	uint32_t dbatu[8];
@@ -34,9 +30,6 @@ class PPCMMU : public IVirtualMemory {
 	IPhysicalMemory *physmem;
 	
 	bool swapEndian;
-	bool dataTranslation;
-	bool instrTranslation;
-	bool supervisorMode;
 	
 	int pageIndexShift;
 	uint32_t pageIndexMask;

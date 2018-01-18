@@ -4,18 +4,10 @@
 #include "errors.h"
 
 PPCMMU::PPCMMU(IPhysicalMemory *physmem, bool bigEndian)
-	: physmem(physmem), dataTranslation(false), instrTranslation(false), supervisorMode(true),
-	  sdr1(0), dbatu{}, dbatl{}, ibatu{}, ibatl{}, sr{}
+	: physmem(physmem), sdr1(0), dbatu{}, dbatl{}, ibatu{}, ibatl{}, sr{}
 {
 	swapEndian = bigEndian != (Endian::getSystemEndian() == Endian::Big);
 	setRpnSize(20);
-}
-
-void PPCMMU::setDataTranslation(bool enabled) { dataTranslation = enabled; }
-void PPCMMU::setInstructionTranslation(bool enabled) { instrTranslation = enabled; }
-void PPCMMU::setSupervisorMode(bool enabled) {
-	supervisorMode = enabled;
-	cache.invalidate();
 }
 
 void PPCMMU::setRpnSize(int bits) {

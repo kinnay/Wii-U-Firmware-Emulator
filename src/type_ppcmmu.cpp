@@ -60,24 +60,6 @@ int PPCMMU_init(PPCMMUObj *self, PyObject *args, PyObject *kwargs) {
 	return 0;
 }
 
-PyObject *PPCMMU_setDataTranslation(PPCMMUObj *self, PyObject *arg) {
-	CHECK_INIT(self->object);
-	self->object->setDataTranslation(PyObject_IsTrue(arg) != 0);
-	Py_RETURN_NONE;
-}
-
-PyObject *PPCMMU_setInstructionTranslation(PPCMMUObj *self, PyObject *arg) {
-	CHECK_INIT(self->object);
-	self->object->setInstructionTranslation(PyObject_IsTrue(arg) != 0);
-	Py_RETURN_NONE;
-}
-
-PyObject *PPCMMU_setSupervisor(PPCMMUObj *self, PyObject *arg) {
-	CHECK_INIT(self->object);
-	self->object->setSupervisorMode(PyObject_IsTrue(arg) != 0);
-	Py_RETURN_NONE;
-}
-
 PyObject *PPCMMU_setRpnSize(PPCMMUObj *self, PyObject *arg) {
 	CHECK_INIT(self->object);
 
@@ -260,9 +242,6 @@ PyObject *PPCMMU_setSdr1(PPCMMUObj *self, PyObject *arg) {
 }
 
 PyMethodDef PPCMMU_methods[] = {
-	{"set_data_translation", (PyCFunction)PPCMMU_setDataTranslation, METH_O, NULL},
-	{"set_instruction_translation", (PyCFunction)PPCMMU_setInstructionTranslation, METH_O, NULL},
-	{"set_supervisor", (PyCFunction)PPCMMU_setSupervisor, METH_O, NULL},
 	{"set_rpn_size", (PyCFunction)PPCMMU_setRpnSize, METH_O, NULL},
 	{"set_dbatu", (PyCFunction)PPCMMU_setDbatu, METH_VARARGS, NULL},
 	{"set_dbatl", (PyCFunction)PPCMMU_setDbatl, METH_VARARGS, NULL},

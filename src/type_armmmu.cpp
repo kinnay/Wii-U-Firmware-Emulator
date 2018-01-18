@@ -70,15 +70,8 @@ PyObject *ARMMMU_setTranslationTableBase(ARMMMUObj *self, PyObject *arg) {
 	Py_RETURN_NONE;
 }
 
-PyObject *ARMMMU_setEnabled(ARMMMUObj *self, PyObject *arg) {
-	CHECK_INIT(self->object);
-	self->object->setEnabled(PyObject_IsTrue(arg) != 0);
-	Py_RETURN_NONE;
-}
-
 PyMethodDef ARMMMU_methods[] = {
 	{"set_translation_table_base", (PyCFunction)ARMMMU_setTranslationTableBase, METH_O, NULL},
-	{"set_enabled", (PyCFunction)ARMMMU_setEnabled, METH_O, NULL},
 	{NULL}
 };
 
