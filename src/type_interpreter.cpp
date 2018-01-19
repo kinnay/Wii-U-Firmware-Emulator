@@ -56,6 +56,11 @@ PyObject *Interpreter_run(InterpreterObj *self, PyObject *args) {
 	int steps = 0;
 	if (!PyArg_ParseTuple(args, "|i", &steps)) return NULL;
 	
+	if (steps < 0) {
+		ValueError("Steps may not be negative");
+		return NULL;
+	}
+	
 	if (!self->object->run(steps)) {
 		return NULL;
 	}

@@ -2301,7 +2301,7 @@ GPU_PM4_DATA = 0xC2C0000
 class GPUController:
 	def __init__(self, scheduler, physmem):
 		self.scheduler = scheduler
-		self.scheduler.add_alarm(5000000, self.trigger_vsync)
+		self.scheduler.add_alarm(2000, self.trigger_vsync)
 		self.physmem = physmem
 		
 		self.pm4 = PM4Processor(scheduler, physmem)

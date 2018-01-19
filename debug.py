@@ -508,7 +508,7 @@ class DebugShell:
 	def current(self):
 		if self.current_override:
 			return self.current_override
-		return self.scheduler.current
+		return self.scheduler.current()
 		
 	def handle_breakpoint(self, addr):
 		self.current_override = None

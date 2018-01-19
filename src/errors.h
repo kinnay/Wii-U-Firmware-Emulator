@@ -1,4 +1,5 @@
 
+void IndexError(const char *message, ...);
 void IOError(const char *message, ...);
 void KeyError(const char *message, ...);
 void MemoryError(const char *message, ...);

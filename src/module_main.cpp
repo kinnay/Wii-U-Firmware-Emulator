@@ -14,6 +14,7 @@
 #include "type_ppcmmu.h"
 #include "type_ppccore.h"
 #include "type_ppcinterp.h"
+#include "type_scheduler.h"
 #include "type_sha1.h"
 #include "errors.h"
 
@@ -50,6 +51,7 @@ PyMODINIT_FUNC PyInit_pyemu() {
 	if (!PPCMMUType_Init()) return NULL;
 	if (!PPCCoreType_Init()) return NULL;
 	if (!PPCInterpType_Init()) return NULL;
+	if (!SchedulerType_Init()) return NULL;
 	if (!SHA1Type_Init()) return NULL;
 	
 	PyObject *m = PyModule_Create(&MainModule);
@@ -71,6 +73,7 @@ PyMODINIT_FUNC PyInit_pyemu() {
 	ADD("PPCMMU", &PPCMMUType);
 	ADD("PPCCore", &PPCCoreType);
 	ADD("PPCInterpreter", &PPCInterpType);
+	ADD("Scheduler", &SchedulerType);
 	ADD("SHA1", &SHA1Type);
 	return m;
 }

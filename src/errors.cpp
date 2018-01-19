@@ -18,6 +18,7 @@
 		va_end(args); \
 	}
 
+ERROR(IndexError)
 ERROR(IOError)
 ERROR(KeyError)
 ERROR(MemoryError)

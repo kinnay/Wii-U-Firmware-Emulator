@@ -11,59 +11,29 @@ import hardware
 import debug
 
 
-class Alarm:
-	def __init__(self, interval, callback):
-		self.interval = interval
-		self.callback = callback
-		self.timer = interval
-		
-	def update(self, tick):
-		self.timer -= tick
-		if self.timer < 0:
-			self.timer += self.interval
-			self.callback()
-
 class Scheduler:
 	def __init__(self):
+		self.scheduler = pyemu.Scheduler()
+		self.scheduler.add_alarm(1, self.check_interrupts)
 		self.emulators = []
-		self.running = []
-		self.alarms = []
-		self.steps = {}
-		self.current = None
-
+		
 	def add(self, emulator, steps):
-		if not self.current:
-			self.current = emulator
 		self.emulators.append(emulator)
-		self.steps[emulator] = steps
+		self.scheduler.add(emulator.interpreter, steps)
 		
 	def resume(self, emulator):
-		if emulator not in self.running:
-			self.running.append(emulator)
-			
-	def pause(self, emulator):
-		if emulator in self.running:
-			self.running.remove(emulator)
-
-	def run(self):
-		index = 0
-		while True:
-			self.current = self.running[index]
-			self.current.check_interrupts()
-			self.current.interpreter.run(self.steps[self.current])
-
-			for alarm in self.alarms:
-				alarm.update(self.steps[self.current])
-
-			index += 1
-			if index >= len(self.running):
-				index = 0
-				
-	def pc(self):
-		return self.current.debugger.pc()
+		self.scheduler.resume(self.emulators.index(emulator))
 		
+	def run(self): self.scheduler.run()
 	def add_alarm(self, interval, callback):
-		self.alarms.append(Alarm(interval, callback))
+		self.scheduler.add_alarm(interval, callback)
+		
+	def current(self): return self.emulators[self.scheduler.index]
+	def pc(self): return self.current().debugger.pc()
+		
+	def check_interrupts(self):
+		for emulator in self.emulators:
+			emulator.check_interrupts()
 				
 				
 class Emulator:
