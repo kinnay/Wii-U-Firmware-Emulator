@@ -10,7 +10,6 @@ int PPCCore_clear(PPCCoreObj *self) {
 	Py_CLEAR(self->lockMgr);
 	Py_CLEAR(self->sprReadCB);
 	Py_CLEAR(self->sprWriteCB);
-	Py_CLEAR(self->msrWriteCB);
 	Py_CLEAR(self->srReadCB);
 	Py_CLEAR(self->srWriteCB);
 	return 0;
@@ -20,7 +19,6 @@ int PPCCore_traverse(PPCCoreObj *self, visitproc visit, void *arg) {
 	Py_VISIT(self->lockMgr);
 	Py_VISIT(self->sprReadCB);
 	Py_VISIT(self->sprWriteCB);
-	Py_VISIT(self->msrWriteCB);
 	Py_VISIT(self->srReadCB);
 	Py_VISIT(self->srWriteCB);
 	return 0;
@@ -42,7 +40,6 @@ PyObject *PPCCore_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
 		self->lockMgr = NULL;
 		self->sprReadCB = NULL;
 		self->sprWriteCB = NULL;
-		self->msrWriteCB = NULL;
 		self->srReadCB = NULL;
 		self->srWriteCB = NULL;
 	}
@@ -281,36 +278,6 @@ PyObject *PPCCore_onSprWrite(PPCCoreObj *self, PyObject *arg) {
 	Py_RETURN_NONE;
 }
 
-PyObject *PPCCore_onMsrWrite(PPCCoreObj *self, PyObject *arg) {
-	CHECK_INIT(self->object);
-	if (!PyCallable_Check(arg)) {
-		TypeError("Parameter must be callable");
-		return NULL;
-	}
-	
-	Py_INCREF(arg);
-	Py_XDECREF(self->msrWriteCB);
-	self->msrWriteCB = arg;
-	
-	self->object->setMsrWriteCB(
-		[arg] (uint32_t value) {
-			PyObject *args = Py_BuildValue("(I)", value);
-			if (!args) return false;
-			
-			PyObject *result = PyObject_CallObject(arg, args);
-			Py_DECREF(args);
-			
-			if (!result) {
-				return false;
-			}
-			Py_DECREF(result);
-			return true;
-		}
-	);
-	
-	Py_RETURN_NONE;
-}
-
 PyObject *PPCCore_onSrWrite(PPCCoreObj *self, PyObject *arg) {
 	CHECK_INIT(self->object);
 	if (!PyCallable_Check(arg)) {
@@ -390,7 +357,6 @@ PyMethodDef PPCCore_methods[] = {
 	{"trigger_exception", (PyCFunction)PPCCore_triggerException, METH_O, NULL},
 	{"on_spr_read", (PyCFunction)PPCCore_onSprRead, METH_O, NULL},
 	{"on_spr_write", (PyCFunction)PPCCore_onSprWrite, METH_O, NULL},
-	{"on_msr_write", (PyCFunction)PPCCore_onMsrWrite, METH_O, NULL},
 	{"on_sr_read", (PyCFunction)PPCCore_onSrRead, METH_O, NULL},
 	{"on_sr_write", (PyCFunction)PPCCore_onSrWrite, METH_O, NULL},
 	{NULL}

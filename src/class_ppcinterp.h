@@ -19,4 +19,6 @@ class PPCInterpreter : public Interpreter {
 	private:
 	IPhysicalMemory *physmem;
 	bool swapEndian;
+	
+	bool handleMsrWrite(uint32_t value);
 };

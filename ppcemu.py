@@ -147,16 +147,6 @@ class SPRHandler:
 	def handle_iabr(self, addr):
 		if (self.core.msr() & 0x20) >> 5 == self.iabr & 1:
 			raise NotImplementedError("Instruction address breakpoint hit")
-			
-			
-class MSRHandler:
-	def __init__(self, mmu):
-		self.mmu = mmu
-
-	def write(self, value):
-		self.mmu.set_data_translation(value & 0x10)
-		self.mmu.set_instruction_translation(value & 0x20)
-		self.mmu.set_supervisor(not value & 0x4000)
 		
 		
 class ExceptionHandler:
@@ -194,7 +184,6 @@ class PPCEmulator:
 		self.breakpoints = debug.BreakpointHandler(self.interpreter)
 		self.breakpoints.add(0xFFF1AB34, self.handle_log)
 		self.spr_handler = SPRHandler(emulator, self.core, self.virtmem, self.breakpoints)
-		self.msr_handler = MSRHandler(self.virtmem)
 		self.exc_handler = ExceptionHandler(self.core)
 
 		self.interpreter.on_fetch_error(self.exc_handler.handle_isi)
@@ -210,7 +199,6 @@ class PPCEmulator:
 		
 		self.core.on_spr_read(self.spr_handler.read)
 		self.core.on_spr_write(self.spr_handler.write)
-		self.core.on_msr_write(self.msr_handler.write)
 		self.core.on_sr_read(self.virtmem.get_sr)
 		self.core.on_sr_write(self.virtmem.set_sr)
 		

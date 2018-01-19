@@ -124,10 +124,11 @@ class Interpreter {
 	void invalidateICache();
 	void invalidateMMUCache();
 	
-	private:
+	protected:
 	IPhysicalMemory *physmem;
 	IVirtualMemory *virtmem;
 	
+	private:
 	DataErrorCB dataErrorCB;
 	FetchErrorCB fetchErrorCB;
 	

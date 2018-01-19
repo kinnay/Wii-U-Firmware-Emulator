@@ -11,7 +11,6 @@ struct PPCCoreObj {
 	PPCLockObj *lockMgr;
 	PyObject *sprReadCB;
 	PyObject *sprWriteCB;
-	PyObject *msrWriteCB;
 	PyObject *srReadCB;
 	PyObject *srWriteCB;
 };

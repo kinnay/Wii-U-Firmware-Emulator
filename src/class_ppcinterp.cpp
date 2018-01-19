@@ -4,7 +4,17 @@
 #include "class_ppcinstr.h"
 
 PPCInterpreter::PPCInterpreter(PPCCore *core, IPhysicalMemory *physmem, IVirtualMemory *virtmem, bool bigEndian)
-	: Interpreter(physmem, virtmem, bigEndian), core(core) {}
+	: Interpreter(physmem, virtmem, bigEndian), core(core)
+{
+	core->setMsrWriteCB([this](uint32_t value) -> bool { return this->handleMsrWrite(value); });
+}
+
+bool PPCInterpreter::handleMsrWrite(uint32_t value) {
+	virtmem->setDataTranslation(value & 0x10);
+	virtmem->setInstructionTranslation(value & 0x20);
+	virtmem->setSupervisorMode(!(value & 0x4000));
+	return true;
+}
 
 bool PPCInterpreter::step() {
 	PPCInstruction instr;
