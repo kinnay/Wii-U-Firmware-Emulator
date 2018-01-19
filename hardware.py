@@ -1980,6 +1980,14 @@ class LatteController:
 
 	def read(self, addr):
 		if addr == LT_TIMER: return self.timer
+		elif LT_IRQ_PPC0_START <= addr < LT_IRQ_PPC0_END: return self.irq_ppc[0].read(addr - LT_IRQ_PPC0_START)
+		elif LT_IRQ_PPC1_START <= addr < LT_IRQ_PPC1_END: return self.irq_ppc[1].read(addr - LT_IRQ_PPC1_START)
+		elif LT_IRQ_PPC2_START <= addr < LT_IRQ_PPC2_END: return self.irq_ppc[2].read(addr - LT_IRQ_PPC2_START)
+		elif LT_IRQ_ARM_START <= addr < LT_IRQ_ARM_END: return self.irq_arm.read(addr - LT_IRQ_ARM_START)
+		elif LT_IPC_PPC0_START <= addr < LT_IPC_PPC0_END: return self.ipc[0].read(addr - LT_IPC_PPC0_START)
+		elif LT_IPC_PPC1_START <= addr < LT_IPC_PPC1_END: return self.ipc[1].read(addr - LT_IPC_PPC1_START)
+		elif LT_IPC_PPC2_START <= addr < LT_IPC_PPC2_END: return self.ipc[2].read(addr - LT_IPC_PPC2_START)
+
 		elif addr == LT_AHB_WDG_CONFIG: return self.ahb_wdg_config
 		elif addr == LT_ERROR: return self.error
 		elif addr == LT_ERROR_MASK: return self.error_mask
@@ -2003,13 +2011,6 @@ class LatteController:
 		elif addr == LT_OTPDATA: return self.otpdata
 		elif addr == LT_D800204: return self.d800204
 		elif addr == LT_ASICREV_ACR: return HARDWARE_VERSION_ACR
-		elif LT_IPC_PPC0_START <= addr < LT_IPC_PPC0_END: return self.ipc[0].read(addr - LT_IPC_PPC0_START)
-		elif LT_IPC_PPC1_START <= addr < LT_IPC_PPC1_END: return self.ipc[1].read(addr - LT_IPC_PPC1_START)
-		elif LT_IPC_PPC2_START <= addr < LT_IPC_PPC2_END: return self.ipc[2].read(addr - LT_IPC_PPC2_START)
-		elif LT_IRQ_PPC0_START <= addr < LT_IRQ_PPC0_END: return self.irq_ppc[0].read(addr - LT_IRQ_PPC0_START)
-		elif LT_IRQ_PPC1_START <= addr < LT_IRQ_PPC1_END: return self.irq_ppc[1].read(addr - LT_IRQ_PPC1_START)
-		elif LT_IRQ_PPC2_START <= addr < LT_IRQ_PPC2_END: return self.irq_ppc[2].read(addr - LT_IRQ_PPC2_START)
-		elif LT_IRQ_ARM_START <= addr < LT_IRQ_ARM_END: return self.irq_arm.read(addr - LT_IRQ_ARM_START)
 		elif addr == LT_D800500: return self.d800500
 		elif addr == LT_D800504: return self.d800504
 		elif LT_GPIO2_START <= addr < LT_GPIO2_END: return self.gpio2.read(addr - LT_GPIO2_START)
