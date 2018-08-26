@@ -25,7 +25,8 @@ Using this emulator you can actually see what IOSU and the PowerPC kernel/loader
 | select &lt;index&gt; | Select a processor to debug: 0=ARM, 1-3=PPC cores |
 | break add/del &lt;address&gt; | Add/remove breakpoint |
 | watch add/del read/write &lt;address&gt; | Add/remove memory read/write watchpoint |
-| read phys/virt &lt;address&gt; &lt;length&gt; | Read and print memory with optional address translation |
+| read phys/virt &lt;address&gt; &lt;length&gt; | Read memory and print to console |
+| dump phys/virt &lt;address&gt; &lt;length&gt; &lt;filename&gt; | Dump memory to file |
 | translate &lt;address&gt; (&lt;type&gt;) | Translate address with optional type: 0=code, 1=data read (default), 2=data write |
 | getreg &lt;reg&gt; | Print general purpose register |
 | setreg &lt;reg&gt; &lt;value&gt; | Change general purpose register |
