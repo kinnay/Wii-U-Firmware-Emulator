@@ -498,6 +498,7 @@ class DebugShell:
 			"break": Command(2, 2, self.breakp, "break add/del <address>"),
 			"watch": Command(3, 3, self.watch, "watch add/del read/write <address>"),
 			"read": Command(3, 3, self.read, "read phys/virt <address> <length>"),
+			"dump": Command(4, 4, self.dump, "dump phys/virt <address> <length> <filename>"),
 			"translate": Command(1, 2, self.translate, "translate <address> (type)"),
 			"getreg": Command(1, 1, self.getreg, "getreg <reg>"),
 			"setreg": Command(2, 2, self.setreg, "setreg <reg> <value>"),
@@ -622,6 +623,15 @@ class DebugShell:
 		print(data.hex())
 		if is_printable(data):
 			print(data.decode("ascii"))
+			
+	def dump(self, type, address, length, filename):
+		address = self.eval(address)
+		if type == "virt":
+			address = self.current().virtmem.translate(address)
+
+		data = self.current().physmem.read(address, self.eval(length))
+		with open(filename, "wb") as f:
+			f.write(data)
 
 	def translate(self, address, type=pyemu.IVirtualMemory.DATA_READ):
 		addr = self.current().virtmem.translate(self.eval(address), type)

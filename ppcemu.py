@@ -210,7 +210,7 @@ class PPCEmulator:
 		
 	def handle_log(self, addr):
 		data = self.physmem.read(self.core.reg(6), self.core.reg(7)).decode("ascii")
-		self.logger.write(data)
+		self.logger.write(data.strip("\0"))
 		
 	def update_timer(self):
 		self.core.settb((self.core.tb() + 2000) & (0xFFFFFFFFFFFFFFFF))
