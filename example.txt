@@ -1,0 +1,1831 @@
+ARM> region starting at virtual address 0xffff0000:
+ARM>    size    = 0x00010000
+ARM>    paddr   = 0xffff0000
+ARM>    domain  = 0x00000000
+ARM>    attributes: Kernel-Only, cached
+ARM> region starting at virtual address 0x08120000:
+ARM>    size    = 0x000a0000
+ARM>    paddr   = 0x08120000
+ARM>    domain  = 0x00000000
+ARM>    attributes: Kernel-Only, cached
+ARM> region starting at virtual address 0x1d000000:
+ARM>    size    = 0x02b00000
+ARM>    paddr   = 0x1d000000
+ARM>    domain  = 0x00000000
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x08000000:
+ARM>    size    = 0x00100000
+ARM>    paddr   = 0x08000000
+ARM>    domain  = 0x0000000f
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x08100000:
+ARM>    size    = 0x00020000
+ARM>    paddr   = 0x08100000
+ARM>    domain  = 0x00000000
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x00000000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x00000000
+ARM>    domain  = 0x00000000
+ARM>    attributes: Kernel-Only, cached
+ARM> region starting at virtual address 0x00001000:
+ARM>    size    = 0x01fff000
+ARM>    paddr   = 0x00001000
+ARM>    domain  = 0x00000000
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x14000000:
+ARM>    size    = 0x09000000
+ARM>    paddr   = 0x14000000
+ARM>    domain  = 0x00000000
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x28000000:
+ARM>    size    = 0xa8000000
+ARM>    paddr   = 0x28000000
+ARM>    domain  = 0x00000000
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x28000000:
+ARM>    size    = 0xa8000000
+ARM>    paddr   = 0x28000000
+ARM>    domain  = 0x00000000
+ARM>    attributes: Read/Write, cached
+ARM> IOS_KERNEL: Built 07/28/15 19:27:01, SRAM Utilization 91%, MEM Utilization 90%.
+ARM> region starting at virtual address 0x05000000:
+ARM>    size    = 0x0005a000
+ARM>    paddr   = 0x081c0000
+ARM>    domain  = 0x00000001
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0x05060000:
+ARM>    size    = 0x00010000
+ARM>    paddr   = 0x08220000
+ARM>    domain  = 0x00000001
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0x05070000:
+ARM>    size    = 0x00004000
+ARM>    paddr   = 0x08230000
+ARM>    domain  = 0x00000001
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x05074000:
+ARM>    size    = 0x00049000
+ARM>    paddr   = 0x08234000
+ARM>    domain  = 0x00000001
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x04000000:
+ARM>    size    = 0x00018000
+ARM>    paddr   = 0x08280000
+ARM>    domain  = 0x00000003
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0x04020000:
+ARM>    size    = 0x00004000
+ARM>    paddr   = 0x082a0000
+ARM>    domain  = 0x00000003
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0x04024000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x082a4000
+ARM>    domain  = 0x00000003
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x04025000:
+ARM>    size    = 0x0000a000
+ARM>    paddr   = 0x082a5000
+ARM>    domain  = 0x00000003
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe7000000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x082c0000
+ARM>    domain  = 0x00000002
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x10000000:
+ARM>    size    = 0x00100000
+ARM>    paddr   = 0x10000000
+ARM>    domain  = 0x00000001
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x10100000:
+ARM>    size    = 0x00032000
+ARM>    paddr   = 0x10100000
+ARM>    domain  = 0x00000004
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0x10140000:
+ARM>    size    = 0x00005000
+ARM>    paddr   = 0x10140000
+ARM>    domain  = 0x00000004
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0x10145000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x10145000
+ARM>    domain  = 0x00000004
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x10146000:
+ARM>    size    = 0x00380000
+ARM>    paddr   = 0x10146000
+ARM>    domain  = 0x00000004
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x10700000:
+ARM>    size    = 0x000f9000
+ARM>    paddr   = 0x10700000
+ARM>    domain  = 0x00000005
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0x10800000:
+ARM>    size    = 0x00034000
+ARM>    paddr   = 0x10800000
+ARM>    domain  = 0x00000005
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0x10834000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x10834000
+ARM>    domain  = 0x00000005
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x10835000:
+ARM>    size    = 0x01407000
+ARM>    paddr   = 0x10835000
+ARM>    domain  = 0x00000005
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x11f00000:
+ARM>    size    = 0x00086000
+ARM>    paddr   = 0x11f00000
+ARM>    domain  = 0x00000006
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xd1f00000:
+ARM>    size    = 0x00086000
+ARM>    paddr   = 0x11f00000
+ARM>    domain  = 0x00000006
+ARM>    attributes: Read-Only, un-cached
+ARM> region starting at virtual address 0x11fc0000:
+ARM>    size    = 0x00015000
+ARM>    paddr   = 0x11fc0000
+ARM>    domain  = 0x00000006
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xd1fc0000:
+ARM>    size    = 0x00015000
+ARM>    paddr   = 0x11fc0000
+ARM>    domain  = 0x00000006
+ARM>    attributes: Read-Only, un-cached
+ARM> region starting at virtual address 0x11fd5000:
+ARM>    size    = 0x00024000
+ARM>    paddr   = 0x11fd5000
+ARM>    domain  = 0x00000006
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xd1fd5000:
+ARM>    size    = 0x00024000
+ARM>    paddr   = 0x11fd5000
+ARM>    domain  = 0x00000006
+ARM>    attributes: Read/Write, un-cached
+ARM> region starting at virtual address 0x11ff9000:
+ARM>    size    = 0x00160000
+ARM>    paddr   = 0x11ff9000
+ARM>    domain  = 0x00000006
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xd1ff9000:
+ARM>    size    = 0x00160000
+ARM>    paddr   = 0x11ff9000
+ARM>    domain  = 0x00000006
+ARM>    attributes: Read/Write, un-cached
+ARM> region starting at virtual address 0x12300000:
+ARM>    size    = 0x00132000
+ARM>    paddr   = 0x12300000
+ARM>    domain  = 0x00000007
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0x12440000:
+ARM>    size    = 0x00029000
+ARM>    paddr   = 0x12440000
+ARM>    domain  = 0x00000007
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0x12469000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x12469000
+ARM>    domain  = 0x00000007
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x1246a000:
+ARM>    size    = 0x0005c000
+ARM>    paddr   = 0x1246a000
+ARM>    domain  = 0x00000007
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x124c6000:
+ARM>    size    = 0x003c8000
+ARM>    paddr   = 0x124c6000
+ARM>    domain  = 0x00000007
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe0000000:
+ARM>    size    = 0x000dc000
+ARM>    paddr   = 0x12900000
+ARM>    domain  = 0x00000008
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe0100000:
+ARM>    size    = 0x00021000
+ARM>    paddr   = 0x12a00000
+ARM>    domain  = 0x00000008
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe0121000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x12a21000
+ARM>    domain  = 0x00000008
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe0122000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x12a22000
+ARM>    domain  = 0x00000008
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe0123000:
+ARM>    size    = 0x0013f000
+ARM>    paddr   = 0x12a23000
+ARM>    domain  = 0x00000008
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe1000000:
+ARM>    size    = 0x00091000
+ARM>    paddr   = 0x12bc0000
+ARM>    domain  = 0x00000009
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe10c0000:
+ARM>    size    = 0x00022000
+ARM>    paddr   = 0x12c80000
+ARM>    domain  = 0x00000009
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe10e2000:
+ARM>    size    = 0x00002000
+ARM>    paddr   = 0x12ca2000
+ARM>    domain  = 0x00000009
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe10e4000:
+ARM>    size    = 0x00205000
+ARM>    paddr   = 0x12ca4000
+ARM>    domain  = 0x00000009
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe2000000:
+ARM>    size    = 0x00266000
+ARM>    paddr   = 0x12ec0000
+ARM>    domain  = 0x0000000b
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe2280000:
+ARM>    size    = 0x00049000
+ARM>    paddr   = 0x13140000
+ARM>    domain  = 0x0000000b
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe22c9000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x13189000
+ARM>    domain  = 0x0000000b
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe22ca000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x1318a000
+ARM>    domain  = 0x0000000b
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe22cb000:
+ARM>    size    = 0x003fe000
+ARM>    paddr   = 0x1318b000
+ARM>    domain  = 0x0000000b
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe3000000:
+ARM>    size    = 0x0016c000
+ARM>    paddr   = 0x13640000
+ARM>    domain  = 0x0000000c
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe3180000:
+ARM>    size    = 0x0002d000
+ARM>    paddr   = 0x137c0000
+ARM>    domain  = 0x0000000c
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe31ad000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x137ed000
+ARM>    domain  = 0x0000000c
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe31ae000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x137ee000
+ARM>    domain  = 0x0000000c
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe31af000:
+ARM>    size    = 0x0014e000
+ARM>    paddr   = 0x137ef000
+ARM>    domain  = 0x0000000c
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe4000000:
+ARM>    size    = 0x0001a000
+ARM>    paddr   = 0x13a40000
+ARM>    domain  = 0x0000000d
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe4040000:
+ARM>    size    = 0x00006000
+ARM>    paddr   = 0x13a80000
+ARM>    domain  = 0x0000000d
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe4046000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x13a86000
+ARM>    domain  = 0x0000000d
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe4047000:
+ARM>    size    = 0x00112000
+ARM>    paddr   = 0x13a87000
+ARM>    domain  = 0x0000000d
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe5000000:
+ARM>    size    = 0x00010000
+ARM>    paddr   = 0x13c00000
+ARM>    domain  = 0x0000000a
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe5040000:
+ARM>    size    = 0x00004000
+ARM>    paddr   = 0x13c40000
+ARM>    domain  = 0x0000000a
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe5044000:
+ARM>    size    = 0x00001000
+ARM>    paddr   = 0x13c44000
+ARM>    domain  = 0x0000000a
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe5045000:
+ARM>    size    = 0x0002a000
+ARM>    paddr   = 0x13c45000
+ARM>    domain  = 0x0000000a
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe6000000:
+ARM>    size    = 0x00011000
+ARM>    paddr   = 0x13cc0000
+ARM>    domain  = 0x00000002
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe6040000:
+ARM>    size    = 0x00002000
+ARM>    paddr   = 0x13d00000
+ARM>    domain  = 0x00000002
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0xe6042000:
+ARM>    size    = 0x00005000
+ARM>    paddr   = 0x13d02000
+ARM>    domain  = 0x00000002
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xe6047000:
+ARM>    size    = 0x00002000
+ARM>    paddr   = 0x13d07000
+ARM>    domain  = 0x00000002
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x05100000:
+ARM>    size    = 0x00016000
+ARM>    paddr   = 0x13d80000
+ARM>    domain  = 0x00000001
+ARM>    attributes: Read-Only, cached
+ARM> region starting at virtual address 0x1fb00000:
+ARM>    size    = 0x00300000
+ARM>    paddr   = 0x1fb00000
+ARM>    domain  = 0x00000007
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x1fe00000:
+ARM>    size    = 0x00015000
+ARM>    paddr   = 0x1fe00000
+ARM>    domain  = 0x00000001
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x1fe40000:
+ARM>    size    = 0x001c0000
+ARM>    paddr   = 0x1fe40000
+ARM>    domain  = 0x00000001
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0x20000000:
+ARM>    size    = 0x08000000
+ARM>    paddr   = 0x20000000
+ARM>    domain  = 0x00000005
+ARM>    attributes: Read/Write, cached
+ARM> region starting at virtual address 0xeff00000:
+ARM>    size    = 0x00008000
+ARM>    paddr   = 0xfff00000
+ARM>    domain  = 0x00000001
+ARM>    attributes: Read/Write, cached
+ARM> Creating main() thread for IOS-BSP:
+ARM>    priority=125    stackSize=4096  stackPtr=0xe7000000     entry=0xe600f848        memPermMask=0x00100000
+ARM> IOS-BSP: Built 07/28/15 19:23:58, Image Utilization 37%.
+ARM> Creating main() thread for IOS-MCP:
+ARM>    priority=124    stackSize=8192  stackPtr=0x050ba4a0     entry=0x05056718        memPermMask=0x000c0030
+ARM> Creating main() thread for IOS-CRYPTO:
+ARM>    priority=123    stackSize=4096  stackPtr=0x04028628     entry=0x04015ea4        memPermMask=0x000c0030
+ARM> Creating main() thread for IOS-USB:
+ARM>    priority=107    stackSize=16384 stackPtr=0x104b92c8     entry=0x1012e9e8        memPermMask=0x00038600
+ARM> Creating main() thread for IOS-FS:
+ARM>    priority=85     stackSize=16384 stackPtr=0x1114117c     entry=0x107f6830        memPermMask=0x001c5870
+ARM> Creating main() thread for IOS-PAD:
+ARM>    priority=117    stackSize=8192  stackPtr=0x1214ab4c     entry=0x11f82d94        memPermMask=0x00008180
+ARM> Creating main() thread for IOS-NET:
+ARM>    priority=80     stackSize=16384 stackPtr=0x12804498     entry=0x123e4174        memPermMask=0x00002000
+ARM> Creating main() thread for IOS-ACP:
+ARM>    priority=50     stackSize=16384 stackPtr=0xe0125390     entry=0xe00d8290        memPermMask=0x00000000
+ARM> Creating main() thread for IOS-NSEC:
+ARM>    priority=50     stackSize=4096  stackPtr=0xe12e71a4     entry=0xe108e860        memPermMask=0x00000000
+ARM> Creating main() thread for IOS-AUXIL:
+ARM>    priority=70     stackSize=16384 stackPtr=0xe506a900     entry=0xe500d720        memPermMask=0x00000000
+ARM> Creating main() thread for IOS-NIM-BOSS:
+ARM>    priority=50     stackSize=16384 stackPtr=0xe22cb000     entry=0xe22602fc        memPermMask=0x00000000
+ARM> Creating main() thread for IOS-FPD:
+ARM>    priority=50     stackSize=16384 stackPtr=0xe31af000     entry=0xe3166b34        memPermMask=0x00000000
+ARM> Creating main() thread for IOS-TEST:
+ARM>    priority=75     stackSize=8192  stackPtr=0xe415623c     entry=0xe40168a4        memPermMask=0x00000000
+ARM> IOS-MCP: Built 07/28/15 19:23:58, Image Utilization 98%.
+ARM> IOS-CRYPTO: Built 07/28/15 19:23:58, Image Utilization 72%.
+ARM> CRYPTO Open, clientPid=1 nodeId 00000000 titleId 0000000000000000 perm=0xffffffff
+ARM> IOSC Initialize -- IOSC library build time 09/27/12 19:28:40
+ARM> IOS-PAD: Built 07/28/15 19:23:58, Image Utilization 58%.
+ARM> IOS-USB: Built 07/28/15 19:23:58, Image Utilization 62%.
+ARM> IOS-FS: Built 07/28/15 19:23:58, Image Utilization 88%.
+ARM> MMC(0): initializing Controller 0, Slot 0 base 0x0D070000
+ARM> MMC(3): initializing Controller 2, Slot 0 base 0x0D100000
+ARM> MMC(4): initializing Controller 3, Slot 0 base 0x0D110000
+ARM> IOS-NET: Built 07/28/15 19:23:58, Image Utilization 92%.
+ARM> USB Trace: Activating root hubs @ uptime 1.115 s with options 0x40000.
+ARM> UHS0 Trace: DevFsm(EHCI-0/L0/P0): Creating device, speed=HIGH.
+ARM> UHS0 Trace: DevFsm(OHCI-0:0/L0/P0): Creating device, speed=FULL.
+ARM> USB Info: UhsServerAddHc 0 OK.
+ARM> UHS0 Trace: DevFsm(EHCI-1/L0/P0): Creating device, speed=HIGH.
+ARM> UHS0 Trace: DevFsm(OHCI-1:0/L0/P0): Creating device, speed=FULL.
+ARM> USB Info: UhsServerAddHc 1 OK.
+ARM> UHS0 Trace: Powering on root hub group 0.
+ARM> UHS0 Trace: Powering on root hub group 1.
+ARM> AHCI_MGR Trace: Turning on drive power.
+ARM> AHCI_MGR Trace: Initializing phy.
+ARM> AHCI_DRV Trace: Initiating cold open.
+ARM> AHCI_DRV Trace: Resetting HBA.
+ARM> AHCI_DRV Trace: HBA Reset OK.
+ARM> AHCI_DRV Trace: link ready, speed is GEN 0.
+ARM> AHCI_DRV Trace: device ready.
+ARM> AHCI_DRV Trace: port operational.
+ARM> IOS-TEST: Built 07/28/15 19:23:58, Image Utilization 76%.
+ARM> TEST Info: localProcessHeap OK.
+ARM> TEST Info: crossProcessHeap OK.
+ARM> IOS-AUXIL: Built 07/28/15 19:23:58, Image Utilization 57%.
+ARM> AUXIL Info: localProcessHeap OK.
+ARM> AUXIL Info: crossProcessHeap OK.
+ARM> AUXIL Info: Net OK.
+ARM> IOS-ACP: Built 07/28/15 19:23:58, Image Utilization 86%.
+ARM> IOS-NSEC: Built 07/28/15 19:23:58, Image Utilization 96%.
+ARM> IOS-NIM-BOSS: Built 07/28/15 19:23:58, Image Utilization 90%.
+ARM> IOS-FPD: Built 07/28/15 19:23:58, Image Utilization 74%.
+ARM> act_main.cpp,Start,174CRYPTO Open, clientPid=5 nodeId 00000000 titleId 00000000100000f1 perm=0xffffffff
+ARM> ISFS: fs_fat.c(545)FAT INFO (ch WUP): slot 63 / seq 2053377 (Each FAT slot has been updated 32084 times in avr)
+ARM> ISFS: fs_fat.c(545)FAT INFO (ch RVL Compat): slot 6 / seq 303832 (Each FAT slot has been updated 18989 times in avr)
+ARM> ISFS: fs_ops.c(2215)FAT block entries check start
+ARM> ISFS: fs_ops.c(2292)FAT block entries check finished.
+ARM> ISFS: fs_ops.c(2215)FAT block entries check start
+ARM> ISFS: fs_ops.c(2292)FAT block entries check finished.
+ARM> [ES] checkOwnedTitleUpdateFlags: no delete in progress
+ARM> [ES] checkOwnedTitleUpdateFlags: no import in progress
+ARM> ISFS: fs_ops.c(3733) Can not change the owner Id of a non-empty file
+ARM> ISFS: fs_ops.c(6719) Could not set attribute, rc=-524312
+ARM> UHS0 Trace: HubPort(OHCI-0:0/L00/PXX/AXX)-PX: Resetting root hub.
+ARM> UHS0 Trace: HubPort(OHCI-1:0/L00/PXX/AXX)-PX: Resetting root hub.
+ARM> $IOSVersion: OHCI1: 07/28/15 19:23:17 $
+ARM> OHCI1 NOT READY: waiting for OhciPath=/dev/usb/oh1/57e/305
+ARM> OHCI1 NOT READY: waiting for OhciPath=/dev/usb/oh1/57e/305
+ARM> OHCI1: USB device at port 0, vid: 0x057e pid: 0x0305
+ARM> __ohci_xfer_buildIntrBlkReq(@608)INVALID idx <= 0
+ARM> __ohci_xfer_buildIntrBlkReq(@608)INVALID idx <= 0
+DSI exception: FE000000 at FFF1A050
+DSI exception: F5FFF004 at FFE00980
+DSI exception: FE600000 at FFF09D1C
+PPC> COSREPORT: Set level:7 from syslog level
+PPC>
+PPC> ----------------------------------------------- BPERF: (0/54421735) PPC Init.
+PPC> Cafe OS SDK Version 2.13.01 Build 68939 Branch sdk_2_13
+PPC> PPC
+PPC> NDEBUG
+PPC>  Kernel Build date - Jul 28 2015 19:55:58
+PPC> BUILT AS OS_VERSION_MAJOR 000500101000800A MINOR 0x3D56
+PPC> core=1
+PPC> COLD BOOT
+PPC> SOFT INTERRUPT MODE
+PPC> -----------------------------------------------
+PPC>
+ARM> UHS1 Trace: DevFsm(EHCI-2/L0/P0): Creating device, speed=HIGH.
+ARM> UHS1 Trace: DevFsm(OHCI-2:0/L0/P0): Creating device, speed=FULL.
+PPC> KiCblRegisterBlocks() completed with status 0:-4.
+ARM> CRYPTO Open, clientPid=1 nodeId 00000000 titleId 0000000000000000 perm=0xffffffff
+PPC> PROD Mode - don't even try to load kdebug.elf
+PPC> title id: 5001010040200, app type 90000001
+PPC>
+PPC> ---------------------------------------
+PPC> OS VERSION ID     0x000500101000400A
+PPC> MASTER TITLE ON
+PPC> FLASH
+PPC> ---------------------------------------
+PPC>
+DSI exception: F6000004 at FFF107D4
+ARM> Dongle Host Driver, version 5.91.153.64
+ARM> IOPOS board:11  asic:21/cafe0060  clk:248625000/1942382
+ARM> Host Controller version 1.0, Vendor Revision: 0x00
+ARM> sdstd_set_dma_mode: SDMA not supported by controller.
+ARM> sdstd_start_clock:now, divided clk is: 0 Hz
+ARM> Need to determine divisor for 0 MHz clocks
+ARM> Consult SD Host Controller Spec: Clock Control Register
+ARM> sdstd_start_power: sdstd_start_clock failed
+ARM> sdstd_start_power failed
+ARM> Host Controller version 1.0, Vendor Revision: 0x00
+ARM> sdstd_start_clock:now, divided clk is: 0 Hz
+ARM> Need to determine divisor for 0 MHz clocks
+ARM> Consult SD Host Controller Spec: Clock Control Register
+ARM> sdstd_start_power: sdstd_start_clock failed
+ARM> sdstd_start_power failed
+ARM> sdioh_attach:driver_init() failed()
+ARM> bcmsdh_probe failed
+ARM> Exiting owing to error
+ARM> AUXIL Info: resumed.
+ARM> [ACP]INFO:mxmlAcpPortInitialize:81: Create local heap 37 for mxml.
+DSI exception: FB000000 at FFF09BFC
+PPC> Init&Pre PhysAlloc Start
+DSI exception: FE000014 at FFF19D04
+PPC> Init&Pre PhysAlloc End
+PPC> Init&Pre InitAddrSp Start
+PPC> Init&Pre InitAddrSp End, ret=0
+PPC> Init&Pre memset Start
+DSI exception: FE000014 at FFF19D04
+PPC> Init&Pre memset Done
+PPC> DIAG:+KiRPLLoaderSetup
+DSI exception: 01000000 at FFF09BFC
+PPC> DIAG:-KiRPLLoaderSetup: before no-return call to KiLoadContext (0xEFE09400) (0x01003FFC)
+DSI exception: FA000018 at 0101205C
+PPC> LOADER_Init
+PPC> LOADER_Init  LoadINIT memset compl, sizeof(RPL_STARTINFO)=40.
+PPC> LOADER_Init  LoadINIT TnyHeapSetup.
+PPC> LiInitSharedForProcess
+PPC> LiInitSharedForAll
+PPC> sLoadOneShared  Loading Shared RPL coreinit.rpl.
+PPC> sLoadOneShared  LiSyncBnce start coreinit.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=coreinit.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end coreinit.rpl.
+ARM> CRYPTO Open, clientPid=9 nodeId 00000000 titleId 00000000100000f4 perm=0xffffffff
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 311552, WaitTime 38194 mics
+DSI exception: F6000000 at 010117B4
+PPC> sLoadOneShared  LiSetupOneRPL start.
+DSI exception: 10000000 at 01010A18
+ARM> [NET] Init: Nintendo Wii U
+ARM> USBETH Trace: Created interface 100.
+ARM> IP address of wl0 : 0.0.0.0
+ARM> CRYPTO Open, clientPid=12 nodeId 00000000 titleId 00000000100000f7 perm=0xffffffff
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> LiInitSharedForAll  LiInitSharedForAll
+PPC> sLoadOneShared  Loading Shared RPL tve.rpl.
+PPC> sLoadOneShared  LiSyncBnce start tve.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=tve.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end tve.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 82432, WaitTime 74167 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL nsysccr.rpl.
+PPC> sLoadOneShared  LiSyncBnce start nsysccr.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=nsysccr.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end nsysccr.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 18624, WaitTime 19692 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL nsysnet.rpl.
+PPC> sLoadOneShared  LiSyncBnce start nsysnet.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=nsysnet.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end nsysnet.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 38784, WaitTime 12581 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL uvc.rpl.
+PPC> sLoadOneShared  LiSyncBnce start uvc.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=uvc.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end uvc.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 7744, WaitTime 8559 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL tcl.rpl.
+PPC> sLoadOneShared  LiSyncBnce start tcl.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=tcl.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end tcl.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 61824, WaitTime 10489 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL nn_pdm.rpl.
+PPC> sLoadOneShared  LiSyncBnce start nn_pdm.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=nn_pdm.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end nn_pdm.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 12032, WaitTime 10843 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL dmae.rpl.
+PPC> sLoadOneShared  LiSyncBnce start dmae.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=dmae.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end dmae.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 5760, WaitTime 8398 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL dc.rpl.
+PPC> sLoadOneShared  LiSyncBnce start dc.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=dc.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end dc.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 47552, WaitTime 7336 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL vpadbase.rpl.
+PPC> sLoadOneShared  LiSyncBnce start vpadbase.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=vpadbase.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end vpadbase.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 14080, WaitTime 4054 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL vpad.rpl.
+PPC> sLoadOneShared  LiSyncBnce start vpad.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=vpad.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end vpad.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 33600, WaitTime 19370 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL avm.rpl.
+PPC> sLoadOneShared  LiSyncBnce start avm.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=avm.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end avm.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 45568, WaitTime 8430 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL gx2.rpl.
+PPC> sLoadOneShared  LiSyncBnce start gx2.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=gx2.rpl, aProcId=0, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end gx2.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 275456, WaitTime 24197 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> sLoadOneShared  Loading Shared RPL snd_core.rpl.
+PPC> sLoadOneShared  LiSyncBnce start snd_core.rpl.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=snd_core.rpl, aProcId=0, aFileType=1, HunkBytes=0
+ARM> UHS1 Trace: HubPort(OHCI-2:0/L00/PXX/AXX)-PX: Resetting root hub.
+PPC> LiBounceOneChunk
+PPC> sLoadOneShared  LiSyncBnce end snd_core.rpl.
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 112448, WaitTime 11326 mics
+PPC> sLoadOneShared  LiSetupOneRPL start.
+PPC> sLoadOneShared  LiSetupOneRPL end.
+PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+PPC> sLoadOneShared  LiFixupRelocOneRPL end.
+PPC> LiInitSharedForAll  LiInitSharedForAll
+ARM> [ACP]INFO:ClearApplicationBoxCacheForBoss:6353: ClearApplicationBoxCacheForBoss failed due to result.GetValue() = -1607403008
+PPC> LiInitSharedForAll
+PPC> LiInitSharedForProcess
+PPC> LOADER_Init  LoadINIT ShrForPro ret=0.
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=root.rpx, aProcId=1, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> LOADER_Init  LoadINIT BncLoad ret, pName=root.rpx, mProcId=1, &pLoaded=0xEFE05764, err=0.
+ARM> resetting DRH
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 1719552, WaitTime 91253 mics
+PPC> LOADER_Init  LoadINIT Setup1RPL ret, mpName=root, aProcId=1, mpCodeHeapTracking=268425152, err=0.
+PPC> LiLoadCoreIntoProcess
+PPC> LiLoadCoreIntoProcess
+PPC> LOADER_Init  LoadINIT LdCrIntoPc ret, mpName=root, aProcId=1, mpCodeHeapTracking=268425152, err=0.
+PPC> LOADER_Init
+PPC> DIAG:+KiProcess_FinishInitAndPreload
+PPC> KiCblRegisterBlocks() completed with status 0:-4.
+DSI exception: F8000000 at FFF09D1C
+PPC> Kernel is loading shared data...
+DSI exception: E0000000 at FFF09D1C
+DSI exception: F4000000 at FFF09D1C
+DSI exception: 106A73B8 at FFF08178
+PPC> DIAG:-KiProcess_FinishInitAndPreload: before no-return call to KiInitKernelFinish
+DSI exception: FE000014 at FFF19D04
+PPC> DIAG:+KiInitKernelFinish
+PPC> VVVVVVV----- PPC Kernel Waiting -----VVVVVVV
+PPC> ^^^^^^^----- PPC Kernel Release -----^^^^^^^
+PPC> Finished KiInitKernelFinish ff Moving on to Process Launch
+PPC> DIAG:-KiInitKernelFinish: before no-return call to KiProcess_Launch
+PPC>
+PPC> --------------------
+PPC> PROCESS  1 STARTING
+PPC> SYSLOG_LEVEL 7:
+PPC> Warnings, Notices, and Verbose Enabled
+PPC>
+PPC> UserMode Core & Thread Initialization (3 Cores)
+PPC>   Core 1 Complete, Default Thread 0x100457E0
+DSI exception: 106A73A8 at 0101FAFC
+PPC>   Core 0 Complete, MSR 0x00005072, Default Thread 0x10045140
+DSI exception: FE000014 at FFF19D04
+DSI exception: 106AF3A8 at 0101FAFC
+PPC>   Core 2 Complete, MSR 0x00005072, Default Thread 0x10045E80
+DSI exception: FE000014 at FFF19D04
+PPC> Clearing Process MEM2 Arena...
+DSI exception: 11000000 at 01024078
+PPC> MEM2 Arena clear complete, size 23 MB, 19ms
+PPC> RPL_LAYOUT:sysheap,SYSHEAP,start,="0106b3000"
+PPC> RPL_LAYOUT:sysheap,SYSHEAP,end,="0106b8000"
+PPC> RPL_SYSHEAP:Event,Change,Hex Addr,Bytes,Available
+PPC> RPL_SYSHEAP:SYSHEAP START,CREATE,="0106b3000",16384
+PPC> SYSTEM_HEAP:Event,Change,Hex Addr,Bytes,Available
+PPC> SYSTEM_HEAP:SYSHEAP START,CREATE,="0106b3000",16384
+DSI exception: E0000000 at 01024078
+PPC> UserMode OS library build date: Jul 28 2015 19:57:03
+PPC> __AppFlags: 0x00000e00
+PPC>
+PPC> OSBlockThreadsOnExit default for sdk version 21301
+PPC> RPL_SYSHEAP:RPX START,
+PPC> SYSTEM_HEAP:RPX START,
+PPC> SYSTEM_HEAP:0,ALLOC,="0106b3068",-16
+PPC> RPL_SYSHEAP:RPL_NOTIFY_CALLBACK,ALLOC,="0106b3068",-16
+PPC> SYSTEM_HEAP:1,ALLOC,="0106b308c",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b308c",-148
+PPC> SYSTEM_HEAP:2,ALLOC,="0106b6ee0",-288
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6ee0",-288
+PPC> SYSTEM_HEAP:3,ALLOC,="0106b3134",-263
+PPC> RPL_SYSHEAP:RPL_FILE_INFO,ALLOC,="0106b3134",-263
+PPC> SYSTEM_HEAP:4,ALLOC,="0106b3250",-54
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b3250",-54
+DSI exception: FAFCBD00 at 0102AB7C
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6ee0",288
+PPC> SYSTEM_HEAP:0,FREE,="0106b6ee0",0
+DSI exception: F4000000 at 0104B9D0
+DSI exception: E0000000 at 0104B9D0
+DSI exception: 1004F88C at 0104B9F4
+PPC> DEFAULT_HEAP:Event,Change,Hex Addr,Bytes,Available
+DSI exception: FE000014 at FFF19D04
+PPC> DEFAULT_HEAP:DEFAULT HEAP START,CREATE,="0106b8000",24543232
+PPC> SYSTEM_HEAP:5,ALLOC,="0106b329c",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b329c",-148
+PPC> SYSTEM_HEAP:6,ALLOC,="0106b3344",-1
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3344",-1
+PPC> SYSTEM_HEAP:7,ALLOC,="0106b6eb0",-336
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6eb0",-336
+PPC> SYSTEM_HEAP:8,ALLOC,="0106b335c",-254
+PPC> RPL_SYSHEAP:RPL_FILE_INFO,ALLOC,="0106b335c",-254
+PPC> SYSTEM_HEAP:9,ALLOC,="0106b3470",-45
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b3470",-45
+PPC> SYSTEM_HEAP:10,ALLOC,="0106b34b4",-40
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b34b4",-40
+PPC> RPL_SYSHEAP:IMPORT START,nsysnet
+PPC> SYSTEM_HEAP:IMPORT START,nsysnet
+PPC> SYSTEM_HEAP:11,ALLOC,="0106b34f0",-8
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b34f0",-8
+PPC> SYSTEM_HEAP:12,ALLOC,="0106b350c",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b350c",-148
+PPC> SYSTEM_HEAP:13,ALLOC,="0106b35b4",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b35b4",-164
+PPC> SYSTEM_HEAP:14,ALLOC,="0106b6d8c",-272
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6d8c",-272
+PPC> DEFAULT_HEAP:0,ALLOC,="0106b8068",-261
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106b8068",-261
+PPC> RPL_LAYOUT:nsysnet,FILE,start,="0106b8068"
+PPC> RPL_LAYOUT:nsysnet,FILE,end,="0106b816d"
+PPC> SYSTEM_HEAP:15,ALLOC,="0106b366c",-52
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b366c",-52
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b35b4",164
+PPC> SYSTEM_HEAP:1,FREE,="0106b35b4",0
+PPC> SYSTEM_HEAP:16,ALLOC,="0106b35b4",-8
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b35b4",-8
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:17,ALLOC,="0106b35d0",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b35d0",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b35d0",12
+PPC> SYSTEM_HEAP:2,FREE,="0106b35d0",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:18,ALLOC,="0106b35d0",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b35d0",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b35d0",12
+PPC> SYSTEM_HEAP:3,FREE,="0106b35d0",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6d8c",272
+PPC> SYSTEM_HEAP:4,FREE,="0106b6d8c",0
+PPC> RPL_SYSHEAP:IMPORT END,nsysnet
+PPC> SYSTEM_HEAP:IMPORT END,nsysnet
+PPC> RPL_SYSHEAP:IMPORT START,nsysuvd
+PPC> SYSTEM_HEAP:IMPORT START,nsysuvd
+PPC> SYSTEM_HEAP:19,ALLOC,="0106b35d0",-8
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b35d0",-8
+PPC> SYSTEM_HEAP:20,ALLOC,="0106b36b4",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b36b4",-148
+PPC> SYSTEM_HEAP:21,ALLOC,="0106b375c",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b375c",-164
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=nsysuvd.rpl, aProcId=1, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 3328, WaitTime 4923 mics
+PPC> SYSTEM_HEAP:22,ALLOC,="0106b6d9c",-256
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6d9c",-256
+PPC> DEFAULT_HEAP:1,ALLOC,="0106b8184",-261
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106b8184",-261
+PPC> RPL_LAYOUT:nsysuvd,FILE,start,="0106b8184"
+PPC> RPL_LAYOUT:nsysuvd,FILE,end,="0106b8289"
+PPC> SYSTEM_HEAP:23,ALLOC,="0106b35ec",-52
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b35ec",-52
+PPC> DEFAULT_HEAP:2,ALLOC,="0106b82c0",-1280
+PPC> OSDYNLOAD_HEAP:RPL_DATA_AREA,ALLOC,="0106b82c0",-1280
+PPC> DEFAULT_HEAP:3,ALLOC,="0106b87e0",-28480
+PPC> OSDYNLOAD_HEAP:RPL_LOAD_INFO_AREA,ALLOC,="0106b87e0",-28480
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b375c",164
+PPC> SYSTEM_HEAP:5,FREE,="0106b375c",0
+PPC> SYSTEM_HEAP:24,ALLOC,="0106b3634",-8
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b3634",-8
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:25,ALLOC,="0106b375c",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b375c",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b375c",12
+PPC> SYSTEM_HEAP:6,FREE,="0106b375c",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:26,ALLOC,="0106b375c",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b375c",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b375c",12
+PPC> SYSTEM_HEAP:7,FREE,="0106b375c",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6d9c",256
+PPC> SYSTEM_HEAP:8,FREE,="0106b6d9c",0
+PPC> RPL_SYSHEAP:IMPORT END,nsysuvd
+PPC> SYSTEM_HEAP:IMPORT END,nsysuvd
+PPC> RPL_SYSHEAP:IMPORT START,gx2
+PPC> SYSTEM_HEAP:IMPORT START,gx2
+PPC> SYSTEM_HEAP:27,ALLOC,="0106b3650",-4
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3650",-4
+PPC> SYSTEM_HEAP:28,ALLOC,="0106b375c",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b375c",-148
+PPC> SYSTEM_HEAP:29,ALLOC,="0106b3804",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b3804",-164
+PPC> SYSTEM_HEAP:30,ALLOC,="0106b6d5c",-320
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6d5c",-320
+PPC> DEFAULT_HEAP:4,ALLOC,="0106bf734",-249
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106bf734",-249
+PPC> RPL_LAYOUT:gx2,FILE,start,="0106bf734"
+PPC> RPL_LAYOUT:gx2,FILE,end,="0106bf82d"
+PPC> SYSTEM_HEAP:31,ALLOC,="0106b38bc",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b38bc",-40
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b3804",164
+PPC> SYSTEM_HEAP:9,FREE,="0106b3804",0
+PPC> SYSTEM_HEAP:32,ALLOC,="0106b3804",-16
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b3804",-16
+PPC> RPL_SYSHEAP:IMPORT START,avm
+PPC> SYSTEM_HEAP:IMPORT START,avm
+PPC> SYSTEM_HEAP:33,ALLOC,="0106b3828",-4
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3828",-4
+PPC> SYSTEM_HEAP:34,ALLOC,="0106b38f8",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b38f8",-148
+PPC> SYSTEM_HEAP:35,ALLOC,="0106b39a0",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b39a0",-164
+PPC> SYSTEM_HEAP:36,ALLOC,="0106b6bd8",-368
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6bd8",-368
+PPC> DEFAULT_HEAP:5,ALLOC,="0106bf844",-249
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106bf844",-249
+PPC> RPL_LAYOUT:avm,FILE,start,="0106bf844"
+PPC> RPL_LAYOUT:avm,FILE,end,="0106bf93d"
+PPC> SYSTEM_HEAP:37,ALLOC,="0106b3840",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b3840",-40
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b39a0",164
+PPC> SYSTEM_HEAP:10,FREE,="0106b39a0",0
+PPC> SYSTEM_HEAP:38,ALLOC,="0106b387c",-32
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b387c",-32
+PPC> RPL_SYSHEAP:IMPORT START,tcl
+PPC> SYSTEM_HEAP:IMPORT START,tcl
+PPC> SYSTEM_HEAP:39,ALLOC,="0106b39a0",-4
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b39a0",-4
+PPC> SYSTEM_HEAP:40,ALLOC,="0106b39b8",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b39b8",-148
+PPC> SYSTEM_HEAP:41,ALLOC,="0106b3a60",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b3a60",-164
+PPC> SYSTEM_HEAP:42,ALLOC,="0106b6aa4",-288
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6aa4",-288
+PPC> DEFAULT_HEAP:6,ALLOC,="0106bf954",-249
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106bf954",-249
+PPC> RPL_LAYOUT:tcl,FILE,start,="0106bf954"
+PPC> RPL_LAYOUT:tcl,FILE,end,="0106bfa4d"
+PPC> SYSTEM_HEAP:43,ALLOC,="0106b3b18",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b3b18",-40
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b3a60",164
+PPC> SYSTEM_HEAP:11,FREE,="0106b3a60",0
+PPC> SYSTEM_HEAP:44,ALLOC,="0106b3a60",-8
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b3a60",-8
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:45,ALLOC,="0106b3a7c",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3a7c",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b3a7c",12
+PPC> SYSTEM_HEAP:12,FREE,="0106b3a7c",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:46,ALLOC,="0106b3a7c",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3a7c",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b3a7c",12
+PPC> SYSTEM_HEAP:13,FREE,="0106b3a7c",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6aa4",288
+PPC> SYSTEM_HEAP:14,FREE,="0106b6aa4",0
+PPC> RPL_SYSHEAP:IMPORT END,tcl
+PPC> SYSTEM_HEAP:IMPORT END,tcl
+PPC> RPL_SYSHEAP:IMPORT START,tve
+PPC> SYSTEM_HEAP:IMPORT START,tve
+PPC> SYSTEM_HEAP:47,ALLOC,="0106b3a7c",-4
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3a7c",-4
+PPC> SYSTEM_HEAP:48,ALLOC,="0106b3b54",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b3b54",-148
+PPC> SYSTEM_HEAP:49,ALLOC,="0106b3bfc",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b3bfc",-164
+PPC> SYSTEM_HEAP:50,ALLOC,="0106b6ab4",-272
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6ab4",-272
+PPC> DEFAULT_HEAP:7,ALLOC,="0106bfa64",-249
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106bfa64",-249
+PPC> RPL_LAYOUT:tve,FILE,start,="0106bfa64"
+PPC> RPL_LAYOUT:tve,FILE,end,="0106bfb5d"
+PPC> SYSTEM_HEAP:51,ALLOC,="0106b3a94",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b3a94",-40
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b3bfc",164
+PPC> SYSTEM_HEAP:15,FREE,="0106b3bfc",0
+PPC> SYSTEM_HEAP:52,ALLOC,="0106b3ad0",-8
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b3ad0",-8
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:53,ALLOC,="0106b3aec",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3aec",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b3aec",12
+PPC> SYSTEM_HEAP:16,FREE,="0106b3aec",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:54,ALLOC,="0106b3aec",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3aec",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b3aec",12
+PPC> SYSTEM_HEAP:17,FREE,="0106b3aec",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6ab4",272
+PPC> SYSTEM_HEAP:18,FREE,="0106b6ab4",0
+PPC> RPL_SYSHEAP:IMPORT END,tve
+PPC> SYSTEM_HEAP:IMPORT END,tve
+PPC> RPL_SYSHEAP:IMPORT START,dc
+PPC> SYSTEM_HEAP:IMPORT START,dc
+PPC> SYSTEM_HEAP:55,ALLOC,="0106b3aec",-4
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3aec",-4
+PPC> SYSTEM_HEAP:56,ALLOC,="0106b3bfc",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b3bfc",-148
+PPC> SYSTEM_HEAP:57,ALLOC,="0106b3ca4",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b3ca4",-164
+PPC> SYSTEM_HEAP:58,ALLOC,="0106b6ab4",-272
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6ab4",-272
+PPC> DEFAULT_HEAP:8,ALLOC,="0106bfb74",-247
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106bfb74",-247
+PPC> RPL_LAYOUT:dc,FILE,start,="0106bfb74"
+PPC> RPL_LAYOUT:dc,FILE,end,="0106bfc6b"
+PPC> SYSTEM_HEAP:59,ALLOC,="0106b3d5c",-38
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b3d5c",-38
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b3ca4",164
+PPC> SYSTEM_HEAP:19,FREE,="0106b3ca4",0
+PPC> SYSTEM_HEAP:60,ALLOC,="0106b3ca4",-12
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b3ca4",-12
+PPC> RPL_SYSHEAP:IMPORT START,tcl
+PPC> SYSTEM_HEAP:IMPORT START,tcl
+PPC> SYSTEM_HEAP:61,ALLOC,="0106b3cc4",-4
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3cc4",-4
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b3cc4",4
+PPC> SYSTEM_HEAP:20,FREE,="0106b3cc4",0
+PPC> RPL_SYSHEAP:IMPORT END,tcl
+PPC> SYSTEM_HEAP:IMPORT END,tcl
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:62,ALLOC,="0106b3cc4",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3cc4",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b3cc4",12
+PPC> SYSTEM_HEAP:21,FREE,="0106b3cc4",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:63,ALLOC,="0106b3cc4",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3cc4",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b3cc4",12
+PPC> SYSTEM_HEAP:22,FREE,="0106b3cc4",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6ab4",272
+PPC> SYSTEM_HEAP:23,FREE,="0106b6ab4",0
+PPC> RPL_SYSHEAP:IMPORT END,dc
+PPC> SYSTEM_HEAP:IMPORT END,dc
+PPC> RPL_SYSHEAP:IMPORT START,uvc
+PPC> SYSTEM_HEAP:IMPORT START,uvc
+PPC> SYSTEM_HEAP:64,ALLOC,="0106b3cc4",-4
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3cc4",-4
+PPC> SYSTEM_HEAP:65,ALLOC,="0106b3d98",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b3d98",-148
+PPC> SYSTEM_HEAP:66,ALLOC,="0106b3e40",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b3e40",-164
+PPC> SYSTEM_HEAP:67,ALLOC,="0106b6ac4",-256
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6ac4",-256
+PPC> DEFAULT_HEAP:9,ALLOC,="0106bfc80",-250
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106bfc80",-250
+PPC> RPL_LAYOUT:uvc,FILE,start,="0106bfc80"
+PPC> RPL_LAYOUT:uvc,FILE,end,="0106bfd7a"
+PPC> SYSTEM_HEAP:68,ALLOC,="0106b3cdc",-41
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b3cdc",-41
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b3e40",164
+PPC> SYSTEM_HEAP:24,FREE,="0106b3e40",0
+PPC> SYSTEM_HEAP:69,ALLOC,="0106b3d1c",-8
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b3d1c",-8
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:70,ALLOC,="0106b3d38",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3d38",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b3d38",12
+PPC> SYSTEM_HEAP:25,FREE,="0106b3d38",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:71,ALLOC,="0106b3d38",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3d38",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b3d38",12
+PPC> SYSTEM_HEAP:26,FREE,="0106b3d38",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6ac4",256
+PPC> SYSTEM_HEAP:27,FREE,="0106b6ac4",0
+PPC> RPL_SYSHEAP:IMPORT END,uvc
+PPC> SYSTEM_HEAP:IMPORT END,uvc
+PPC> RPL_SYSHEAP:IMPORT START,vpad
+PPC> SYSTEM_HEAP:IMPORT START,vpad
+PPC> SYSTEM_HEAP:72,ALLOC,="0106b3d38",-8
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3d38",-8
+PPC> SYSTEM_HEAP:73,ALLOC,="0106b3e40",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b3e40",-148
+PPC> SYSTEM_HEAP:74,ALLOC,="0106b3ee8",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b3ee8",-164
+PPC> SYSTEM_HEAP:75,ALLOC,="0106b6aa4",-288
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6aa4",-288
+PPC> DEFAULT_HEAP:10,ALLOC,="0106bfd90",-252
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106bfd90",-252
+PPC> RPL_LAYOUT:vpad,FILE,start,="0106bfd90"
+PPC> RPL_LAYOUT:vpad,FILE,end,="0106bfe8c"
+PPC> SYSTEM_HEAP:76,ALLOC,="0106b3fa0",-43
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b3fa0",-43
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b3ee8",164
+PPC> SYSTEM_HEAP:28,FREE,="0106b3ee8",0
+PPC> SYSTEM_HEAP:77,ALLOC,="0106b3ee8",-16
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b3ee8",-16
+PPC> RPL_SYSHEAP:IMPORT START,vpadbase
+PPC> SYSTEM_HEAP:IMPORT START,vpadbase
+PPC> SYSTEM_HEAP:78,ALLOC,="0106b3f0c",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b3f0c",-12
+PPC> SYSTEM_HEAP:79,ALLOC,="0106b3fe0",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b3fe0",-148
+PPC> SYSTEM_HEAP:80,ALLOC,="0106b4088",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b4088",-164
+PPC> SYSTEM_HEAP:81,ALLOC,="0106b6990",-256
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6990",-256
+PPC> DEFAULT_HEAP:11,ALLOC,="0106bfea0",-260
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106bfea0",-260
+PPC> RPL_LAYOUT:vpadbase,FILE,start,="0106bfea0"
+PPC> RPL_LAYOUT:vpadbase,FILE,end,="0106bffa4"
+PPC> SYSTEM_HEAP:82,ALLOC,="0106b3f2c",-51
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b3f2c",-51
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b4088",164
+PPC> SYSTEM_HEAP:29,FREE,="0106b4088",0
+PPC> SYSTEM_HEAP:83,ALLOC,="0106b3f74",-12
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b3f74",-12
+PPC> RPL_SYSHEAP:IMPORT START,nsysccr
+PPC> SYSTEM_HEAP:IMPORT START,nsysccr
+PPC> SYSTEM_HEAP:84,ALLOC,="0106b4088",-8
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4088",-8
+PPC> SYSTEM_HEAP:85,ALLOC,="0106b40a4",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b40a4",-148
+PPC> SYSTEM_HEAP:86,ALLOC,="0106b414c",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b414c",-164
+PPC> SYSTEM_HEAP:87,ALLOC,="0106b686c",-272
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b686c",-272
+PPC> DEFAULT_HEAP:12,ALLOC,="0106bffb8",-261
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106bffb8",-261
+PPC> RPL_LAYOUT:nsysccr,FILE,start,="0106bffb8"
+PPC> RPL_LAYOUT:nsysccr,FILE,end,="0106c00bd"
+PPC> SYSTEM_HEAP:88,ALLOC,="0106b4204",-52
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b4204",-52
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b414c",164
+PPC> SYSTEM_HEAP:30,FREE,="0106b414c",0
+PPC> SYSTEM_HEAP:89,ALLOC,="0106b414c",-8
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b414c",-8
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:90,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",12
+PPC> SYSTEM_HEAP:31,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:91,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",12
+PPC> SYSTEM_HEAP:32,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b686c",272
+PPC> SYSTEM_HEAP:33,FREE,="0106b686c",0
+PPC> RPL_SYSHEAP:IMPORT END,nsysccr
+PPC> SYSTEM_HEAP:IMPORT END,nsysccr
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:92,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",12
+PPC> SYSTEM_HEAP:34,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:93,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",12
+PPC> SYSTEM_HEAP:35,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6990",256
+PPC> SYSTEM_HEAP:36,FREE,="0106b6990",0
+PPC> RPL_SYSHEAP:IMPORT END,vpadbase
+PPC> SYSTEM_HEAP:IMPORT END,vpadbase
+PPC> RPL_SYSHEAP:IMPORT START,nsysccr
+PPC> SYSTEM_HEAP:IMPORT START,nsysccr
+PPC> SYSTEM_HEAP:94,ALLOC,="0106b4168",-8
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-8
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",8
+PPC> SYSTEM_HEAP:37,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,nsysccr
+PPC> SYSTEM_HEAP:IMPORT END,nsysccr
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:95,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",12
+PPC> SYSTEM_HEAP:38,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:96,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",12
+PPC> SYSTEM_HEAP:39,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6aa4",288
+PPC> SYSTEM_HEAP:40,FREE,="0106b6aa4",0
+PPC> RPL_SYSHEAP:IMPORT END,vpad
+PPC> SYSTEM_HEAP:IMPORT END,vpad
+PPC> RPL_SYSHEAP:IMPORT START,nsysccr
+PPC> SYSTEM_HEAP:IMPORT START,nsysccr
+PPC> SYSTEM_HEAP:97,ALLOC,="0106b4168",-8
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-8
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",8
+PPC> SYSTEM_HEAP:41,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,nsysccr
+PPC> SYSTEM_HEAP:IMPORT END,nsysccr
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:98,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",12
+PPC> SYSTEM_HEAP:42,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:99,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",12
+PPC> SYSTEM_HEAP:43,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6bd8",368
+PPC> SYSTEM_HEAP:44,FREE,="0106b6bd8",0
+PPC> RPL_SYSHEAP:IMPORT END,avm
+PPC> SYSTEM_HEAP:IMPORT END,avm
+PPC> RPL_SYSHEAP:IMPORT START,tcl
+PPC> SYSTEM_HEAP:IMPORT START,tcl
+PPC> SYSTEM_HEAP:100,ALLOC,="0106b4168",-4
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-4
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",4
+PPC> SYSTEM_HEAP:45,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,tcl
+PPC> SYSTEM_HEAP:IMPORT END,tcl
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:101,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",12
+PPC> SYSTEM_HEAP:46,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:102,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",12
+PPC> SYSTEM_HEAP:47,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6d5c",320
+PPC> SYSTEM_HEAP:48,FREE,="0106b6d5c",0
+PPC> RPL_SYSHEAP:IMPORT END,gx2
+PPC> SYSTEM_HEAP:IMPORT END,gx2
+PPC> RPL_SYSHEAP:IMPORT START,avm
+PPC> SYSTEM_HEAP:IMPORT START,avm
+PPC> SYSTEM_HEAP:103,ALLOC,="0106b4168",-4
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-4
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4168",4
+PPC> SYSTEM_HEAP:49,FREE,="0106b4168",0
+PPC> RPL_SYSHEAP:IMPORT END,avm
+PPC> SYSTEM_HEAP:IMPORT END,avm
+PPC> RPL_SYSHEAP:IMPORT START,snd_core
+PPC> SYSTEM_HEAP:IMPORT START,snd_core
+PPC> SYSTEM_HEAP:104,ALLOC,="0106b4168",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4168",-12
+PPC> SYSTEM_HEAP:105,ALLOC,="0106b424c",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b424c",-148
+PPC> SYSTEM_HEAP:106,ALLOC,="0106b42f4",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b42f4",-164
+PPC> SYSTEM_HEAP:107,ALLOC,="0106b6d6c",-304
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6d6c",-304
+PPC> DEFAULT_HEAP:13,ALLOC,="0106c00d4",-261
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106c00d4",-261
+PPC> RPL_LAYOUT:snd_core,FILE,start,="0106c00d4"
+PPC> RPL_LAYOUT:snd_core,FILE,end,="0106c01d9"
+PPC> SYSTEM_HEAP:108,ALLOC,="0106b4188",-52
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b4188",-52
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b42f4",164
+PPC> SYSTEM_HEAP:50,FREE,="0106b42f4",0
+PPC> SYSTEM_HEAP:109,ALLOC,="0106b41d0",-16
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b41d0",-16
+PPC> RPL_SYSHEAP:IMPORT START,avm
+PPC> SYSTEM_HEAP:IMPORT START,avm
+PPC> SYSTEM_HEAP:110,ALLOC,="0106b42f4",-4
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b42f4",-4
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b42f4",4
+PPC> SYSTEM_HEAP:51,FREE,="0106b42f4",0
+PPC> RPL_SYSHEAP:IMPORT END,avm
+PPC> SYSTEM_HEAP:IMPORT END,avm
+PPC> RPL_SYSHEAP:IMPORT START,vpadbase
+PPC> SYSTEM_HEAP:IMPORT START,vpadbase
+PPC> SYSTEM_HEAP:111,ALLOC,="0106b42f4",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b42f4",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b42f4",12
+PPC> SYSTEM_HEAP:52,FREE,="0106b42f4",0
+PPC> RPL_SYSHEAP:IMPORT END,vpadbase
+PPC> SYSTEM_HEAP:IMPORT END,vpadbase
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:112,ALLOC,="0106b42f4",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b42f4",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b42f4",12
+PPC> SYSTEM_HEAP:53,FREE,="0106b42f4",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:113,ALLOC,="0106b42f4",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b42f4",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b42f4",12
+PPC> SYSTEM_HEAP:54,FREE,="0106b42f4",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6d6c",304
+PPC> SYSTEM_HEAP:55,FREE,="0106b6d6c",0
+PPC> RPL_SYSHEAP:IMPORT END,snd_core
+PPC> SYSTEM_HEAP:IMPORT END,snd_core
+PPC> RPL_SYSHEAP:IMPORT START,dmae
+PPC> SYSTEM_HEAP:IMPORT START,dmae
+PPC> SYSTEM_HEAP:114,ALLOC,="0106b42f4",-8
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b42f4",-8
+PPC> SYSTEM_HEAP:115,ALLOC,="0106b4310",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b4310",-148
+PPC> SYSTEM_HEAP:116,ALLOC,="0106b43b8",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b43b8",-164
+PPC> SYSTEM_HEAP:117,ALLOC,="0106b6d9c",-256
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6d9c",-256
+PPC> DEFAULT_HEAP:14,ALLOC,="0106c01f0",-251
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106c01f0",-251
+PPC> RPL_LAYOUT:dmae,FILE,start,="0106c01f0"
+PPC> RPL_LAYOUT:dmae,FILE,end,="0106c02eb"
+PPC> SYSTEM_HEAP:118,ALLOC,="0106b4470",-42
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b4470",-42
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b43b8",164
+PPC> SYSTEM_HEAP:56,FREE,="0106b43b8",0
+PPC> SYSTEM_HEAP:119,ALLOC,="0106b43b8",-12
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b43b8",-12
+PPC> RPL_SYSHEAP:IMPORT START,tcl
+PPC> SYSTEM_HEAP:IMPORT START,tcl
+PPC> SYSTEM_HEAP:120,ALLOC,="0106b43d8",-4
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b43d8",-4
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b43d8",4
+PPC> SYSTEM_HEAP:57,FREE,="0106b43d8",0
+PPC> RPL_SYSHEAP:IMPORT END,tcl
+PPC> SYSTEM_HEAP:IMPORT END,tcl
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:121,ALLOC,="0106b43d8",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b43d8",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b43d8",12
+PPC> SYSTEM_HEAP:58,FREE,="0106b43d8",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:122,ALLOC,="0106b43d8",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b43d8",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b43d8",12
+PPC> SYSTEM_HEAP:59,FREE,="0106b43d8",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6d9c",256
+PPC> SYSTEM_HEAP:60,FREE,="0106b6d9c",0
+PPC> RPL_SYSHEAP:IMPORT END,dmae
+PPC> SYSTEM_HEAP:IMPORT END,dmae
+PPC> RPL_SYSHEAP:IMPORT START,vpad
+PPC> SYSTEM_HEAP:IMPORT START,vpad
+PPC> SYSTEM_HEAP:123,ALLOC,="0106b43d8",-8
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b43d8",-8
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b43d8",8
+PPC> SYSTEM_HEAP:61,FREE,="0106b43d8",0
+PPC> RPL_SYSHEAP:IMPORT END,vpad
+PPC> SYSTEM_HEAP:IMPORT END,vpad
+PPC> RPL_SYSHEAP:IMPORT START,padscore
+PPC> SYSTEM_HEAP:IMPORT START,padscore
+PPC> SYSTEM_HEAP:124,ALLOC,="0106b43d8",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b43d8",-12
+PPC> SYSTEM_HEAP:125,ALLOC,="0106b44b0",-148
+PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b44b0",-148
+PPC> SYSTEM_HEAP:126,ALLOC,="0106b4558",-164
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b4558",-164
+PPC> LiBounceOneChunk
+PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=padscore.rpl, aProcId=1, aFileType=1, HunkBytes=0
+PPC> LiBounceOneChunk
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 112768, WaitTime 11004 mics
+PPC> SYSTEM_HEAP:127,ALLOC,="0106b6d9c",-256
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6d9c",-256
+PPC> DEFAULT_HEAP:15,ALLOC,="0106c0300",-260
+PPC> OSDYNLOAD_HEAP:RPL_FILE_INFO,ALLOC,="0106c0300",-260
+PPC> RPL_LAYOUT:padscore,FILE,start,="0106c0300"
+PPC> RPL_LAYOUT:padscore,FILE,end,="0106c0404"
+PPC> SYSTEM_HEAP:128,ALLOC,="0106b43f8",-51
+PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b43f8",-51
+PPC> DEFAULT_HEAP:16,ALLOC,="0106c0440",-728512
+PPC> OSDYNLOAD_HEAP:RPL_DATA_AREA,ALLOC,="0106c0440",-728512
+PPC> DEFAULT_HEAP:17,ALLOC,="010772220",-81984
+PPC> OSDYNLOAD_HEAP:RPL_LOAD_INFO_AREA,ALLOC,="010772220",-81984
+PPC> RPL_SYSHEAP:RPL_TEMP_DATA,FREE,="0106b4558",164
+PPC> SYSTEM_HEAP:62,FREE,="0106b4558",0
+PPC> SYSTEM_HEAP:129,ALLOC,="0106b4440",-8
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b4440",-8
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:130,ALLOC,="0106b4558",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4558",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4558",12
+PPC> SYSTEM_HEAP:63,FREE,="0106b4558",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:131,ALLOC,="0106b4558",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4558",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4558",12
+PPC> SYSTEM_HEAP:64,FREE,="0106b4558",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6d9c",256
+PPC> SYSTEM_HEAP:65,FREE,="0106b6d9c",0
+PPC> RPL_SYSHEAP:IMPORT END,padscore
+PPC> SYSTEM_HEAP:IMPORT END,padscore
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:132,ALLOC,="0106b4558",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4558",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4558",12
+PPC> SYSTEM_HEAP:66,FREE,="0106b4558",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:IMPORT START,coreinit
+PPC> SYSTEM_HEAP:133,ALLOC,="0106b4558",-12
+PPC> RPL_SYSHEAP:RPL_NAME,ALLOC,="0106b4558",-12
+PPC> RPL_SYSHEAP:RPL_NAME,FREE,="0106b4558",12
+PPC> SYSTEM_HEAP:67,FREE,="0106b4558",0
+PPC> RPL_SYSHEAP:IMPORT END,coreinit
+PPC> SYSTEM_HEAP:IMPORT END,coreinit
+PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6eb0",336
+PPC> SYSTEM_HEAP:68,FREE,="0106b6eb0",0
+PPC> SYSTEM_HEAP:134,ALLOC,="0106b6d64",-668
+PPC> RPL_SYSHEAP:RPL_MODULES_LINK_ARRAY,ALLOC,="0106b6d64",-668
+PPC> SYSTEM_HEAP:135,ALLOC,="0106b4558",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b4558",-40
+PPC> RPL_LAYOUT:padscore,TEXT,start,="00fe8e580"
+PPC> RPL_LAYOUT:padscore,TEXT,end,="00feb4de0"
+PPC> RPL_LAYOUT:padscore,DATA,start,="0106c0440"
+PPC> RPL_LAYOUT:padscore,DATA,end,="010772200"
+PPC> RPL_LAYOUT:padscore,LOAD,start,="010772220"
+PPC> RPL_LAYOUT:padscore,LOAD,end,="010786260"
+PPC> SYSTEM_HEAP:136,ALLOC,="0106b4594",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b4594",-40
+PPC> RPL_LAYOUT:nsysccr,TEXT,start,="0010b9c00"
+PPC> RPL_LAYOUT:nsysccr,TEXT,end,="0010bfd40"
+PPC> RPL_LAYOUT:nsysccr,DATA,start,="01022bc00"
+PPC> RPL_LAYOUT:nsysccr,DATA,end,="010232700"
+PPC> RPL_LAYOUT:nsysccr,LOAD,start,="0fafb0e60"
+PPC> RPL_LAYOUT:nsysccr,LOAD,end,="0fafbb500"
+PPC> SYSTEM_HEAP:137,ALLOC,="0106b45d0",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b45d0",-40
+PPC> RPL_LAYOUT:vpadbase,TEXT,start,="00111ff00"
+PPC> RPL_LAYOUT:vpadbase,TEXT,end,="001128840"
+PPC> RPL_LAYOUT:vpadbase,DATA,start,="0102ed040"
+PPC> RPL_LAYOUT:vpadbase,DATA,end,="0102f3b40"
+PPC> RPL_LAYOUT:vpadbase,LOAD,start,="0faf52260"
+PPC> RPL_LAYOUT:vpadbase,LOAD,end,="0faf665a0"
+PPC> SYSTEM_HEAP:138,ALLOC,="0106b460c",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b460c",-40
+PPC> RPL_LAYOUT:vpad,TEXT,start,="001128880"
+PPC> RPL_LAYOUT:vpad,TEXT,end,="00113d5e0"
+PPC> RPL_LAYOUT:vpad,DATA,start,="0102f3b40"
+PPC> RPL_LAYOUT:vpad,DATA,end,="0102fc000"
+PPC> RPL_LAYOUT:vpad,LOAD,start,="0faf367a0"
+PPC> RPL_LAYOUT:vpad,LOAD,end,="0faf52260"
+PPC> SYSTEM_HEAP:139,ALLOC,="0106b4648",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b4648",-40
+PPC> RPL_LAYOUT:uvc,TEXT,start,="0010cfec0"
+PPC> RPL_LAYOUT:uvc,TEXT,end,="0010d2120"
+PPC> RPL_LAYOUT:uvc,DATA,start,="01024d1c0"
+PPC> RPL_LAYOUT:uvc,DATA,end,="010297fc0"
+PPC> RPL_LAYOUT:uvc,LOAD,start,="0faf9dd60"
+PPC> RPL_LAYOUT:uvc,LOAD,end,="0fafa51c0"
+PPC> SYSTEM_HEAP:140,ALLOC,="0106b4684",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b4684",-40
+PPC> RPL_LAYOUT:tve,TEXT,start,="001090f40"
+PPC> RPL_LAYOUT:tve,TEXT,end,="0010b9bc0"
+PPC> RPL_LAYOUT:tve,DATA,start,="010223d80"
+PPC> RPL_LAYOUT:tve,DATA,end,="01022bc00"
+PPC> RPL_LAYOUT:tve,LOAD,start,="0fafbb500"
+PPC> RPL_LAYOUT:tve,LOAD,end,="0fafcbd00"
+PPC> SYSTEM_HEAP:141,ALLOC,="0106b46c0",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b46c0",-40
+PPC> RPL_LAYOUT:tcl,TEXT,start,="0010d2180"
+PPC> RPL_LAYOUT:tcl,TEXT,end,="0010ed6e0"
+PPC> RPL_LAYOUT:tcl,DATA,start,="010298000"
+PPC> RPL_LAYOUT:tcl,DATA,end,="0102d3400"
+PPC> RPL_LAYOUT:tcl,LOAD,start,="0faf907e0"
+PPC> RPL_LAYOUT:tcl,LOAD,end,="0faf9dd60"
+PPC> SYSTEM_HEAP:142,ALLOC,="0106b46fc",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b46fc",-40
+PPC> RPL_LAYOUT:dmae,TEXT,start,="00110bf40"
+PPC> RPL_LAYOUT:dmae,TEXT,end,="00110d5a0"
+PPC> RPL_LAYOUT:dmae,DATA,start,="0102e0140"
+PPC> RPL_LAYOUT:dmae,DATA,end,="0102e09c0"
+PPC> RPL_LAYOUT:dmae,LOAD,start,="0faf72820"
+PPC> RPL_LAYOUT:dmae,LOAD,end,="0faf7a060"
+PPC> SYSTEM_HEAP:143,ALLOC,="0106b4738",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b4738",-40
+PPC> RPL_LAYOUT:dc,TEXT,start,="00110d600"
+PPC> RPL_LAYOUT:dc,TEXT,end,="00111fec0"
+PPC> RPL_LAYOUT:dc,DATA,start,="0102e09c0"
+PPC> RPL_LAYOUT:dc,DATA,end,="0102ed040"
+PPC> RPL_LAYOUT:dc,LOAD,start,="0faf665a0"
+PPC> RPL_LAYOUT:dc,LOAD,end,="0faf72820"
+PPC> SYSTEM_HEAP:144,ALLOC,="0106b4774",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b4774",-40
+PPC> RPL_LAYOUT:avm,TEXT,start,="00113d640"
+PPC> RPL_LAYOUT:avm,TEXT,end,="00114ebe0"
+PPC> RPL_LAYOUT:avm,DATA,start,="0102fc000"
+PPC> RPL_LAYOUT:avm,DATA,end,="010306100"
+PPC> RPL_LAYOUT:avm,LOAD,start,="0faf28300"
+PPC> RPL_LAYOUT:avm,LOAD,end,="0faf367a0"
+PPC> SYSTEM_HEAP:145,ALLOC,="0106b47b0",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b47b0",-40
+PPC> RPL_LAYOUT:snd_core,TEXT,start,="0011c3080"
+PPC> RPL_LAYOUT:snd_core,TEXT,end,="0011e3820"
+PPC> RPL_LAYOUT:snd_core,DATA,start,="010348d00"
+PPC> RPL_LAYOUT:snd_core,DATA,end,="010502200"
+PPC> RPL_LAYOUT:snd_core,LOAD,start,="0faee7e40"
+PPC> RPL_LAYOUT:snd_core,LOAD,end,="0faefbfa0"
+PPC> SYSTEM_HEAP:146,ALLOC,="0106b47ec",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b47ec",-40
+PPC> RPL_LAYOUT:gx2,TEXT,start,="00114ec40"
+PPC> RPL_LAYOUT:gx2,TEXT,end,="0011c3020"
+PPC> RPL_LAYOUT:gx2,DATA,start,="010306100"
+PPC> RPL_LAYOUT:gx2,DATA,end,="010348d00"
+PPC> RPL_LAYOUT:gx2,LOAD,start,="0faefbfa0"
+PPC> RPL_LAYOUT:gx2,LOAD,end,="0faf28300"
+PPC> SYSTEM_HEAP:147,ALLOC,="0106b4828",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b4828",-40
+PPC> RPL_LAYOUT:nsysuvd,TEXT,start,="00fe8c400"
+PPC> RPL_LAYOUT:nsysuvd,TEXT,end,="00fe8cd20"
+PPC> RPL_LAYOUT:nsysuvd,DATA,start,="0106b82c0"
+PPC> RPL_LAYOUT:nsysuvd,DATA,end,="0106b87c0"
+PPC> RPL_LAYOUT:nsysuvd,LOAD,start,="0106b87e0"
+PPC> RPL_LAYOUT:nsysuvd,LOAD,end,="0106bf720"
+PPC> SYSTEM_HEAP:148,ALLOC,="0106b4864",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b4864",-40
+PPC> RPL_LAYOUT:nsysnet,TEXT,start,="0010bfd80"
+PPC> RPL_LAYOUT:nsysnet,TEXT,end,="0010cfe60"
+PPC> RPL_LAYOUT:nsysnet,DATA,start,="010232700"
+PPC> RPL_LAYOUT:nsysnet,DATA,end,="01024d1c0"
+PPC> RPL_LAYOUT:nsysnet,LOAD,start,="0fafa51c0"
+PPC> RPL_LAYOUT:nsysnet,LOAD,end,="0fafb0e60"
+PPC> SYSTEM_HEAP:149,ALLOC,="0106b48a0",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b48a0",-40
+PPC> RPL_LAYOUT:,TEXT,start,="00fe80000"
+PPC> RPL_LAYOUT:,TEXT,end,="00fe8b820"
+PPC> RPL_LAYOUT:,DATA,start,="010502200"
+PPC> RPL_LAYOUT:,DATA,end,="0106a1914"
+PPC> RPL_LAYOUT:,LOAD,start,="0106a1940"
+PPC> RPL_LAYOUT:,LOAD,end,="0106a33b8"
+PPC> SYSTEM_HEAP:150,ALLOC,="0106b6d14",-60
+PPC> RPL_SYSHEAP:RPL_MODULES_ARRAY,ALLOC,="0106b6d14",-60
+PPC> SYSTEM_HEAP:151,ALLOC,="0106b6cc4",-60
+PPC> RPL_SYSHEAP:RPL_ENTRYPOINTS_ARRAY,ALLOC,="0106b6cc4",-60
+PPC> RPL_SYSHEAP:RPL_MODULES_LINK_ARRAY,FREE,="0106b6d64",0
+PPC> SYSTEM_HEAP:69,FREE,="0106b6d64",0
+PPC> RPL_LAYOUT:coreinit,TEXT,start,="00101c400"
+PPC> RPL_LAYOUT:coreinit,TEXT,end,="001090f00"
+PPC> RPL_LAYOUT:coreinit,DATA,start,="010000000"
+PPC> RPL_LAYOUT:coreinit,DATA,end,="010223d80"
+PPC> RPL_LAYOUT:coreinit,LOAD,start,="0fafcbd00"
+PPC> RPL_LAYOUT:coreinit,LOAD,end,="0fb000000"
+PPC> SYSTEM_HEAP:152,ALLOC,="0106b48dc",-40
+PPC> RPL_SYSHEAP:RPL_NOTIFY,ALLOC,="0106b48dc",-40
+PPC> SYSTEM_HEAP:153,ALLOC,="0106b4918",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4918",-76
+PPC> OSDriver_Register: Reg=CCR, ms=0
+PPC> SYSTEM_HEAP:154,ALLOC,="0106b4978",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4978",-76
+PPC> OSDriver_Register: Reg=VPAD, ms=0
+PPC> SYSTEM_HEAP:155,ALLOC,="0106b49d8",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b49d8",-76
+PPC> OSDriver_Register: Reg=TVE, ms=0
+PPC> SYSTEM_HEAP:156,ALLOC,="0106b4a38",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4a38",-76
+PPC> OSDriver_Register: Reg=TCL, ms=0
+PPC> DMAE: Build date - Jul 28 2015 19:57:55
+PPC> SYSTEM_HEAP:157,ALLOC,="0106b4a98",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4a98",-76
+PPC> OSDriver_Register: Reg=DC, ms=0
+PPC> SYSTEM_HEAP:158,ALLOC,="0106b4af8",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4af8",-76
+PPC> OSDriver_Register: Reg=AVM, ms=0
+PPC> SYSTEM_HEAP:159,ALLOC,="0106b4b58",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4b58",-76
+PPC> OSDriver_Register: Reg=NSYSUVD, ms=0
+PPC> SYSTEM_HEAP:160,ALLOC,="0106b4bb8",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4bb8",-76
+PPC> OSDriver_Register: Reg=NETWORK, ms=0
+PPC> RPL_SYSHEAP:RPL_ENTRYPOINTS_ARRAY,FREE,="0106b6cc4",60
+PPC> SYSTEM_HEAP:70,FREE,="0106b6cc4",0
+PPC> RPL_SYSHEAP:RPL_MODULES_ARRAY,FREE,="0106b6d14",60
+PPC> SYSTEM_HEAP:71,FREE,="0106b6d14",0
+PPC> RPL_SYSHEAP:RPX RUNNING,
+PPC> SYSTEM_HEAP:RPX RUNNING,
+PPC> SYSTEM_HEAP:161,ALLOC,="0106b4c18",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4c18",-76
+PPC> OSDriver_Register: Reg=MEM, ms=0
+PPC> SYSTEM_HEAP:162,ALLOC,="0106b4c78",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4c78",-76
+PPC> OSDriver_Register: Reg=Cache, ms=0
+PPC> SYSTEM_HEAP:163,ALLOC,="0106b4cd8",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4cd8",-76
+PPC> OSDriver_Register: Reg=IPC, ms=0
+PPC> SYSTEM_HEAP:164,ALLOC,="0106b4d38",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4d38",-76
+PPC> OSDriver_Register: Reg=SETTING, ms=0
+PPC> SYSTEM_HEAP:165,ALLOC,="0106b4d98",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4d98",-76
+PPC> OSDriver_Register: Reg=INPT, ms=0
+PPC> SYSTEM_HEAP:166,ALLOC,="0106b4df8",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4df8",-76
+PPC> OSDriver_Register: Reg=TEST, ms=0
+PPC> SYSTEM_HEAP:167,ALLOC,="0106b4e58",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4e58",-76
+PPC> OSDriver_Register: Reg=ACPLoad, ms=0
+PPC> SYSTEM_HEAP:168,ALLOC,="0106b4eb8",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4eb8",-76
+PPC> OSDriver_Register: Reg=Button, ms=0
+PPC> SYSTEM_HEAP:169,ALLOC,="0106b4f18",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4f18",-76
+PPC> OSDriver_Register: Reg=Clipboard, ms=0
+PPC> sOnAcquireForegroundOnCore: PIni=MEM, <!ms 0
+PPC> sOnAcquireForegroundOnCore: PIni=Cache, <!ms 0
+PPC> UCReadSysConfig(slc:cos.check_active_threads): 6 ms
+PPC> SYSTEM_HEAP:170,ALLOC,="0106b4f78",-76
+PPC> RPL_SYSHEAP:CACHED_SETTING,ALLOC,="0106b4f78",-76
+PPC> UCReadSysConfig(slc:cos.spin_after_crash): 10 ms
+PPC> SYSTEM_HEAP:171,ALLOC,="0106b4fd8",-76
+PPC> RPL_SYSHEAP:CACHED_SETTING,ALLOC,="0106b4fd8",-76
+PPC> UCReadSysConfig(slc:cos.time_advance): 8 ms
+PPC> SYSTEM_HEAP:172,ALLOC,="0106b5038",-76
+PPC> RPL_SYSHEAP:CACHED_SETTING,ALLOC,="0106b5038",-76
+PPC> UCReadSysConfig(slc:cos.sdk_ver_override): 9 ms
+PPC> SYSTEM_HEAP:173,ALLOC,="0106b5098",-76
+PPC> RPL_SYSHEAP:CACHED_SETTING,ALLOC,="0106b5098",-76
+PPC> OSSetting_SynchronousPrinting DISABLED
+PPC> UCReadSysConfig(slc:cos.crash_dump_type): 9 ms
+PPC> SYSTEM_HEAP:174,ALLOC,="0106b50f8",-76
+PPC> RPL_SYSHEAP:CACHED_SETTING,ALLOC,="0106b50f8",-76
+PPC> OSSetting_CrashDumpType 0,
+PPC> MINI dump after crash
+PPC> sOnAcquireForegroundOnCore: PIni=SETTING, <!ms 44
+PPC> sOnAcquireForegroundOnCore: PIni=NETWORK, <!ms 0
+PPC> TCL: Build date - Jul 28 2015 19:57:50
+PPC> TCL(1): Master Init
+PPC> TCL::init: Got command line:
+PPC>
+PPC>
+PPC> TCL: Asic ID = 0x4E
+PPC> TCL: SCLK is 27000000
+PPC> TCL: full 4 quad pipes
+PPC> TCL: full 2 SIMD/TC
+PPC> TCL: Texture L2 full size
+PPC> TCL: Texture L1 full size (8k)
+PPC> TCL: full 2 RB
+PPC> TCL: GB_TILING_CONFIG is 00044902
+DSI exception: E8000000 at 010E4004
+PPC> TCL: consumed timestamp FAIL expected 0000000000000001 got 0000000000000000
+PPC> TCL: DRMDMA consumed timestamp FAIL
+PPC> TCL(1): init DONE
+PPC> sOnAcquireForegroundOnCore: PIni=TCL, <!ms 31
+PPC> UCReadSysConfig(DRCCfg.rumble): 9 ms
+PPC> sOnAcquireForegroundOnCore: PIni=CCR, <!ms 10
+PPC> AVM: Build date - Jul 28 2015 19:58:01
+PPC> UCReadSysConfig(ram:avmflg): 0 ms
+PPC> TVE: Build date - Jul 28 2015 19:57:54
+PPC> UCReadSysConfig(hdmiEDID): 6 ms
+PPC> UCReadSysConfig(AVMCfg): 8 ms
+PPC> __AVMCDCInit,CCRCDCSysGetInfo failed returned -1179519
+PPC> DC: Build date - Jul 28 2015 19:57:55
+PPC> UCReadSysConfig(AVMCfg): 6 ms
+PPC> UCReadSysConfig(AVMCfg): 9 ms
+PPC> UCReadSysConfig(AVMCfg): 7 ms
+PPC> Called CCRCDCSysSetAVMode(16) returned: -1179519
+PPC> Called CCRCDCSysSetAVMode(255) returned: -1179519
+PPC> Called CCRCDCSysSetVideoEncodingRate(16216) returned: -1179519
+PPC> AVM: HDMI,
+PPC>  1080P
+PPC> AVM: TV Color DC:RGB,
+PPC>  TVE:RGB
+PPC> AVM: TV Aspect 16:9
+PPC> VPADInit() depricated, no need to call
+PPC> sOnAcquireForegroundOnCore: PIni=AVM, <!ms 185
+PPC> VPAD Init end, BPERF: (0/17073057) Title PID=1
+PPC> sOnAcquireForegroundOnCore: PIni=VPAD, <!ms 0
+PPC> sOnAcquireForegroundOnCore: PIni=NSYSUVD, <!ms 0
+PPC> sOnAcquireForegroundOnCore: PIni=INPT, <!ms 1
+PPC> sOnAcquireForegroundOnCore: PIni=ACPLoad, <!ms 0
+PPC> sOnAcquireForegroundOnCore: PIni=Clipboard, <!ms 0
+PPC> sOnAcquireForegroundOnCore: PIni=Button, <!ms 0
+PPC> sOnAcquireForegroundOnCore: PIni=TEST, <!ms 0
+PPC> UCWriteSysConfig(cos.root_test_autorestart): 97 ms
+PPC> UCReadSysConfig(ram:rootflg): 0 ms
+PPC> ROOT: Read restart value 0
+PPC> UCReadSysConfig(ram:audio): 1 ms
+PPC> ROOT: Read audio relaunch value 0
+PPC> ROOT: OSID 0x000500101000400A
+PPC> Info: Calculating cold boot font CRCs on core:0
+DSI exception: F8000000 at FFF151AC
+PPC> SYSTEM_HEAP:175,ALLOC,="0106b5158",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b5158",-76
+PPC> OSDriver_Register: Reg=PAD, ms=0
+PPC> SYSTEM_HEAP:176,ALLOC,="0106b51b8",-16
+PPC> RPL_SYSHEAP:RPL_NOTIFY_CALLBACK,ALLOC,="0106b51b8",-16
+PPC> SYSTEM_HEAP:177,ALLOC,="0106b51dc",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b51dc",-76
+PPC> OSDriver_Register: Reg=WPAD, ms=0
+PPC> WPAD: Master Init
+PPC> VPADInit() depricated, no need to call
+PPC> UCReadSysConfig(cos.cosreport_upid_mask): 86 ms
+PPC> UCReadSysConfig(cos.cosreport_module_mask): 8 ms
+PPC> UCReadSysConfig(cos.cosreport_level): 5 ms
+PPC> UCReadSysConfig(cos.crash_detail_level): 87 ms
+PPC> UCReadSysConfig(cos.crash_recovery): 6 ms
+PPC> UCReadSysConfig(cos.timestamp_level): 5 ms
+PPC> DEFAULT_HEAP:18,ALLOC,="010787000",-262144
+PPC> GX2: Build date - Jul 28 2015 19:58:09
+PPC> GX2: Init on core 1
+ARM> resetting DRH
+PPC> GX2: Hang Response = 2
+PPC> _GX2PadCB; Check if multiple threads simultaneously writing CB/DL on this core
+PPC> SYSTEM_HEAP:178,ALLOC,="0106b523c",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b523c",-76
+PPC> OSDriver_Register: Reg=GX2, ms=0
+PPC> DEFAULT_HEAP:19,ALLOC,="0107c7040",-7116
+PPC> Info: Root calc font 0 CRC:14c7272f
+PPC> Info: Root calc font 1 CRC:a2a1a55a
+PPC> Info: Root calc font 2 CRC:f1252709
+PPC> DEFAULT_HEAP:0,FREE,="0107c7040",0
+PPC> _GX2PadCB; Check if multiple threads simultaneously writing CB/DL on this core
+PPC> Info: Root calc font 3 CRC:e5a938cd
+PPC> GX2: GX2WaitTimeStamp timed out.
+ARM> resetting DRH
+PPC> Called CCRCDCSysSetAVMode(0) returned: -1179519
+PPC> Called CCRCDCSysSetAVMode(0) returned: -1179519
+PPC> ROOT: Splash screen draw complete
+PPC> DSP_SWITCH: Read relaunch value 0
+PPC> SYSTEM_HEAP:179,ALLOC,="0106b529c",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b529c",-76
+PPC> OSDriver_Register: Reg=SNDD, ms=0
+PPC> SYSTEM_HEAP:180,ALLOC,="0106b52fc",-76
+PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b52fc",-76
+PPC> OSDriver_Register: Reg=SNDD_Ramp, ms=0
+PPC> CL's shd be 103668c0 or 10366980
+PPC> In DSPInit
+PPC> Out DSPInit
+PPC> registering AI cbs
+PPC>  starting DMAS in AXOut
+PPC> TV mode before transition = 0
+PPC> DRC mode before transition = 1
+PPC> RPL_SYSHEAP:DRIVER_REG,FREE,="0106b529c",76
+PPC> SYSTEM_HEAP:72,FREE,="0106b529c",0
+PPC> OSDriver_Deregister: Reg=SNDD, ms=0
+PPC> RPL_SYSHEAP:DRIVER_REG,FREE,="0106b52fc",76
+PPC> SYSTEM_HEAP:73,FREE,="0106b52fc",0
+PPC> OSDriver_Deregister: Reg=SNDD_Ramp, ms=0
+PPC> ROOT: Got audio buffer from foreground bucket @ e2c00000 len = 9437184
+PPC> DEFAULT_HEAP:20,ALLOC,="0107c7040",-7116
+ARM> CRYPTO Open, clientPid=11 nodeId 00000000 titleId 00000000100000f3 perm=0xffffffff
+PPC> DEFAULT_HEAP:1,FREE,="0107c7040",0
+PPC> TV 6CH buf = e2de5380
+PPC> TV 2CH buf = e2de6800
+PPC> DRC 2CH buf = 16de6f00
+PPC> TV mode before transition in start_os_audio_transition = 0
+PPC> passed 0xe34ffe00 (phy 0x174ffe00) for read_data
+PPC> DSPH_RunTask: phys_DRAM = 0x174ffe00
+PPC>
+PPC>
+PPC>
+PPC> Querying BSP for Hardware Information...
+ARM> resetting DRH
+PPC>    It is not Holly/Bolly-Wood
+PPC>    It is Latte A2x or later
+PPC> using DSP memory parameters:
+PPC>     DROM_BASE: 0x3000
+PPC>     IRAM_SIZE: 0x2000
+PPC>     DRAM_SIZE: 0x3000
+PPC> Transition Starts now!!
+PPC> DSP_SWITCH: set relaunch flag
+PPC> Info: Cold boot processing font CRCs on core:1
+PPC> UCReadSysConfig(cos.font0): 4 ms
+PPC> Info: Root load font 0 CRC:14c7272f
+PPC> UCReadSysConfig(cos.font1): 4 ms
+PPC> Info: Root load font 1 CRC:a2a1a55a
+PPC> UCReadSysConfig(cos.font2): 4 ms
+PPC> Info: Root load font 2 CRC:f1252709
+PPC> UCReadSysConfig(cos.font3): 5 ms
+PPC> Info: Root load font 3 CRC:e5a938cd
+PPC> OSSendAppSwitchRequest called
+PPC> DIAG:Issued KiPrepareTitleAsync(0x000500301001120A)
+PPC> OSSendAppSwitchRequest Requested Switch
+PPC> DIAG:Result PrepareTitle(0x000500301001120A) returned error status -262152
+PPC> ***PrepareTitle(async) of 0x0000000000000000 returned error -262152 (0xFFFBFFF8)
+PPC> ***Could not start error display. [5359]=Hang.
