@@ -84,6 +84,7 @@ bool ELFFile::init(const void *data, uint32_t length) {
 	
 	if (header->headerSize != sizeof(ELFHeader)) {
 		ParseError("header->headerSize doesn't match sizeof(ELFHeader)");
+		return false;
 	}
 	
 	if (header->programNum && header->programSize != sizeof(ELFProgram)) {
