@@ -2,6 +2,7 @@
 import pyemu
 import debug
 import log
+import sys
 
 class SPRHandler:
 
@@ -183,6 +184,7 @@ class PPCEmulator:
 		self.logger = log.ConsoleLogger("PPC")
 		self.breakpoints = debug.BreakpointHandler(self.interpreter)
 		self.breakpoints.add(0xFFF1AB34, self.handle_log)
+		self.breakpoints.add(0xFFF0AEAC, self.hack_log_level)
 		self.spr_handler = SPRHandler(emulator, self.core, self.virtmem, self.breakpoints)
 		self.exc_handler = ExceptionHandler(self.core)
 
@@ -207,10 +209,20 @@ class PPCEmulator:
 	def check_interrupts(self):
 		if self.interrupts.check_interrupts():
 			self.core.trigger_exception(self.core.EXTERNAL_INTERRUPT)
-		
+			
+	def hack_log_level(self, addr):
+		if "logall" in sys.argv:
+			self.core.setreg(3, 0xFFFFFFFF)
+			self.core.setreg(4, 0xFFFFFFFF)
+			self.core.setreg(5, 0xFFFFFFFF)
+			self.core.setreg(6, 0xFFFFFFFF)
+			self.core.setreg(7, 7)
+
 	def handle_log(self, addr):
-		data = self.physmem.read(self.core.reg(6), self.core.reg(7)).decode("ascii")
-		self.logger.write(data.strip("\0"))
+		data = self.mem_reader.read(self.core.reg(6), self.core.reg(7)).decode("ascii")
+		if not data.endswith("\n"):
+			data += "\n"
+		self.logger.write(data)
 		
 	def update_timer(self):
 		self.core.settb((self.core.tb() + 2000) & (0xFFFFFFFFFFFFFFFF))
