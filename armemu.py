@@ -151,10 +151,11 @@ class UNDHandler:
 		self.async_reqs = []
 		self.added_pcs = []
 		self.ipc_names = {}
-		
-		self.ipc_logger = log.FileLogger("ipc.txt")
-		self.message_logger = log.FileLogger("messages.txt")
-		self.file_logger = log.FileLogger("files.txt")
+
+		if "logsys" in sys.argv:
+			self.ipc_logger = log.FileLogger("ipc.txt")
+			self.message_logger = log.FileLogger("messages.txt")
+			self.file_logger = log.FileLogger("files.txt")
 
 	def handle(self):
 		if "logsys" in sys.argv:
