@@ -173,12 +173,6 @@ class ARMDebugger:
 	def name(self): return "ARM"
 	def pc(self): return self.core.reg(pyemu.ARMCore.PC)
 	def lr(self): return self.core.reg(pyemu.ARMCore.LR)
-	
-	def set_option(self, option, value):
-		if option == "thumb":
-			core.set_thumb(bool(int(value)))
-		else:
-			print("Invalid option")
 			
 	def get_context(self):
 		core = self.core
