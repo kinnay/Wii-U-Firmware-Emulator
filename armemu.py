@@ -205,8 +205,11 @@ class UNDHandler:
 		elif syscall == self.IOS_IOCTLV:
 			self.ipc_logger.print("[%s:%08X] IOCTLV[%s](%08X, %i) -> %08X" %(module, lr, *args[:3], result))
 			
-			dev, fd, ioctlv, vectors = args
-			self.handle_ioctlv(dev, ioctlv, vectors, result)
+			dev, fd, ioctlv, invecs, outinfo = args
+			outvecs = []
+			for ptr, size in outinfo:
+				outvecs.append(self.reader.read(ptr, size))
+			self.handle_ioctlv(dev, ioctlv, invecs, outvecs, result)
 					
 		elif syscall == self.IOS_RESUME:
 			self.ipc_logger.print("[%s:%08X] RESUME[%s](%08X) -> %08X" %(module, lr, *args, result))
@@ -221,11 +224,15 @@ class UNDHandler:
 			self.handle_ioctl(name, ioctl, indata, outdata, result)
 		
 		elif syscall == self.IOS_IOCTLV_ASYNC:
-			fd, ioctlv, vectors = args
+			fd, ioctlv, invecs, outinfo = args
 			name = self.ipc_names[fd]
+			
+			outvecs = []
+			for ptr, size in outinfo:
+				outvecs.append(self.reader.read(ptr, size))
 		
 			self.ipc_logger.print("[%s:%08X] IOCTLV_ASYNC[%s](%08X, %i) -> %08X" %(module, lr, name, fd, ioctlv, result))
-			self.handle_ioctlv(name, ioctlv, vectors, result)
+			self.handle_ioctlv(name, ioctlv, invecs, outvecs, result)
 		
 		elif syscall == self.IOS_RESUME_ASYNC:
 			fd = args[0]
@@ -271,37 +278,37 @@ class UNDHandler:
 				}[struct.unpack_from(">I", indata, 0x284)[0]]
 				self.ipc_logger.print("\tFSAGetInfoByQuery(%s, %s)" %(fn, type))
 			
-	def handle_ioctlv(self, name, ioctlv, vectors, result):
+	def handle_ioctlv(self, name, ioctlv, invecs, outvecs, result):
 		if name == "/dev/crypto":
 			if ioctlv == 12: #IOSC_GenerateHash
-				type = struct.unpack_from(">I", vectors[0], 12)[0]
-				datalen = len(vectors[2])
-				hash = vectors[3]
+				type = struct.unpack_from(">I", invecs[0], 12)[0]
+				datalen = len(invecs[2])
+				hash = outvecs[0]
 				self.ipc_logger.print("\tIOSC_GenerateHash(0x%X, %i) -> %s" %(datalen, type, hash.hex()))
 			elif ioctlv == 14: #IOSC_Decrypt
-				key = struct.unpack_from(">I", vectors[0], 8)[0]
-				iv = vectors[1]
-				datalen = len(vectors[2])
+				key = struct.unpack_from(">I", invecs[0], 8)[0]
+				iv = invecs[1]
+				datalen = len(invecs[2])
 				self.ipc_logger.print("\tIOSC_Decrypt(%i, 0x%X, %s)" %(key, datalen, iv.hex()))
 			if ioctlv == 16: #IOSC_GenerateBlockMAC
-				key, type = struct.unpack_from(">II", vectors[0], 8)
-				datalen = len(vectors[3])
-				customlen = len(vectors[2])
-				hash = vectors[4]
+				key, type = struct.unpack_from(">II", invecs[0], 8)
+				datalen = len(invecs[3])
+				customlen = len(invecs[2])
+				hash = outvecs[0]
 				self.ipc_logger.print("\tIOSC_GenerateBlockMAC(%i, 0x%X, 0x%X, %i) -> %s" %(key, datalen, customlen, type, hash.hex()))
 				
 		if name == "/dev/fsa":
 			if ioctlv == 1: #FSAMount
-				data = vectors[0]
+				data = invecs[0]
 				path1 = data[4 : 4 + 0x280].decode("ascii").strip("\0")
 				path2 = data[0x284 : 0x284 + 0x280].decode("ascii").strip("\0")
 				self.ipc_logger.print("\tFSAMount(%s, %s)" %(path1, path2))
 			elif ioctlv == 15: #FSAReadFile
-				data = vectors[0]
+				data = invecs[0]
 				length, count = struct.unpack_from(">II", data, 8)
 				self.ipc_logger.print("\tFSAReadFile(0x%X * %i) -> 0x%X" %(count, length, result))
 			elif ioctlv == 103:
-				data = vectors[0]
+				data = invecs[0]
 				string1 = data[4 : 4 + 0x280].decode("ascii").strip("\0")
 				string2 = data[0x284 : 0x284 + 0x280].decode("ascii").strip("\0")
 				self.ipc_logger.print("\tFSA_0x67(%s, %s, ...)" %(string1, string2))
@@ -357,14 +364,19 @@ class UNDHandler:
 				
 				fd, ioctlv = args[0], args[1]
 				
-				offs = args[4]
-				vectors = []
-				for i in range(args[2] + args[3]):
-					ptr, size = self.reader.u32(offs), self.reader.u32(offs + 4)
-					vectors.append(self.reader.read(ptr, size))
-					offs += 12
+				invecs = []
+				outvecs = []
+				addr = args[4]
+				for i in range(args[2]):
+					ptr, size = self.reader.u32(addr), self.reader.u32(addr + 4)
+					invecs.append(self.reader.read(ptr, size))
+					addr += 12
+				for i in range(args[3]):
+					ptr, size = self.reader.u32(addr), self.reader.u32(addr + 4)
+					outvecs.append((ptr, size))
+					addr += 12
 
-				self.add_request(pc, syscall, self.ipc_names[fd], fd, ioctlv, vectors)
+				self.add_request(pc, syscall, self.ipc_names[fd], fd, ioctlv, invecs, outvecs)
 
 			elif syscall == self.IOS_IOCTL_ASYNC:
 				args = self.get_args(8)
@@ -377,14 +389,19 @@ class UNDHandler:
 
 				fd, ioctlv = args[0], args[1]
 				
-				offs = args[4]
-				vectors = []
-				for i in range(args[2] + args[3]):
-					ptr, size = self.reader.u32(offs), self.reader.u32(offs + 4)
-					vectors.append(self.reader.read(ptr, size))
-					offs += 12
+				invecs = []
+				outvecs = []
+				addr = args[4]
+				for i in range(args[2]):
+					ptr, size = self.reader.u32(addr), self.reader.u32(addr + 4)
+					invecs.append(self.reader.read(ptr, size))
+					addr += 12
+				for i in range(args[3]):
+					ptr, size = self.reader.u32(addr), self.reader.u32(addr + 4)
+					outvecs.append((ptr, size))
+					addr += 12
 
-				self.add_async(pc, lr, *args[5:], syscall, fd, ioctlv, vectors)
+				self.add_async(pc, lr, *args[5:], syscall, fd, ioctlv, invecs, outvecs)
 
 			elif syscall == self.IOS_RESUME:
 				fd = core.reg(0)
