@@ -482,7 +482,8 @@ class ARMEmulator:
 		
 	def cleanup(self):
 		self.logger.close()
-		self.und_handler.ipc_logger.close()
-		self.und_handler.message_logger.close()
-		self.und_handler.file_logger.close()
+		if "logsys" in sys.argv:
+			self.und_handler.ipc_logger.close()
+			self.und_handler.message_logger.close()
+			self.und_handler.file_logger.close()
 		self.svc_handler.logger.close()
