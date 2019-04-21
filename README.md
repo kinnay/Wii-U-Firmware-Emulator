@@ -42,7 +42,7 @@ Using this emulator you can actually see what IOSU and the PowerPC kernel/loader
 ### PPC only
 | Command | Description |
 | --- | --- |
-| state | Print all GPRs and the most important other registers |
+| state (all) | Print all GPRs and the most important other registers. When 'all' is passed, the segment registers are printed as well. |
 | getspr &lt;spr&gt; | Print a special purpose register |
 | setspr &lt;spr&gt; &lt;value&gt; | Change a special purpose register |
 | setpc &lt;value&gt; | Change the program counter |

@@ -213,11 +213,12 @@ class Module:
 class PPCDebugger:
 	def __init__(self, emulator, core_id):
 		self.emulator = emulator
+		self.mmu = emulator.virtmem
 		self.core = emulator.core
 		self.core_id = core_id
 		
 		self.commands = {
-			"state": Command(0, 0, self.state, "state"),
+			"state": Command(0, 1, self.state, "state"),
 			"getspr": Command(1, 1, self.getspr, "getspr <spr>"),
 			"setspr": Command(2, 2, self.setspr, "setspr <spr> <value>"),
 			"setpc": Command(1, 1, self.setpc, "setpc <value>"),
@@ -249,8 +250,10 @@ class PPCDebugger:
 	def eval(self, source):
 		return eval(source, self.get_context())
 		
-	def state(self):
+	def state(self, mode="basic"):
 		core = self.core
+		mmu = self.mmu
+		
 		print("r0  = %08X r1  = %08X r2  = %08X r3  = %08X r4  = %08X" %(core.reg(0), core.reg(1), core.reg(2), core.reg(3), core.reg(4)))
 		print("r5  = %08X r6  = %08X r7  = %08X r8  = %08X r9  = %08X" %(core.reg(5), core.reg(6), core.reg(7), core.reg(8), core.reg(9)))
 		print("r10 = %08X r11 = %08X r12 = %08X r13 = %08X r14 = %08X" %(core.reg(10), core.reg(11), core.reg(12), core.reg(13), core.reg(14)))
@@ -259,6 +262,13 @@ class PPCDebugger:
 		print("r25 = %08X r26 = %08X r27 = %08X r28 = %08X r29 = %08X" %(core.reg(25), core.reg(26), core.reg(27), core.reg(28), core.reg(29)))
 		print("r30 = %08X r31 = %08X pc  = %08X lr  = %08X ctr = %08X" %(core.reg(30), core.reg(31), core.pc(), core.spr(core.LR), core.spr(core.CTR)))
 		print("cr  = %08X dec = %08X srr0= %08X srr1= %08X" %(core.cr(), core.spr(22), core.spr(26), core.spr(27)))
+		
+		if mode == "all":
+			print()
+			print("sr0  = %08X sr1  = %08X sr2  = %08X sr3  = %08X" %(mmu.get_sr(0), mmu.get_sr(1), mmu.get_sr(2), mmu.get_sr(3)))
+			print("sr4  = %08X sr5  = %08X sr6  = %08X sr7  = %08X" %(mmu.get_sr(4), mmu.get_sr(5), mmu.get_sr(6), mmu.get_sr(7)))
+			print("sr8  = %08X sr9  = %08X sr10 = %08X sr11 = %08X" %(mmu.get_sr(8), mmu.get_sr(9), mmu.get_sr(10), mmu.get_sr(11)))
+			print("sr12 = %08X sr13 = %08X sr14 = %08X sr15 = %08X" %(mmu.get_sr(12), mmu.get_sr(13), mmu.get_sr(14), mmu.get_sr(15)))
 		
 	def getspr(self, spr):
 		value = self.core.spr(int(spr))
