@@ -218,7 +218,7 @@ class PPCDebugger:
 		self.core_id = core_id
 		
 		self.commands = {
-			"state": Command(0, 1, self.state, "state"),
+			"state": Command(0, 1, self.state, "state (all)"),
 			"getspr": Command(1, 1, self.getspr, "getspr <spr>"),
 			"setspr": Command(2, 2, self.setspr, "setspr <spr> <value>"),
 			"setpc": Command(1, 1, self.setpc, "setpc <value>"),
