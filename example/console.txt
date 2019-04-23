@@ -456,8 +456,8 @@ ARM> IOS-NSEC: Built 07/28/15 19:23:58, Image Utilization 96%.
 ARM> IOS-NIM-BOSS: Built 07/28/15 19:23:58, Image Utilization 90%.
 ARM> IOS-FPD: Built 07/28/15 19:23:58, Image Utilization 74%.
 ARM> act_main.cpp,Start,174CRYPTO Open, clientPid=5 nodeId 00000000 titleId 00000000100000f1 perm=0xffffffff
-ARM> ISFS: fs_fat.c(545)FAT INFO (ch WUP): slot 63 / seq 2053377 (Each FAT slot has been updated 32084 times in avr)
-ARM> ISFS: fs_fat.c(545)FAT INFO (ch RVL Compat): slot 6 / seq 303832 (Each FAT slot has been updated 18989 times in avr)
+ARM> ISFS: fs_fat.c(545)FAT INFO (ch WUP): slot 58 / seq 2053564 (Each FAT slot has been updated 32086 times in avr)
+ARM> ISFS: fs_fat.c(545)FAT INFO (ch RVL Compat): slot 8 / seq 303994 (Each FAT slot has been updated 18999 times in avr)
 ARM> ISFS: fs_ops.c(2215)FAT block entries check start
 ARM> ISFS: fs_ops.c(2292)FAT block entries check finished.
 ARM> ISFS: fs_ops.c(2215)FAT block entries check start
@@ -470,16 +470,13 @@ ARM> UHS0 Trace: HubPort(OHCI-0:0/L00/PXX/AXX)-PX: Resetting root hub.
 ARM> UHS0 Trace: HubPort(OHCI-1:0/L00/PXX/AXX)-PX: Resetting root hub.
 ARM> $IOSVersion: OHCI1: 07/28/15 19:23:17 $
 ARM> OHCI1 NOT READY: waiting for OhciPath=/dev/usb/oh1/57e/305
-ARM> OHCI1 NOT READY: waiting for OhciPath=/dev/usb/oh1/57e/305
-ARM> OHCI1: USB device at port 0, vid: 0x057e pid: 0x0305
+ARM> OHCI1 NOT READY: waiting for OOHCI1: USB device at port 0, vid: 0x057e pid: 0x0305
+ARM> hciPath=/dev/usb/oh1/57e/305
 ARM> __ohci_xfer_buildIntrBlkReq(@608)INVALID idx <= 0
 ARM> __ohci_xfer_buildIntrBlkReq(@608)INVALID idx <= 0
-DSI exception: FE000000 at FFF1A050
-DSI exception: F5FFF004 at FFE00980
-DSI exception: FE600000 at FFF09D1C
 PPC> COSREPORT: Set level:7 from syslog level
 PPC>
-PPC> ----------------------------------------------- BPERF: (0/54421735) PPC Init.
+PPC> ----------------------------------------------- BPERF: (0/39586500) PPC Init.
 PPC> Cafe OS SDK Version 2.13.01 Build 68939 Branch sdk_2_13
 PPC> PPC
 PPC> NDEBUG
@@ -503,7 +500,6 @@ PPC> MASTER TITLE ON
 PPC> FLASH
 PPC> ---------------------------------------
 PPC>
-DSI exception: F6000004 at FFF107D4
 ARM> Dongle Host Driver, version 5.91.153.64
 ARM> IOPOS board:11  asic:21/cafe0060  clk:248625000/1942382
 ARM> Host Controller version 1.0, Vendor Revision: 0x00
@@ -524,19 +520,14 @@ ARM> bcmsdh_probe failed
 ARM> Exiting owing to error
 ARM> AUXIL Info: resumed.
 ARM> [ACP]INFO:mxmlAcpPortInitialize:81: Create local heap 37 for mxml.
-DSI exception: FB000000 at FFF09BFC
 PPC> Init&Pre PhysAlloc Start
-DSI exception: FE000014 at FFF19D04
 PPC> Init&Pre PhysAlloc End
 PPC> Init&Pre InitAddrSp Start
 PPC> Init&Pre InitAddrSp End, ret=0
 PPC> Init&Pre memset Start
-DSI exception: FE000014 at FFF19D04
 PPC> Init&Pre memset Done
 PPC> DIAG:+KiRPLLoaderSetup
-DSI exception: 01000000 at FFF09BFC
 PPC> DIAG:-KiRPLLoaderSetup: before no-return call to KiLoadContext (0xEFE09400) (0x01003FFC)
-DSI exception: FA000018 at 0101205C
 PPC> LOADER_Init
 PPC> LOADER_Init  LoadINIT memset compl, sizeof(RPL_STARTINFO)=40.
 PPC> LOADER_Init  LoadINIT TnyHeapSetup.
@@ -549,10 +540,8 @@ PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=coreinit.rpl, aProcId=0, aFil
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end coreinit.rpl.
 ARM> CRYPTO Open, clientPid=9 nodeId 00000000 titleId 00000000100000f4 perm=0xffffffff
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 311552, WaitTime 38194 mics
-DSI exception: F6000000 at 010117B4
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 311552, WaitTime 43374 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
-DSI exception: 10000000 at 01010A18
 ARM> [NET] Init: Nintendo Wii U
 ARM> USBETH Trace: Created interface 100.
 ARM> IP address of wl0 : 0.0.0.0
@@ -567,7 +556,7 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=tve.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end tve.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 82432, WaitTime 74167 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 82432, WaitTime 69212 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -578,7 +567,7 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=nsysccr.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end nsysccr.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 18624, WaitTime 19692 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 18624, WaitTime 19660 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -589,7 +578,7 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=nsysnet.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end nsysnet.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 38784, WaitTime 12581 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 38784, WaitTime 12935 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -600,7 +589,7 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=uvc.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end uvc.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 7744, WaitTime 8559 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 7744, WaitTime 9138 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -611,7 +600,7 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=tcl.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end tcl.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 61824, WaitTime 10489 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 61824, WaitTime 10135 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -622,7 +611,7 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=nn_pdm.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end nn_pdm.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 12032, WaitTime 10843 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 12032, WaitTime 10811 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -633,7 +622,7 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=dmae.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end dmae.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 5760, WaitTime 8398 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 5760, WaitTime 14576 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -644,7 +633,7 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=dc.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end dc.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 47552, WaitTime 7336 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 47552, WaitTime 4247 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -655,7 +644,7 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=vpadbase.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end vpadbase.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 14080, WaitTime 4054 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 14080, WaitTime 14801 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -666,7 +655,7 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=vpad.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end vpad.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 33600, WaitTime 19370 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 33600, WaitTime 6210 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -677,7 +666,7 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=avm.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end avm.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 45568, WaitTime 8430 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 45568, WaitTime 8076 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -688,19 +677,19 @@ PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=gx2.rpl, aProcId=0, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end gx2.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 275456, WaitTime 24197 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 275456, WaitTime 24004 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
+ARM> UHS1 Trace: HubPort(OHCI-2:0/L00/PXX/AXX)-PX: Resetting root hub.
 PPC> sLoadOneShared  LiFixupRelocOneRPL end.
 PPC> sLoadOneShared  Loading Shared RPL snd_core.rpl.
 PPC> sLoadOneShared  LiSyncBnce start snd_core.rpl.
 PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=snd_core.rpl, aProcId=0, aFileType=1, HunkBytes=0
-ARM> UHS1 Trace: HubPort(OHCI-2:0/L00/PXX/AXX)-PX: Resetting root hub.
 PPC> LiBounceOneChunk
 PPC> sLoadOneShared  LiSyncBnce end snd_core.rpl.
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 112448, WaitTime 11326 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 112448, WaitTime 11969 mics
 PPC> sLoadOneShared  LiSetupOneRPL start.
 PPC> sLoadOneShared  LiSetupOneRPL end.
 PPC> sLoadOneShared  LiFixupRelocOneRPL start.
@@ -715,7 +704,7 @@ PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=root.rpx, aProcId=1, aFileTyp
 PPC> LiBounceOneChunk
 PPC> LOADER_Init  LoadINIT BncLoad ret, pName=root.rpx, mProcId=1, &pLoaded=0xEFE05764, err=0.
 ARM> resetting DRH
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 1719552, WaitTime 91253 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 1719552, WaitTime 88744 mics
 PPC> LOADER_Init  LoadINIT Setup1RPL ret, mpName=root, aProcId=1, mpCodeHeapTracking=268425152, err=0.
 PPC> LiLoadCoreIntoProcess
 PPC> LiLoadCoreIntoProcess
@@ -723,13 +712,8 @@ PPC> LOADER_Init  LoadINIT LdCrIntoPc ret, mpName=root, aProcId=1, mpCodeHeapTra
 PPC> LOADER_Init
 PPC> DIAG:+KiProcess_FinishInitAndPreload
 PPC> KiCblRegisterBlocks() completed with status 0:-4.
-DSI exception: F8000000 at FFF09D1C
 PPC> Kernel is loading shared data...
-DSI exception: E0000000 at FFF09D1C
-DSI exception: F4000000 at FFF09D1C
-DSI exception: 106A73B8 at FFF08178
 PPC> DIAG:-KiProcess_FinishInitAndPreload: before no-return call to KiInitKernelFinish
-DSI exception: FE000014 at FFF19D04
 PPC> DIAG:+KiInitKernelFinish
 PPC> VVVVVVV----- PPC Kernel Waiting -----VVVVVVV
 PPC> ^^^^^^^----- PPC Kernel Release -----^^^^^^^
@@ -743,14 +727,9 @@ PPC> Warnings, Notices, and Verbose Enabled
 PPC>
 PPC> UserMode Core & Thread Initialization (3 Cores)
 PPC>   Core 1 Complete, Default Thread 0x100457E0
-DSI exception: 106A73A8 at 0101FAFC
 PPC>   Core 0 Complete, MSR 0x00005072, Default Thread 0x10045140
-DSI exception: FE000014 at FFF19D04
-DSI exception: 106AF3A8 at 0101FAFC
 PPC>   Core 2 Complete, MSR 0x00005072, Default Thread 0x10045E80
-DSI exception: FE000014 at FFF19D04
 PPC> Clearing Process MEM2 Arena...
-DSI exception: 11000000 at 01024078
 PPC> MEM2 Arena clear complete, size 23 MB, 19ms
 PPC> RPL_LAYOUT:sysheap,SYSHEAP,start,="0106b3000"
 PPC> RPL_LAYOUT:sysheap,SYSHEAP,end,="0106b8000"
@@ -758,7 +737,6 @@ PPC> RPL_SYSHEAP:Event,Change,Hex Addr,Bytes,Available
 PPC> RPL_SYSHEAP:SYSHEAP START,CREATE,="0106b3000",16384
 PPC> SYSTEM_HEAP:Event,Change,Hex Addr,Bytes,Available
 PPC> SYSTEM_HEAP:SYSHEAP START,CREATE,="0106b3000",16384
-DSI exception: E0000000 at 01024078
 PPC> UserMode OS library build date: Jul 28 2015 19:57:03
 PPC> __AppFlags: 0x00000e00
 PPC>
@@ -775,14 +753,9 @@ PPC> SYSTEM_HEAP:3,ALLOC,="0106b3134",-263
 PPC> RPL_SYSHEAP:RPL_FILE_INFO,ALLOC,="0106b3134",-263
 PPC> SYSTEM_HEAP:4,ALLOC,="0106b3250",-54
 PPC> RPL_SYSHEAP:RPL_NOTIFY_NAME,ALLOC,="0106b3250",-54
-DSI exception: FAFCBD00 at 0102AB7C
 PPC> RPL_SYSHEAP:RPL_SEC_INFO,FREE,="0106b6ee0",288
 PPC> SYSTEM_HEAP:0,FREE,="0106b6ee0",0
-DSI exception: F4000000 at 0104B9D0
-DSI exception: E0000000 at 0104B9D0
-DSI exception: 1004F88C at 0104B9F4
 PPC> DEFAULT_HEAP:Event,Change,Hex Addr,Bytes,Available
-DSI exception: FE000014 at FFF19D04
 PPC> DEFAULT_HEAP:DEFAULT HEAP START,CREATE,="0106b8000",24543232
 PPC> SYSTEM_HEAP:5,ALLOC,="0106b329c",-148
 PPC> RPL_SYSHEAP:RPL_DATA,ALLOC,="0106b329c",-148
@@ -847,7 +820,7 @@ PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b375c",-164
 PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=nsysuvd.rpl, aProcId=1, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 3328, WaitTime 4923 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 3328, WaitTime 3732 mics
 PPC> SYSTEM_HEAP:22,ALLOC,="0106b6d9c",-256
 PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6d9c",-256
 PPC> DEFAULT_HEAP:1,ALLOC,="0106b8184",-261
@@ -1407,7 +1380,7 @@ PPC> RPL_SYSHEAP:RPL_TEMP_DATA,ALLOC,="0106b4558",-164
 PPC> LiBounceOneChunk
 PPC> LiBounceOneChunk  LiBounceOneChunk apFileName=padscore.rpl, aProcId=1, aFileType=1, HunkBytes=0
 PPC> LiBounceOneChunk
-PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 112768, WaitTime 11004 mics
+PPC> LiWaitOneChunk  LiWaitOneChunk: ret 0, gotBytes 112768, WaitTime 12645 mics
 PPC> SYSTEM_HEAP:127,ALLOC,="0106b6d9c",-256
 PPC> RPL_SYSHEAP:RPL_SEC_INFO,ALLOC,="0106b6d9c",-256
 PPC> DEFAULT_HEAP:15,ALLOC,="0106c0300",-260
@@ -1658,13 +1631,13 @@ PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b4f18",-76
 PPC> OSDriver_Register: Reg=Clipboard, ms=0
 PPC> sOnAcquireForegroundOnCore: PIni=MEM, <!ms 0
 PPC> sOnAcquireForegroundOnCore: PIni=Cache, <!ms 0
-PPC> UCReadSysConfig(slc:cos.check_active_threads): 6 ms
+PPC> UCReadSysConfig(slc:cos.check_active_threads): 5 ms
 PPC> SYSTEM_HEAP:170,ALLOC,="0106b4f78",-76
 PPC> RPL_SYSHEAP:CACHED_SETTING,ALLOC,="0106b4f78",-76
-PPC> UCReadSysConfig(slc:cos.spin_after_crash): 10 ms
+PPC> UCReadSysConfig(slc:cos.spin_after_crash): 9 ms
 PPC> SYSTEM_HEAP:171,ALLOC,="0106b4fd8",-76
 PPC> RPL_SYSHEAP:CACHED_SETTING,ALLOC,="0106b4fd8",-76
-PPC> UCReadSysConfig(slc:cos.time_advance): 8 ms
+PPC> UCReadSysConfig(slc:cos.time_advance): 9 ms
 PPC> SYSTEM_HEAP:172,ALLOC,="0106b5038",-76
 PPC> RPL_SYSHEAP:CACHED_SETTING,ALLOC,="0106b5038",-76
 PPC> UCReadSysConfig(slc:cos.sdk_ver_override): 9 ms
@@ -1676,7 +1649,7 @@ PPC> SYSTEM_HEAP:174,ALLOC,="0106b50f8",-76
 PPC> RPL_SYSHEAP:CACHED_SETTING,ALLOC,="0106b50f8",-76
 PPC> OSSetting_CrashDumpType 0,
 PPC> MINI dump after crash
-PPC> sOnAcquireForegroundOnCore: PIni=SETTING, <!ms 44
+PPC> sOnAcquireForegroundOnCore: PIni=SETTING, <!ms 45
 PPC> sOnAcquireForegroundOnCore: PIni=NETWORK, <!ms 0
 PPC> TCL: Build date - Jul 28 2015 19:57:50
 PPC> TCL(1): Master Init
@@ -1691,22 +1664,21 @@ PPC> TCL: Texture L2 full size
 PPC> TCL: Texture L1 full size (8k)
 PPC> TCL: full 2 RB
 PPC> TCL: GB_TILING_CONFIG is 00044902
-DSI exception: E8000000 at 010E4004
 PPC> TCL: consumed timestamp FAIL expected 0000000000000001 got 0000000000000000
 PPC> TCL: DRMDMA consumed timestamp FAIL
 PPC> TCL(1): init DONE
 PPC> sOnAcquireForegroundOnCore: PIni=TCL, <!ms 31
-PPC> UCReadSysConfig(DRCCfg.rumble): 9 ms
-PPC> sOnAcquireForegroundOnCore: PIni=CCR, <!ms 10
+PPC> UCReadSysConfig(DRCCfg.rumble): 6 ms
+PPC> sOnAcquireForegroundOnCore: PIni=CCR, <!ms 7
 PPC> AVM: Build date - Jul 28 2015 19:58:01
-PPC> UCReadSysConfig(ram:avmflg): 0 ms
+PPC> UCReadSysConfig(ram:avmflg): 1 ms
 PPC> TVE: Build date - Jul 28 2015 19:57:54
-PPC> UCReadSysConfig(hdmiEDID): 6 ms
-PPC> UCReadSysConfig(AVMCfg): 8 ms
+PPC> UCReadSysConfig(hdmiEDID): 7 ms
+PPC> UCReadSysConfig(AVMCfg): 11 ms
 PPC> __AVMCDCInit,CCRCDCSysGetInfo failed returned -1179519
 PPC> DC: Build date - Jul 28 2015 19:57:55
-PPC> UCReadSysConfig(AVMCfg): 6 ms
 PPC> UCReadSysConfig(AVMCfg): 9 ms
+PPC> UCReadSysConfig(AVMCfg): 6 ms
 PPC> UCReadSysConfig(AVMCfg): 7 ms
 PPC> Called CCRCDCSysSetAVMode(16) returned: -1179519
 PPC> Called CCRCDCSysSetAVMode(255) returned: -1179519
@@ -1717,9 +1689,9 @@ PPC> AVM: TV Color DC:RGB,
 PPC>  TVE:RGB
 PPC> AVM: TV Aspect 16:9
 PPC> VPADInit() depricated, no need to call
-PPC> sOnAcquireForegroundOnCore: PIni=AVM, <!ms 185
-PPC> VPAD Init end, BPERF: (0/17073057) Title PID=1
-PPC> sOnAcquireForegroundOnCore: PIni=VPAD, <!ms 0
+PPC> sOnAcquireForegroundOnCore: PIni=AVM, <!ms 186
+PPC> VPAD Init end, BPERF: (0/17073675) Title PID=1
+PPC> sOnAcquireForegroundOnCore: PIni=VPAD, <!ms 1
 PPC> sOnAcquireForegroundOnCore: PIni=NSYSUVD, <!ms 0
 PPC> sOnAcquireForegroundOnCore: PIni=INPT, <!ms 1
 PPC> sOnAcquireForegroundOnCore: PIni=ACPLoad, <!ms 0
@@ -1733,7 +1705,6 @@ PPC> UCReadSysConfig(ram:audio): 1 ms
 PPC> ROOT: Read audio relaunch value 0
 PPC> ROOT: OSID 0x000500101000400A
 PPC> Info: Calculating cold boot font CRCs on core:0
-DSI exception: F8000000 at FFF151AC
 PPC> SYSTEM_HEAP:175,ALLOC,="0106b5158",-76
 PPC> RPL_SYSHEAP:DRIVER_REG,ALLOC,="0106b5158",-76
 PPC> OSDriver_Register: Reg=PAD, ms=0
@@ -1745,11 +1716,11 @@ PPC> OSDriver_Register: Reg=WPAD, ms=0
 PPC> WPAD: Master Init
 PPC> VPADInit() depricated, no need to call
 PPC> UCReadSysConfig(cos.cosreport_upid_mask): 86 ms
-PPC> UCReadSysConfig(cos.cosreport_module_mask): 8 ms
+PPC> UCReadSysConfig(cos.cosreport_module_mask): 7 ms
 PPC> UCReadSysConfig(cos.cosreport_level): 5 ms
-PPC> UCReadSysConfig(cos.crash_detail_level): 87 ms
-PPC> UCReadSysConfig(cos.crash_recovery): 6 ms
-PPC> UCReadSysConfig(cos.timestamp_level): 5 ms
+PPC> UCReadSysConfig(cos.crash_detail_level): 88 ms
+PPC> UCReadSysConfig(cos.crash_recovery): 11 ms
+PPC> UCReadSysConfig(cos.timestamp_level): 90 ms
 PPC> DEFAULT_HEAP:18,ALLOC,="010787000",-262144
 PPC> GX2: Build date - Jul 28 2015 19:58:09
 PPC> GX2: Init on core 1
