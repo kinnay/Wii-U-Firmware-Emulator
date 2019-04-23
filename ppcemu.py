@@ -155,7 +155,8 @@ class ExceptionHandler:
 		self.core = core
 
 	def handle_dsi(self, addr, write):
-		print("DSI exception: %08X at %08X" %(addr, self.core.pc()))
+		if not "noprint" in sys.argv:
+			print("DSI exception: %08X at %08X" %(addr, self.core.pc()))
 		self.core.setspr(self.core.DAR, addr)
 		self.core.setspr(self.core.DSISR, 0x40000000 | (write * 0x02000000))
 		self.core.trigger_exception(self.core.DSI)
