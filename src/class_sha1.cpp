@@ -11,7 +11,6 @@ SHA1::SHA1() {
 	swapEndian = Endian::getSystemEndian() != Endian::Big;
 }
 
-#include <cstdio>
 void SHA1::processBlock(void *data) {
 	uint32_t w[80];
 	if (swapEndian) {

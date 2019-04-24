@@ -190,7 +190,6 @@ class UNDHandler:
 					self.handle_async_result(pc, req[1], req[4], result, *req[5:])
 					self.async_reqs.remove(req)
 					break
-			
 		
 		elif syscall == self.IOS_OPEN:
 			self.ipc_logger.print("[%s:%08X] OPEN(%s, %i) -> %08X" %(module, lr, *args, result))

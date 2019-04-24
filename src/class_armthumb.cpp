@@ -260,54 +260,38 @@ bool Thumb_LoadStoreImmOffs(ARMThumbInstr *instr, ARMInterpreter *cpu) {
 
 bool Thumb_LoadStoreRegOffs(ARMThumbInstr *instr, ARMInterpreter *cpu) {
 	int reg = instr->value & 7;
+	uint32_t regval = cpu->core->regs[reg];
 	uint32_t addr = cpu->core->regs[(instr->value >> 3) & 7];
 	addr += cpu->core->regs[(instr->value >> 6) & 7];
 	
-	if ((instr->value >> 10) & 1) {
-		if (instr->l()) {
-			uint8_t value;
-			if (!cpu->read<uint8_t>(addr, &value)) return false;
-			cpu->core->regs[reg] = value;
-			return true;
-		}
-		return cpu->write<uint8_t>(addr, cpu->core->regs[reg]);
+	int opcode = (instr->value >> 9) & 7;
+	if (opcode == 0) return cpu->write<uint32_t>(addr, regval);
+	if (opcode == 1) return cpu->write<uint16_t>(addr, regval);
+	if (opcode == 2) return cpu->write<uint8_t>(addr, regval);
+	if (opcode == 3) {
+		int8_t value;
+		if (!cpu->read<int8_t>(addr, &value)) return false;
+		cpu->core->regs[reg] = value;
+		return true;
 	}
-	
-	if (instr->l()) {
-		return cpu->read<uint32_t>(addr, &cpu->core->regs[reg]);
-	}
-	return cpu->write<uint32_t>(addr, cpu->core->regs[reg]);
-}
-
-bool Thumb_LoadStoreSigned(ARMThumbInstr *instr, ARMInterpreter *cpu) {
-	int reg = instr->value & 7;
-	uint32_t addr = cpu->core->regs[(instr->value >> 3) & 7];
-	addr += cpu->core->regs[(instr->value >> 6) & 7];
-	
-	if (instr->h()) {
-		if (instr->s()) {
-			int16_t value;
-			if (!cpu->read<int16_t>(addr, &value)) return false;
-			cpu->core->regs[reg] = value;
-			return true;
-		}
+	if (opcode == 4) return cpu->read<uint32_t>(addr, &cpu->core->regs[reg]);
+	if (opcode == 5) {
 		uint16_t value;
 		if (!cpu->read<uint16_t>(addr, &value)) return false;
 		cpu->core->regs[reg] = value;
 		return true;
 	}
-	else {
-		if (instr->s()) {
-			int8_t value;
-			if (!cpu->read<int8_t>(addr, &value)) return false;
-			cpu->core->regs[reg] = value;
-			return true;
-		}
+	if (opcode == 6) {
 		uint8_t value;
 		if (!cpu->read<uint8_t>(addr, &value)) return false;
 		cpu->core->regs[reg] = value;
 		return true;
 	}
+	
+	int16_t value;
+	if (!cpu->read<int16_t>(addr, &value)) return false;
+	cpu->core->regs[reg] = value;
+	return true;
 }
 
 bool Thumb_LoadStoreHalf(ARMThumbInstr *instr, ARMInterpreter *cpu) {
@@ -405,12 +389,7 @@ bool ARMThumbInstr::execute(ARMInterpreter *cpu) {
 	if ((value >> 8) == 0x47) return Thumb_BranchExchange(this, cpu);
 	if ((value >> 10) == 0x11) return Thumb_SpecialDataProcessing(this, cpu);
 	if ((value >> 11) == 9) return Thumb_LoadPCRelative(this, cpu);
-	if ((value >> 12) == 5) {
-		if (value & 0x200) {
-			return Thumb_LoadStoreSigned(this, cpu);
-		}
-		return Thumb_LoadStoreRegOffs(this, cpu);
-	}
+	if ((value >> 12) == 5) return Thumb_LoadStoreRegOffs(this, cpu);
 	if ((value >> 13) == 3) return Thumb_LoadStoreImmOffs(this, cpu);
 	if ((value >> 12) == 8) return Thumb_LoadStoreHalf(this, cpu);
 	if ((value >> 12) == 9) return Thumb_LoadStoreStack(this, cpu);
