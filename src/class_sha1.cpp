@@ -7,19 +7,10 @@ uint32_t rol(uint32_t value, int bits) {
 	return (value << bits) | (value >> (32 - bits));
 }
 
-SHA1::SHA1() {
-	swapEndian = Endian::getSystemEndian() != Endian::Big;
-}
-
 void SHA1::processBlock(void *data) {
 	uint32_t w[80];
-	if (swapEndian) {
-		for (int i = 0; i < 16; i++) {
-			w[i] = Endian::swap32(((uint32_t *)data)[i]);
-		}
-	}
-	else {
-		memcpy(w, data, 16 * 4);
+	for (int i = 0; i < 16; i++) {
+		w[i] = Endian::swap32(((uint32_t *)data)[i]);
 	}
 	
 	for (int i = 16; i < 80; i++) {

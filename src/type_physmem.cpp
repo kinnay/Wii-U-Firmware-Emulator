@@ -1,6 +1,5 @@
 
 #include <Python.h>
-#include "type_iphysmem.h"
 #include "type_physmem.h"
 #include "class_physmem.h"
 #include "errors.h"
@@ -30,7 +29,7 @@ void PhysMem_dealloc(PhysMemObj *self) {
 }
 
 PyObject *PhysMem_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
-	PhysMemObj *self = (PhysMemObj *)IPhysMemType.tp_new(type, args, kwargs);
+	PhysMemObj *self = (PhysMemObj *)type->tp_alloc(type, 0);
 	if (self) {
 		self->object = NULL;
 	}
@@ -45,7 +44,6 @@ int PhysMem_init(PhysMemObj *self, PyObject *args, PyObject *kwargs) {
 		PyErr_NoMemory();
 		return -1;
 	}
-	self->super.object = self->object;
 	return 0;
 }
 
@@ -134,9 +132,52 @@ PyObject *PhysMem_addSpecial(PhysMemObj *self, PyObject *args) {
 	Py_RETURN_NONE;
 }
 
+PyObject *PhysMem_read(PhysMemObj *self, PyObject *args) {
+	CHECK_INIT(self->object);
+	
+	uint32_t addr;
+	int length;
+	if (!PyArg_ParseTuple(args, "Ii", &addr, &length)) return NULL;
+	
+	if (!length) {
+		return PyBytes_FromStringAndSize(NULL, 0);
+	}
+	
+	char *buffer = new char[length];
+	if (!buffer) {
+		PyErr_NoMemory();
+		return NULL;
+	}
+	
+	if (self->object->read(addr, buffer, length) < 0) {
+		delete buffer;
+		return NULL;
+	}
+	
+	PyObject *result = PyBytes_FromStringAndSize(buffer, length);
+	delete buffer;
+	
+	return result;
+}
+
+PyObject *PhysMem_write(PhysMemObj *self, PyObject *args) {
+	CHECK_INIT(self->object);
+	
+	uint32_t addr;
+	void *data;
+	int length;
+	if (!PyArg_ParseTuple(args, "Iy#", &addr, &data, &length)) return NULL;
+	if (length) {
+		if (self->object->write(addr, data, length) < 0) return NULL;
+	}
+	Py_RETURN_NONE;
+}
+
 PyMethodDef PhysMem_methods[] = {
 	{"add_range", (PyCFunction)PhysMem_addRange, METH_VARARGS, NULL},
 	{"add_special", (PyCFunction)PhysMem_addSpecial, METH_VARARGS, NULL},
+	{"read", (PyCFunction)PhysMem_read, METH_VARARGS, NULL},
+	{"write", (PyCFunction)PhysMem_write, METH_VARARGS, NULL},
 	{NULL}
 };
 
@@ -171,7 +212,7 @@ PyTypeObject PhysMemType = {
 	PhysMem_methods, //methods
 	0, //members
 	0, //getset
-	&IPhysMemType, //base
+	0, //base
 	0, //dict
 	0, //descr_get
 	0, //descr_set

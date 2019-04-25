@@ -3,10 +3,9 @@
 #include "class_endian.h"
 #include "errors.h"
 
-PPCMMU::PPCMMU(IPhysicalMemory *physmem, bool bigEndian)
+PPCMMU::PPCMMU(PhysicalMemory *physmem)
 	: physmem(physmem), sdr1(0), dbatu{}, dbatl{}, ibatu{}, ibatl{}, sr{}
 {
-	swapEndian = bigEndian != (Endian::getSystemEndian() == Endian::Big);
 	setRpnSize(20);
 }
 
@@ -19,8 +18,12 @@ void PPCMMU::setRpnSize(int bits) {
 }
 
 bool PPCMMU::read32(uint32_t addr, uint32_t *value) {
+	if (addr >= 0xFFE00000) {
+		addr = addr - 0xFFE00000 + 0x08000000;
+	}
+	
 	if (physmem->read(addr, value) < 0) return false;
-	if (swapEndian) Endian::swap(value);
+	Endian::swap(value);
 	return true;
 }
 
@@ -28,21 +31,21 @@ bool PPCMMU::translate(uint32_t *addr, uint32_t length, Access type) {
 	if (type == Instruction) {
 		if (!instrTranslation) return true;
 		if (cacheEnabled) {
-			if (cache.translate(addr, length, type)) return true;
+			if (cache.translate(addr, type)) return true;
 		}
 		if (translateBAT(addr, ibatu, ibatl, type)) return true;
 	}
 	else {
 		if (!dataTranslation) return true;
 		if (cacheEnabled) {
-			if (cache.translate(addr, length, type)) return true;
+			if (cache.translate(addr, type)) return true;
 		}
 		if (translateBAT(addr, dbatu, dbatl, type)) return true;
 	}
 	
 	uint32_t segment = sr[*addr >> 28];
 	if (segment >> 31) {
-		NotImplementedError("Direct-store segment: addr=0x%08x length=0x%08x", *addr, length);
+		RuntimeError("Direct-store segment: addr=0x%08x length=0x%08x", *addr, length);
 		return false;
 	}
 

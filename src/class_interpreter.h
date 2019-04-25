@@ -1,8 +1,9 @@
 
 #pragma once
 
-#include "interface_physmem.h"
+#include "class_physmem.h"
 #include "interface_virtmem.h"
+#include "class_memcache.h"
 #include "class_endian.h"
 #include "errors.h"
 
@@ -10,44 +11,35 @@
 #include <vector>
 #include <cstdint>
 
-const int iCacheSize = 0x30;
-
 class Interpreter {
-	public:
+public:
 	typedef std::function<bool(uint32_t addr, bool isWrite)> DataErrorCB;
 	typedef std::function<bool(uint32_t addr)> FetchErrorCB;
 	typedef std::function<bool(uint32_t addr)> BreakpointCB;
 	typedef std::function<bool(uint32_t addr, bool isWrite)> WatchpointCB;
 	typedef std::function<bool()> AlarmCB;
 	
-	Interpreter(IPhysicalMemory *physmem, IVirtualMemory *virtmem, bool bigEndian);
+	Interpreter(PhysicalMemory *physmem, IVirtualMemory *virtmem, bool mirror);
 	
 	template <class T>
 	bool readCode(uint32_t addr, T *value) {
-		if (iCacheEnabled) {
-			if (iCacheValid && iCacheStart <= addr && addr < iCacheStart + iCacheSize) {
-				//Cache hit
-				*value = *(T *)(&instructionCache[addr - iCacheStart]);
-				if (swapEndian) Endian::swap(value);
-				return true;
+		if (instructionCache.enabled) {
+			if (instructionCache.get(addr, value)) return true;
+			
+			uint32_t physAddr = addr & ~CacheMask;
+			if (!translateAddr(&physAddr, sizeof(T), IVirtualMemory::Instruction)) {
+				handleMemoryError(addr, false, true);
+				return false;
 			}
 			
-			else {
-				//Cache miss
-				if (virtmem->translate(&addr, iCacheSize, IVirtualMemory::Instruction)) {
-					if (physmem->read(addr, instructionCache, iCacheSize) == 0) {
-						iCacheStart = addr;
-						iCacheValid = true;
-						*value = *(T *)(&instructionCache[addr - iCacheStart]);
-						if (swapEndian) Endian::swap(value);
-						return true;
-					}
-				}
-				ErrorClear();
+			void *buffer = instructionCache.alloc(addr);
+			if (physmem->read(physAddr, buffer, CacheSize) == 0) {
+				instructionCache.enable(addr);
 			}
+			ErrorClear();
 		}
 		
-		if (!virtmem->translate(&addr, sizeof(T), IVirtualMemory::Instruction)) {
+		if (!translateAddr(&addr, sizeof(T), IVirtualMemory::Instruction)) {
 			handleMemoryError(addr, false, true);
 			return false;
 		}
@@ -59,7 +51,7 @@ class Interpreter {
 			return false;
 		}
 		
-		if (swapEndian) Endian::swap(value);
+		Endian::swap(value);
 		return true;
 	}
 	
@@ -69,7 +61,7 @@ class Interpreter {
 		checkWatchpoints(false, addr, sizeof(T));
 		#endif
 
-		if (!virtmem->translate(&addr, sizeof(T), IVirtualMemory::DataRead)) {
+		if (!translateAddr(&addr, sizeof(T), IVirtualMemory::DataRead)) {
 			handleMemoryError(addr, false, false);
 			return false;
 		}
@@ -80,7 +72,7 @@ class Interpreter {
 			handleMemoryError(addr, false, false);
 			return false;
 		}
-		if (swapEndian) Endian::swap<sizeof(T)>(value);
+		Endian::swap<sizeof(T)>(value);
 		return true;
 	}
 
@@ -90,8 +82,8 @@ class Interpreter {
 		checkWatchpoints(true, addr, sizeof(T));
 		#endif
 		
-		if (swapEndian) Endian::swap<sizeof(T)>(&value);
-		if (!virtmem->translate(&addr, sizeof(T), IVirtualMemory::DataWrite)) {
+		Endian::swap<sizeof(T)>(&value);
+		if (!translateAddr(&addr, sizeof(T), IVirtualMemory::DataWrite)) {
 			handleMemoryError(addr, true, false);
 			return false;
 		}
@@ -124,11 +116,15 @@ class Interpreter {
 	void invalidateICache();
 	void invalidateMMUCache();
 	
-	protected:
-	IPhysicalMemory *physmem;
+protected:
+	PhysicalMemory *physmem;
 	IVirtualMemory *virtmem;
 	
-	private:
+private:
+	bool translateAddr(uint32_t *addr, uint32_t length, IVirtualMemory::Access access);
+	void checkWatchpoints(bool write, uint32_t addr, uint32_t length);
+	void handleMemoryError(uint32_t addr, bool isWrite, bool isCode);
+	
 	DataErrorCB dataErrorCB;
 	FetchErrorCB fetchErrorCB;
 	
@@ -144,13 +140,7 @@ class Interpreter {
 	uint32_t alarmInterval;
 	AlarmCB alarmCB;
 	
-	uint8_t instructionCache[iCacheSize];
-	uint32_t iCacheStart;
-	bool iCacheEnabled;
-	bool iCacheValid;
+	bool mirror;
 	
-	bool swapEndian;
-	
-	void checkWatchpoints(bool write, uint32_t addr, uint32_t length);
-	void handleMemoryError(uint32_t addr, bool isWrite, bool isCode);
+	MemoryCache instructionCache;
 };

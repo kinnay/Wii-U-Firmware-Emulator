@@ -1,7 +1,7 @@
 
 #include <Python.h>
 #include "type_ivirtmem.h"
-#include "type_iphysmem.h"
+#include "type_physmem.h"
 #include "type_armmmu.h"
 #include "class_armmmu.h"
 #include "errors.h"
@@ -37,9 +37,8 @@ PyObject *ARMMMU_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
 int ARMMMU_init(ARMMMUObj *self, PyObject *args, PyObject *kwargs) {
 	CHECK_NOT_INIT(self->object);
 	
-	IPhysMemObj *physmem;
-	bool bigEndian;
-	if (!PyArg_ParseTuple(args, "O!p", &IPhysMemType, &physmem, &bigEndian)) {
+	PhysMemObj *physmem;
+	if (!PyArg_ParseTuple(args, "O!", &PhysMemType, &physmem)) {
 		return -1;
 	}
 	
@@ -48,7 +47,7 @@ int ARMMMU_init(ARMMMUObj *self, PyObject *args, PyObject *kwargs) {
 		return -1;
 	}
 	
-	self->object = new ARMMMU(physmem->object, bigEndian);
+	self->object = new ARMMMU(physmem->object);
 	if (!self->object) {
 		PyErr_NoMemory();
 		return -1;

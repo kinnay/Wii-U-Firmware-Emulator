@@ -3,10 +3,8 @@
 #include "class_endian.h"
 #include "errors.h"
 
-Interpreter::Interpreter(IPhysicalMemory *physmem, IVirtualMemory *virtmem, bool bigEndian)
-	: physmem(physmem), virtmem(virtmem), watchpointHit(false), iCacheValid(false), iCacheEnabled(false) {
-	swapEndian = bigEndian != (Endian::getSystemEndian() == Endian::Big);
-}
+Interpreter::Interpreter(PhysicalMemory *physmem, IVirtualMemory *virtmem, bool mirror)
+	: physmem(physmem), virtmem(virtmem), watchpointHit(false), mirror(mirror) {}
 
 void Interpreter::checkWatchpoints(bool write, uint32_t addr, uint32_t length) {
 	auto &watchpoints = write ? watchpointsWrite : watchpointsRead;
@@ -34,15 +32,24 @@ void Interpreter::setAlarm(uint32_t alarm, AlarmCB callback) {
 }
 
 void Interpreter::setICacheEnabled(bool enabled) {
-	iCacheEnabled = enabled;
+	instructionCache.enabled = enabled;
 }
 
 void Interpreter::invalidateICache() {
-	iCacheValid = false;
+	instructionCache.invalidate();
 }
 
 void Interpreter::invalidateMMUCache() {
 	virtmem->invalidateCache();
+}
+
+bool Interpreter::translateAddr(uint32_t *addr, uint32_t length, IVirtualMemory::Access access) {
+	if (!virtmem->translate(addr, length, access)) return false;
+	
+	if (mirror && *addr >= 0xFFE00000) {
+		*addr = *addr - 0xFFE00000 + 0x08000000;
+	}
+	return true;
 }
 
 void Interpreter::handleMemoryError(uint32_t addr, bool isWrite, bool isCode) {

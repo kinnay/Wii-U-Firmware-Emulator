@@ -2,11 +2,8 @@
 #include <Python.h>
 #include "type_elffile.h"
 #include "type_elfprogram.h"
-#include "type_iphysmem.h"
 #include "type_physmem.h"
-#include "type_physmirror.h"
 #include "type_ivirtmem.h"
-#include "type_virtmem.h"
 #include "type_armmmu.h"
 #include "type_armcore.h"
 #include "type_arminterp.h"
@@ -38,11 +35,8 @@ PyMODINIT_FUNC PyInit_pyemu() {
 	Errors_Init();
 	if (!ELFFileType_Init()) return NULL;
 	if (!ELFProgramType_Init()) return NULL;
-	if (!IPhysMemType_Init()) return NULL;
 	if (!PhysMemType_Init()) return NULL;
-	if (!PhysMirrorType_Init()) return NULL;
 	if (!IVirtMemType_Init()) return NULL;
-	if (!VirtMemType_Init()) return NULL;
 	if (!InterpreterType_Init()) return NULL;
 	if (!ARMMMUType_Init()) return NULL;
 	if (!ARMCoreType_Init()) return NULL;
@@ -60,11 +54,8 @@ PyMODINIT_FUNC PyInit_pyemu() {
 	ADD("ParseError", MyExc_ParseError);
 	ADD("ELFFile", &ELFFileType);
 	ADD("ELFProgram", &ELFProgramType);
-	ADD("IPhysicalMemory", &IPhysMemType);
 	ADD("PhysicalMemory", &PhysMemType);
-	ADD("PhysicalMirror", &PhysMirrorType);
 	ADD("IVirtualMemory", &IVirtMemType);
-	ADD("VirtualMemory", &VirtMemType);
 	ADD("Interpreter", &InterpreterType);
 	ADD("ARMMMU", &ARMMMUType);
 	ADD("ARMCore", &ARMCoreType);

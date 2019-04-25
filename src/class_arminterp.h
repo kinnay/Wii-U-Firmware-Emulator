@@ -4,7 +4,7 @@
 #include "class_interpreter.h"
 #include "class_armcore.h"
 #include "interface_virtmem.h"
-#include "interface_physmem.h"
+#include "class_physmem.h"
 #include <functional>
 
 class ARMInterpreter : public Interpreter {
@@ -18,7 +18,7 @@ class ARMInterpreter : public Interpreter {
 		EQ, NE, CS, CC, MI, PL, VS, VC, HI, LS, GE, LT, GT, LE, AL
 	};
 	
-	ARMInterpreter(ARMCore *core, IPhysicalMemory *physmem, IVirtualMemory *virtmem, bool bigEndian);
+	ARMInterpreter(ARMCore *core, PhysicalMemory *physmem, IVirtualMemory *virtmem);
 	bool step();
 	bool stepARM();
 	bool stepThumb();

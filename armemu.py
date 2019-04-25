@@ -453,15 +453,15 @@ class ARMEmulator:
 		self.emulator = emulator
 		self.core = pyemu.ARMCore()
 		self.physmem = physmem
-		self.virtmem = pyemu.ARMMMU(physmem, True)
+		self.virtmem = pyemu.ARMMMU(physmem)
 		self.virtmem.set_cache_enabled(True)
-		self.interpreter = pyemu.ARMInterpreter(self.core, physmem, self.virtmem, True)
+		self.interpreter = pyemu.ARMInterpreter(self.core, physmem, self.virtmem)
 		self.interpreter.set_icache_enabled(True)
 		self.interpreter.set_alarm(5000, hw.latte.update_timer)
 		self.interrupts = hw.latte.irq_arm
 		
-		self.mem_reader = debug.MemoryReader(physmem, self.virtmem)
-		self.mem_writer = debug.MemoryWriter(physmem, self.virtmem)
+		self.mem_reader = debug.MemoryReader(physmem, self.virtmem, False)
+		self.mem_writer = debug.MemoryWriter(physmem, self.virtmem, False)
 		self.breakpoints = debug.BreakpointHandler(self.interpreter)
 		self.coproc_handler = CoprocHandler(self.interpreter, self.core, self.virtmem)
 		self.svc_handler = SVCHandler(self.core, self.mem_reader, self.mem_writer)

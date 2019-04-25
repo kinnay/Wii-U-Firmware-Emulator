@@ -5,7 +5,7 @@
 #include <cstdint>
 
 class IVirtualMemory {
-	public:
+public:
 	enum Access {
 		Instruction,
 		DataRead,
@@ -23,7 +23,7 @@ class IVirtualMemory {
 	void setCacheEnabled(bool enabled);
 	void invalidateCache();
 	
-	protected:
+protected:
 	bool enabled;
 	bool dataTranslation;
 	bool instrTranslation;

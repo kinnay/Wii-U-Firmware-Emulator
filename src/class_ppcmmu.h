@@ -2,11 +2,11 @@
 #pragma once
 
 #include "interface_virtmem.h"
-#include "interface_physmem.h"
+#include "class_physmem.h"
 
 class PPCMMU : public IVirtualMemory {
-	public:
-	PPCMMU(IPhysicalMemory *phys, bool bigEndian);
+public:
+	PPCMMU(PhysicalMemory *phys);
 	bool translate(uint32_t *addr, uint32_t length, Access type);
 	
 	void setRpnSize(int bits);
@@ -19,7 +19,7 @@ class PPCMMU : public IVirtualMemory {
 	uint32_t sdr1;
 	uint32_t sr[16];
 	
-	private:
+private:
 	bool read32(uint32_t addr, uint32_t *value);
 	bool translateBAT(uint32_t *addr, uint32_t *batu, uint32_t *batl, Access type);
 	bool searchPageTable(
@@ -27,9 +27,7 @@ class PPCMMU : public IVirtualMemory {
 		uint32_t hash, bool secondary, int key, Access type
 	);
 	
-	IPhysicalMemory *physmem;
-	
-	bool swapEndian;
+	PhysicalMemory *physmem;
 	
 	int pageIndexShift;
 	uint32_t pageIndexMask;

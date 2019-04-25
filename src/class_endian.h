@@ -4,14 +4,7 @@
 #include <cstdint>
 
 class Endian {
-	public:
-	enum Type {
-		Unknown,
-		Little,
-		Big
-	};
-	
-	static Type getSystemEndian();
+public:
 	static void swap(uint8_t *);
 	static void swap(uint16_t *);
 	static void swap(uint32_t *);

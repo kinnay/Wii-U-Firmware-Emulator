@@ -8,8 +8,8 @@
 
 #include <algorithm>
 
-ARMInterpreter::ARMInterpreter(ARMCore *core, IPhysicalMemory *physmem, IVirtualMemory *virtmem, bool bigEndian)
-	: Interpreter(physmem, virtmem, bigEndian), core(core), coprocReadCB(0), coprocWriteCB(0) {}
+ARMInterpreter::ARMInterpreter(ARMCore *core, PhysicalMemory *physmem, IVirtualMemory *virtmem)
+	: Interpreter(physmem, virtmem, false), core(core), coprocReadCB(0), coprocWriteCB(0) {}
 
 bool ARMInterpreter::checkCondition(int type) {
 	switch(type) {

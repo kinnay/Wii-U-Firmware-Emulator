@@ -3,13 +3,13 @@
 
 #include <Python.h>
 #include "class_interpreter.h"
-#include "type_iphysmem.h"
+#include "type_physmem.h"
 #include "type_ivirtmem.h"
 
 struct InterpreterObj {
 	PyObject_HEAD
 	Interpreter *object;
-	IPhysMemObj *physmem;
+	PhysMemObj *physmem;
 	IVirtMemObj *virtmem;
 	PyObject *dataErrorCB;
 	PyObject *fetchErrorCB;

@@ -4,7 +4,7 @@
 #include "type_interpreter.h"
 #include "type_arminterp.h"
 #include "type_armcore.h"
-#include "type_iphysmem.h"
+#include "type_physmem.h"
 #include "type_ivirtmem.h"
 #include "class_arminterp.h"
 #include "errors.h"
@@ -55,11 +55,10 @@ int ARMInterp_init(ARMInterpObj *self, PyObject *args, PyObject *kwargs) {
 	CHECK_NOT_INIT(self->object);
 	
 	ARMCoreObj *core;
-	IPhysMemObj *physmem;
+	PhysMemObj *physmem;
 	IVirtMemObj *virtmem;
-	int bigEndian;
-	if (!PyArg_ParseTuple(args, "O!O!O!p", &ARMCoreType, &core,
-		&IPhysMemType, &physmem, &IVirtMemType, &virtmem, &bigEndian))
+	if (!PyArg_ParseTuple(args, "O!O!O!", &ARMCoreType, &core,
+		&PhysMemType, &physmem, &IVirtMemType, &virtmem))
 	{
 		return -1;
 	}
@@ -79,7 +78,7 @@ int ARMInterp_init(ARMInterpObj *self, PyObject *args, PyObject *kwargs) {
 		return -1;
 	}
 	
-	self->object = new ARMInterpreter(core->object, physmem->object, virtmem->object, bigEndian != 0);
+	self->object = new ARMInterpreter(core->object, physmem->object, virtmem->object);
 	if (!self->object) {
 		PyErr_NoMemory();
 		return -1;

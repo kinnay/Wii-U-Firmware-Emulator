@@ -46,13 +46,16 @@ class BreakpointHandler:
 
 	
 class MemoryReader:
-	def __init__(self, physmem, virtmem):
+	def __init__(self, physmem, virtmem, mirror):
 		self.physmem = physmem
 		self.virtmem = virtmem
+		self.mirror = mirror
 		
 	def read(self, addr, len, trans=True):
 		if trans:
 			addr = self.virtmem.translate(addr)
+		if self.mirror and addr >= 0xFFE00000:
+			addr = addr - 0xFFE00000 + 0x08000000
 		return self.physmem.read(addr, len)
 		
 	def string(self, addr, trans=True):
@@ -69,13 +72,16 @@ class MemoryReader:
 		
 		
 class MemoryWriter:
-	def __init__(self, physmem, virtmem):
+	def __init__(self, physmem, virtmem, mirror):
 		self.physmem = physmem
 		self.virtmem = virtmem
+		self.mirror = mirror
 		
 	def write(self, addr, data, trans=True):
 		if trans:
 			addr = self.virtmem.translate(addr, trans)
+		if self.mirror and addr >= 0xFFE00000:
+			addr = addr - 0xFFE00000 + 0x08000000
 		self.physmem.write(addr, data)
 
 			
@@ -619,21 +625,22 @@ class DebugShell:
 		func(write, self.eval(address), self.handle_watchpoint)
 
 	def read(self, type, address, length):
+		reader = self.current().mem_reader
 		address = self.eval(address)
-		if type == "virt":
-			address = self.current().virtmem.translate(address)
-
-		data = self.current().physmem.read(address, self.eval(length))
+		length = self.eval(length)
+		
+		data = reader.read(address, length, type == "virt")
+		
 		print(data.hex())
 		if is_printable(data):
 			print(data.decode("ascii"))
 			
 	def dump(self, type, address, length, filename):
+		reader = self.current().mem_reader
 		address = self.eval(address)
-		if type == "virt":
-			address = self.current().virtmem.translate(address)
-
-		data = self.current().physmem.read(address, self.eval(length))
+		length = self.eval(length)
+		
+		data = reader.read(address, length, type == "virt")
 		with open(filename, "wb") as f:
 			f.write(data)
 

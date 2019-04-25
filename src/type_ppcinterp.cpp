@@ -4,7 +4,7 @@
 #include "type_interpreter.h"
 #include "type_ppcinterp.h"
 #include "type_ppccore.h"
-#include "type_iphysmem.h"
+#include "type_physmem.h"
 #include "type_ivirtmem.h"
 #include "class_ppcinterp.h"
 #include "errors.h"
@@ -43,11 +43,10 @@ int PPCInterp_init(PPCInterpObj *self, PyObject *args, PyObject *kwargs) {
 	CHECK_NOT_INIT(self->object);
 	
 	PPCCoreObj *core;
-	IPhysMemObj *physmem;
+	PhysMemObj *physmem;
 	IVirtMemObj *virtmem;
-	int bigEndian;
-	if (!PyArg_ParseTuple(args, "O!O!O!p", &PPCCoreType, &core,
-		&IPhysMemType, &physmem, &IVirtMemType, &virtmem, &bigEndian))
+	if (!PyArg_ParseTuple(args, "O!O!O!", &PPCCoreType, &core,
+		&PhysMemType, &physmem, &IVirtMemType, &virtmem))
 	{
 		return -1;
 	}
@@ -66,7 +65,7 @@ int PPCInterp_init(PPCInterpObj *self, PyObject *args, PyObject *kwargs) {
 		RuntimeError("Virtual memory object must be initialized");
 	}
 	
-	self->object = new PPCInterpreter(core->object, physmem->object, virtmem->object, bigEndian != 0);
+	self->object = new PPCInterpreter(core->object, physmem->object, virtmem->object);
 	if (!self->object) {
 		PyErr_NoMemory();
 		return -1;

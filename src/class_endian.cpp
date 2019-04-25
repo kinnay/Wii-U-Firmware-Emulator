@@ -11,15 +11,3 @@ void Endian::swap(uint8_t *value) {}
 void Endian::swap(uint16_t *value) { *value = swap16(*value); }
 void Endian::swap(uint32_t *value) { *value = swap32(*value); }
 void Endian::swap(uint64_t *value) { *value = swap64(*value); }
-
-Endian::Type Endian::getSystemEndian() {
-	static Type endian = Unknown;
-	if (endian == Unknown) {
-		uint16_t value = 0xFEFF;
-		if (*(uint8_t *)&value == 0xFE) {
-			endian = Big;
-		}
-		else endian = Little;
-	}
-	return endian;
-}

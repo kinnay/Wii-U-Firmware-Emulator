@@ -4,9 +4,7 @@
 #include "errors.h"
 #include <cstdint>
 
-ARMMMU::ARMMMU(IPhysicalMemory *physmem, bool bigEndian) : physmem(physmem), translationTableBase(0) {
-	swapEndian = bigEndian != (Endian::getSystemEndian() == Endian::Big);
-}
+ARMMMU::ARMMMU(PhysicalMemory *physmem) : physmem(physmem), translationTableBase(0) {}
 
 void ARMMMU::setTranslationTableBase(uint32_t base) {
 	translationTableBase = base;
@@ -15,14 +13,14 @@ void ARMMMU::setTranslationTableBase(uint32_t base) {
 
 bool ARMMMU::read32(uint32_t addr, uint32_t *value) {
 	if (physmem->read(addr, value) < 0) return false;
-	if (swapEndian) Endian::swap(value);
+	Endian::swap(value);
 	return true;
 }
 
 bool ARMMMU::translate(uint32_t *addr, uint32_t length, Access type) {
 	if (!enabled) return true;
 	if (cacheEnabled) {
-		if (cache.translate(addr, length, type)) return true;
+		if (cache.translate(addr, type)) return true;
 	}
 
 	int translationTableOffs = (*addr >> 20) * 4;

@@ -164,24 +164,21 @@ class ExceptionHandler:
 	def handle_isi(self, addr):
 		raise RuntimeError("ISI exception: %08X" %addr)
 
-
+		
 class PPCEmulator:
 	def __init__(self, emulator, physmem, hw, reservation, core_id):
 		self.core = pyemu.PPCCore(reservation)
 		self.core.setspr(self.core.UPIR, core_id)
-		self.translator = pyemu.VirtualMemory()
-		self.translator.add_range(0x00000000, 0xFFE00000, 0x00000000)
-		self.translator.add_range(0xFFE00000, 0x100000000, 0x08000000)
-		self.physmem = pyemu.PhysicalMirror(physmem, self.translator)
-		self.virtmem = pyemu.PPCMMU(self.physmem, True)
+		self.physmem = physmem
+		self.virtmem = pyemu.PPCMMU(self.physmem)
 		self.virtmem.set_cache_enabled(True)
 		self.virtmem.set_rpn_size(15) #This is so weird
-		self.interpreter = pyemu.PPCInterpreter(self.core, self.physmem, self.virtmem, True)
+		self.interpreter = pyemu.PPCInterpreter(self.core, self.physmem, self.virtmem)
 		self.interpreter.set_icache_enabled(True)
 		self.interrupts = hw.pi[core_id]
 
-		self.mem_reader = debug.MemoryReader(self.physmem, self.virtmem)
-		self.mem_writer = debug.MemoryWriter(self.physmem, self.virtmem)
+		self.mem_reader = debug.MemoryReader(self.physmem, self.virtmem, True)
+		self.mem_writer = debug.MemoryWriter(self.physmem, self.virtmem, True)
 		self.logger = log.ConsoleLogger("PPC")
 		self.breakpoints = debug.BreakpointHandler(self.interpreter)
 		self.breakpoints.add(0xFFF1AB34, self.handle_log)

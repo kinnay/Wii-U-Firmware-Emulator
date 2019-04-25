@@ -3,11 +3,10 @@
 
 #include <Python.h>
 #include <vector>
-#include "type_iphysmem.h"
 #include "class_physmem.h"
 
 struct PhysMemObj {
-	IPhysMemObj super;
+	PyObject_HEAD
 	PhysicalMemory *object;
 	std::vector<PyObject *> callbacks;
 };

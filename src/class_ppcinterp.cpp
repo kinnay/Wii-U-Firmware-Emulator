@@ -3,8 +3,8 @@
 #include "class_ppccore.h"
 #include "class_ppcinstr.h"
 
-PPCInterpreter::PPCInterpreter(PPCCore *core, IPhysicalMemory *physmem, IVirtualMemory *virtmem, bool bigEndian)
-	: Interpreter(physmem, virtmem, bigEndian), core(core)
+PPCInterpreter::PPCInterpreter(PPCCore *core, PhysicalMemory *physmem, IVirtualMemory *virtmem)
+	: Interpreter(physmem, virtmem, true), core(core)
 {
 	core->setMsrWriteCB([this](uint32_t value) -> bool { return this->handleMsrWrite(value); });
 }

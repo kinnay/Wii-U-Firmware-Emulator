@@ -60,7 +60,7 @@ bool ELFFile::init(const void *data, uint32_t length) {
 	header = buffer->ptr<ELFHeader>(0);
 	if (!header) return false;
 
-	bool swapEndian = (header->endianness == ELFHeader::Big) != (Endian::getSystemEndian() == Endian::Big);
+	bool swapEndian = header->endianness == ELFHeader::Big;
 
 	if (swapEndian) header->swapEndian();
 	
