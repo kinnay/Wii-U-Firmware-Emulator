@@ -14,9 +14,9 @@ const int CacheMask = CacheSize - 1;
 
 class CacheLine {
 public:
-	bool valid;
 	uint8_t data[CacheSize];
 	uint32_t addr;
+	bool valid;
 };
 
 

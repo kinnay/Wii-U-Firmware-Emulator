@@ -437,7 +437,6 @@ class PPCDebugger:
 
 		pagemap = []
 		current = None
-		pageidx = 0
 		for segment in range(16):
 			sr = mmu.get_sr(segment)
 			if sr >> 31: #Direct-store
@@ -450,6 +449,7 @@ class PPCDebugger:
 				nx = (sr >> 28) & 1
 				vsid = sr & 0xFFFFFF
 			
+				pageidx = 0
 				for addr in range(segment * 0x10000000, (segment + 1) * 0x10000000, 0x20000):
 					hash = ((vsid & 0x7FFFF) ^ pageidx) & hashmask
 					api = pageidx >> 5
