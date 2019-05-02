@@ -2147,7 +2147,7 @@ class PIController:
 			
 	def check_interrupts(self):
 		self.update_interrupts()
-		return self.intsr & self.intmr# or self.dsp.check_interrupts()
+		return self.intsr & self.intmr
 		
 	def update_interrupts(self):
 		if self.irq.check_interrupts():
@@ -2270,6 +2270,73 @@ class PM4Processor:
 			self.physmem.write(addr, struct.pack(">I", self.body[3]))
 		else:
 			self.physmem.write(addr, struct.pack(">II", self.body[4], self.body[3]))
+			
+			
+DRMDMA_RB_CNTL = 0xC20D000
+DRMDMA_RB_BASE = 0xC20D004
+DRMDMA_RB_RPTR = 0xC20D008
+DRMDMA_RB_WPTR = 0xC20D00C
+DRMDMA_RB_WPTR_POLL_CNTL = 0xC20D010
+DRMDMA_RB_WPTR_POLL_ADDR_HI = 0xC20D014
+DRMDMA_RB_WPTR_POLL_ADDR_LO = 0xC20D018
+DRMDMA_RB_RPTR_ADDR_HI = 0xC20D01C
+DRMDMA_RB_RPTR_ADDR_LO = 0xC20D020
+DRMDMA_IB_CNTL = 0xC20D024
+DRMDMA_IB_RPTR = 0xC20D028
+DRMDMA_CNTL = 0xC20D02C
+DRMDMA_STATUS = 0xC20D034
+DRMDMA_IB_OFFSET = 0xC20D04C
+DRMDMA_IB_BASE_LO = 0xC20D050
+DRMDMA_IB_BASE_HI = 0xC20D054
+DRMDMA_IB_SIZE = 0xC20D058
+DRMDMA_FAULT_ADDR_LO = 0xC20D068
+DRMDMA_FAULT_ADDR_HI = 0xC20D06C
+
+DRMDMA_START = 0xC20D000
+DRMDMA_END = 0xC20D800
+			
+class DMAController:
+	def __init__(self, scheduler, physmem, gpu):
+		self.scheduler = scheduler
+		self.physmem = physmem
+		self.gpu = gpu
+		
+		self.rb_cntl = 0
+		self.rb_base = 0
+		self.rb_rptr = 0
+		self.rb_wptr = 0
+		self.rb_rptr_addr = 0
+		
+	def read(self, addr):
+		if addr == DRMDMA_RB_CNTL: return self.rb_cntl
+		elif addr == DRMDMA_RB_BASE: return self.rb_base
+		elif addr == DRMDMA_RB_RPTR: return self.rb_rptr
+		elif addr == DRMDMA_RB_WPTR: return self.rb_wptr
+		
+		print("DMA READ 0x%X at %08X" %(addr, self.scheduler.pc()))
+		return 0
+		
+	def write(self, addr, value):
+		if addr == DRMDMA_RB_CNTL: self.rb_cntl = value
+		elif addr == DRMDMA_RB_BASE: self.rb_base = value
+		elif addr == DRMDMA_RB_RPTR: self.rb_rptr = value
+		elif addr == DRMDMA_RB_WPTR: self.rb_wptr = value
+		elif addr == DRMDMA_RB_RPTR_ADDR_HI:
+			self.rb_rptr_addr = (self.rb_rptr_addr & 0xFFFFFFFF) | (value << 32)
+		elif addr == DRMDMA_RB_RPTR_ADDR_LO:
+			self.rb_rptr_addr = (self.rb_rptr_addr & ~0xFFFFFFFF) | value
+		else:
+			print("DMA WRITE 0x%X %08X at %08X" %(addr, value, self.scheduler.pc()))
+			return 0
+			
+	def update(self):
+		self.state = 0
+		self.ptr = 0
+		if self.rb_rptr != self.rb_wptr:
+			self.rb_rptr = self.rb_wptr
+			self.physmem.write(self.rb_rptr_addr, struct.pack(">I", self.rb_rptr))
+			self.physmem.write(self.rb_rptr_addr - 0x20, struct.pack(">I", self.rb_rptr))
+			self.gpu.trigger_interrupt(0xE0)
 
 
 #Interrupt handling
@@ -2293,21 +2360,18 @@ GPU_CP_PFP_UCODE_DATA = 0xC20C154
 GPU_CP_ME_RAM_WADDR = 0xC20C15C
 GPU_CP_ME_RAM_DATA = 0xC20C160
 
-#DMA
-GPU_DMA_RB_RPTR = 0xC20D008
-GPU_DMA_RB_WPTR = 0xC20D00C
-
 GPU_PM4_DATA = 0xC2C0000
 			
 class GPUController:
 	def __init__(self, scheduler, physmem):
 		self.scheduler = scheduler
-		self.scheduler.add_alarm(2000, self.trigger_vsync)
+		self.scheduler.add_alarm(10000, self.trigger_vsync)
 		self.physmem = physmem
 		
 		self.pm4 = PM4Processor(scheduler, physmem)
 		self.dc0 = DCController(scheduler)
 		self.dc1 = DCController(scheduler)
+		self.dma = DMAController(scheduler, physmem, self)
 
 		self.ih_rb_base = 0
 		self.ih_rb_rptr = 0
@@ -2323,9 +2387,6 @@ class GPUController:
 		self.cp_pfp_ucode_addr = 0
 		self.cp_me_ram_data = [0] * 0x550
 		self.cp_me_ram_waddr = 0
-
-		self.dma_rb_rptr = 0
-		self.dma_rb_wptr = 0
 		
 	def read(self, addr):
 		if addr == GPU_RLC_UCODE_DATA:
@@ -2335,11 +2396,12 @@ class GPUController:
 
 		elif DC0_START <= addr < DC0_END: return self.dc0.read(addr - DC0_START)
 		elif DC1_START <= addr < DC1_END: return self.dc1.read(addr - DC1_START)
+		elif DRMDMA_START <= addr < DRMDMA_END: return self.dma.read(addr)
 			
 		elif addr == GPU_FLUSH:
 			#Process command buffers here?
 			self.physmem.write(self.cp_rb_rptr_addr, struct.pack(">H", self.cp_rb_wptr))
-			self.dma_rb_rptr = self.dma_rb_wptr
+			self.dma.update()
 			return 0
 
 		elif addr == GPU_CP_PFP_UCODE_DATA:
@@ -2350,7 +2412,7 @@ class GPUController:
 			value = self.cp_me_ram_data[self.cp_me_ram_waddr]
 			self.cp_me_ram_waddr += 1
 			return value
-		elif addr == GPU_DMA_RB_RPTR: return self.dma_rb_rptr
+		
 		print("GPU READ 0x%X at %08X" %(addr, self.scheduler.pc()))
 		return 0
 		
@@ -2366,6 +2428,7 @@ class GPUController:
 
 		elif DC0_START <= addr < DC0_END: self.dc0.write(addr - DC0_START, value)
 		elif DC1_START <= addr < DC1_END: self.dc1.write(addr - DC1_START, value)
+		elif DRMDMA_START <= addr < DRMDMA_END: self.dma.write(addr, value)
 			
 		elif addr == GPU_CP_RESET: pass
 
@@ -2380,7 +2443,6 @@ class GPUController:
 		elif addr == GPU_CP_ME_RAM_DATA:
 			self.cp_me_ram_data[self.cp_me_ram_waddr] = value
 			self.cp_me_ram_waddr += 1
-		elif addr == GPU_DMA_RB_WPTR: self.dma_rb_wptr = value
 		
 		elif addr == GPU_PM4_DATA: self.pm4.write(value)
 		else:
@@ -2388,11 +2450,11 @@ class GPUController:
 			
 	def get_ih_rb_wptr(self): return struct.unpack(">I", self.physmem.read(self.ih_rb_wptr_addr, 4))[0]
 	def set_ih_rb_wptr(self, pos): self.physmem.write(self.ih_rb_wptr_addr, struct.pack(">I", pos))
-			
+	
 	def trigger_interrupt(self, type, data1=0, data2=0, data3=0):
 		pos = self.get_ih_rb_wptr()
-		self.physmem.write(self.ih_rb_base + pos * 4, struct.pack(">IIII", type, data1, data2, data3))
-		self.set_ih_rb_wptr(pos + 4)
+		self.physmem.write(self.ih_rb_base + pos, struct.pack(">IIII", type, data1, data2, data3))
+		self.set_ih_rb_wptr(pos + 16)
 
 	def trigger_vsync(self):
 		#avm.rpl seems to be signalling vsync on 'DVOCap' and 'TrigA' instead
