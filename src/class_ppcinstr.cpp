@@ -940,6 +940,16 @@ bool PPCInstr_fsub(PPCInstruction *instr, PPCInterpreter *cpu) {
 	return true;
 }
 
+bool PPCInstr_fsel(PPCInstruction *instr, PPCInterpreter *cpu) {
+	if (cpu->core->fprs[instr->rA()].dbl >= 0) {
+		cpu->core->fprs[instr->rD()].dbl = cpu->core->fprs[instr->rC()].dbl;
+	}
+	else {
+		cpu->core->fprs[instr->rD()].dbl = cpu->core->fprs[instr->rB()].dbl;
+	}
+	return true;
+}
+
 bool PPCInstr_fcmpu(PPCInstruction *instr, PPCInterpreter *cpu) {
 	float left = cpu->core->fprs[instr->rA()].ps0;
 	float right = cpu->core->fprs[instr->rB()].ps1;
@@ -1212,6 +1222,7 @@ bool PPCInstruction::execute(PPCInterpreter *cpu) {
 				case 264: return PPCInstr_fabs(this, cpu);
 				default:
 					switch(opcode3()) {
+						case 23: return PPCInstr_fsel(this, cpu);
 						case 25: return PPCInstr_fmul(this, cpu);
 						case 29: return PPCInstr_fmadd(this, cpu);
 					}
