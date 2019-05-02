@@ -72,9 +72,17 @@ class SPRHandler:
 		elif spr == 944: return self.hid5
 		elif spr == 947: return self.scr
 		elif spr == 948: return self.car
+		elif spr == 952: return self.mmcr0
+		elif spr == 953: return self.pmc1
+		elif spr == 954: return self.pmc2
+		elif spr == 956: return self.mmcr1
+		elif spr == 957: return self.pmc3
+		elif spr == 958: return self.pmc4
 		elif spr == 1008: return self.hid0
 		elif spr == 1009: return self.hid1
+		elif spr == 1010: return self.iabr
 		elif spr == 1011: return self.hid4
+		elif spr == 1013: return self.dabr
 		elif spr == 1017: return self.l2cr
 		print("SPR READ %i at %08X" %(spr, self.core.pc()))
 		return 0
