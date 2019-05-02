@@ -2312,6 +2312,7 @@ class DMAController:
 		elif addr == DRMDMA_RB_BASE: return self.rb_base
 		elif addr == DRMDMA_RB_RPTR: return self.rb_rptr
 		elif addr == DRMDMA_RB_WPTR: return self.rb_wptr
+		elif addr == DRMDMA_STATUS: return 1
 		
 		print("DMA READ 0x%X at %08X" %(addr, self.scheduler.pc()))
 		return 0
@@ -2343,6 +2344,8 @@ class DMAController:
 GPU_IH_RB_BASE = 0xC203E04
 GPU_IH_RB_RPTR = 0xC203E08
 GPU_IH_RB_WPTR_ADDR_LO = 0xC203E14
+GPU_IH_CONTROL = 0xC203E18
+GPU_IH_STATUS = 0xC203E20
 
 #RLC
 GPU_RLC_UCODE_ADDR = 0xC203F2C
@@ -2376,6 +2379,7 @@ class GPUController:
 		self.ih_rb_base = 0
 		self.ih_rb_rptr = 0
 		self.ih_rb_wptr_addr = 0
+		self.ih_control = 0
 
 		self.rlc_ucode_data = [0] * 0x400
 		self.rlc_ucode_addr = 0
@@ -2397,6 +2401,12 @@ class GPUController:
 		elif DC0_START <= addr < DC0_END: return self.dc0.read(addr - DC0_START)
 		elif DC1_START <= addr < DC1_END: return self.dc1.read(addr - DC1_START)
 		elif DRMDMA_START <= addr < DRMDMA_END: return self.dma.read(addr)
+		
+		elif addr == GPU_IH_CONTROL: return self.ih_control
+		elif addr == GPU_IH_STATUS:
+			if self.ih_control & 1:
+				return 0
+			return 5
 			
 		elif addr == GPU_FLUSH:
 			#Process command buffers here?
@@ -2420,6 +2430,7 @@ class GPUController:
 		if addr == GPU_IH_RB_BASE: self.ih_rb_base = value << 8
 		elif addr == GPU_IH_RB_RPTR: self.ih_rb_rptr = value
 		elif addr == GPU_IH_RB_WPTR_ADDR_LO: self.ih_rb_wptr_addr = value
+		elif addr == GPU_IH_CONTROL: self.ih_control = value
 
 		elif addr == GPU_RLC_UCODE_ADDR: self.rlc_ucode_addr = value
 		elif addr == GPU_RLC_UCODE_DATA:
