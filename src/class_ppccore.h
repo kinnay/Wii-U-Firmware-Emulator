@@ -109,6 +109,8 @@ class PPCCore {
 	uint32_t sprg3;
 	uint32_t thrm3;
 	
+	uint32_t fpscr;
+	
 	PPCCore(PPCLockMgr *lockMgr);
 	
 	bool setSpr(SPR spr, uint32_t value);

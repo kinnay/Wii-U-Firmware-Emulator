@@ -10,6 +10,7 @@ PPCCore::PPCCore(PPCLockMgr *lockMgr)
 	for (int i = 0; i < 8; i++) {
 		gqrs[i] = 0;
 	}
+	fpscr = 0;
 }
 
 bool PPCCore::triggerException(ExceptionType type) {

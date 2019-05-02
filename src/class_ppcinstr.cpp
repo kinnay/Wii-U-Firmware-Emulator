@@ -959,6 +959,11 @@ bool PPCInstr_fcmpu(PPCInstruction *instr, PPCInterpreter *cpu) {
 	return true;
 }
 
+bool PPCInstr_mffs(PPCInstruction *instr, PPCInterpreter *cpu) {
+	cpu->core->fprs[instr->rD()].iw1 = cpu->core->fpscr;
+	return true;
+}
+
 /********** PAIRED SINGLE INSTRUCTIONS **********/
 
 template <class T>
@@ -1220,6 +1225,7 @@ bool PPCInstruction::execute(PPCInterpreter *cpu) {
 				case 40: return PPCInstr_fneg(this, cpu);
 				case 72: return PPCInstr_fmr(this, cpu);
 				case 264: return PPCInstr_fabs(this, cpu);
+				case 583: return PPCInstr_mffs(this, cpu);
 				default:
 					switch(opcode3()) {
 						case 23: return PPCInstr_fsel(this, cpu);
