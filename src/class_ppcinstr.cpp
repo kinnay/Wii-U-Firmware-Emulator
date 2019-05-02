@@ -964,6 +964,23 @@ bool PPCInstr_mffs(PPCInstruction *instr, PPCInterpreter *cpu) {
 	return true;
 }
 
+bool PPCInstr_mtfsf(PPCInstruction *instr, PPCInterpreter *cpu) {
+	uint8_t fm = (instr->value >> 17) & 0xFF;
+	
+	uint32_t mask = 0;
+	for (int i = 0; i < 8; i++) {
+		mask <<= 4;
+		if (fm & 0x80) {
+			mask |= 0xF;
+		}
+		fm <<= 1;
+	}
+	
+	cpu->core->fpscr &= ~mask;
+	cpu->core->fpscr |= cpu->core->fprs[instr->rD()].iw1 & mask;
+	return true;
+}
+
 /********** PAIRED SINGLE INSTRUCTIONS **********/
 
 template <class T>
@@ -1226,6 +1243,7 @@ bool PPCInstruction::execute(PPCInterpreter *cpu) {
 				case 72: return PPCInstr_fmr(this, cpu);
 				case 264: return PPCInstr_fabs(this, cpu);
 				case 583: return PPCInstr_mffs(this, cpu);
+				case 711: return PPCInstr_mtfsf(this, cpu);
 				default:
 					switch(opcode3()) {
 						case 23: return PPCInstr_fsel(this, cpu);
