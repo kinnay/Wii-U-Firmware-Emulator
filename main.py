@@ -54,7 +54,7 @@ class Emulator:
 		self.physmem.add_range(0x10000000, 0x28000000) #IOSU processes and ram disk
 		self.physmem.add_range(0x08000000, 0x082E0000) #MEM0
 		self.physmem.add_range(0xFFF00000, 0xFFFFF000) #Kernel stuff
-		self.physmem.add_range(0x30000000, 0x34000000) #Root, loader, error display
+		self.physmem.add_range(0x28000000, 0x34000000) #MEM2
 		self.physmem.add_range(0x00000000, 0x02000000) #MEM1
 
 	def init_hardware(self):
