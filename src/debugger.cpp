@@ -66,7 +66,6 @@ const char *HELP_TEXT =
 	"    queues\n"
 	"    queue <id>\n"
 	"    devices\n"
-	"    ipcdriver\n"
 	"    hardware\n"
 	"\n"
 	"Filesystem state:\n"
@@ -923,47 +922,6 @@ void ARMDebugger::printSlcCacheState() {
 	}
 }
 
-void ARMDebugger::printIPCDriver() {
-	uint32_t deviceList = 0x8166C00;
-	uint16_t index = physmem->read<uint16_t>(deviceList + 4);
-	while (index != 0xFFFF) {
-		uint32_t device = deviceList + 0xC + index * 0x40;
-		std::string name = physmem->read<std::string>(device);
-		
-		uint16_t requestIdx = physmem->read<uint16_t>(device + 0x2E);
-		if (requestIdx != 0xFFFF) {
-			Sys::stdout->write("%s:\n", name);
-			
-			while (requestIdx != 0xFFFF) {
-				uint32_t request = 0x814400C + requestIdx * 0xB4;
-				uint32_t command = physmem->read<uint32_t>(request);
-				uint32_t manager = physmem->read<uint32_t>(request + 0x44);
-				uint32_t pid = physmem->read<uint32_t>(manager + 0xC);
-				
-				uint32_t arg0 = physmem->read<uint32_t>(request + 0x24);
-				
-				std::string cmd = StringUtils::format("Unknown command: %i", command);
-				if (command == 1) cmd = "open";
-				else if (command == 2) cmd = "close";
-				else if (command == 6) cmd = StringUtils::format("ioctl(%i)", arg0);
-				else if (command == 7) cmd = StringUtils::format("ioctlv(%i)", arg0);
-				else if (command == 13) cmd = "resume";
-				
-				std::string name = StringUtils::format("%s:", ProcessNames[pid]);
-				
-				Sys::stdout->write("    %-14s %s\n", name, cmd);
-				
-				requestIdx = physmem->read<uint16_t>(request + 0x50);
-			}
-			
-			Sys::stdout->write("\n");
-		}
-		
-		index = physmem->read<uint16_t>(device + 0x36);
-	}
-}
-
-
 
 bool PPCModule::compareText(Ref<PPCModule> a, Ref<PPCModule> b) {
 	return a->text < b->text;
@@ -1229,55 +1187,6 @@ void PPCDebugger::printBAT(uint32_t batu, uint32_t batl) {
 	else {
 		Sys::stdout->write("disabled\n");
 	}
-}
-
-const char *IPCStates[] = {
-	"INVALID", "UNKNOWN", "PREPARING",
-	"READY", "WAITING"
-};
-
-void PPCDebugger::printIPCDriver() {
-	int core = cpu->core.sprs[PPCCore::PIR];
-	uint32_t driver = 0xFFE86760 + core * 0x2178;
-	translate(&driver);
-	
-	uint32_t state = physmem->read<uint32_t>(driver);
-	
-	Sys::stdout->write("State: %s\n\n", IPCStates[state]);
-	
-	uint32_t active = physmem->read<uint32_t>(driver + 0x14);
-	if (active) {
-		Sys::stdout->write("Active request:\n");
-		printIPCRequest(active);
-		Sys::stdout->write("\n");
-	}
-	else {
-		Sys::stdout->write("Active request: none\n\n");
-	}
-	
-	uint32_t count = physmem->read<uint32_t>(driver + 0x3F0);
-	uint32_t popIndex = physmem->read<uint32_t>(driver + 0x3EC);
-	Sys::stdout->write("Pending requests:\n");
-	if (count == 0) {
-		Sys::stdout->write("    none\n");
-	}
-	else {
-		for (uint32_t i = 0; i < count; i++) {
-			uint32_t index = (popIndex + index) % 0xB0;
-			uint32_t context = physmem->read<uint32_t>(driver + 0x3F8 + index * 4);
-			printIPCRequest(context);
-		}
-	}
-}
-
-void PPCDebugger::printIPCRequest(uint32_t context) {
-	translate(&context);
-	
-	uint32_t request = physmem->read<uint32_t>(context + 0x10);
-	translate(&request);
-			
-	uint32_t cmd = physmem->read<uint32_t>(request);
-	Sys::stdout->write("    Unknown command: %i\n", cmd);
 }
 
 void PPCDebugger::printModules() {
@@ -1583,7 +1492,6 @@ void Debugger::processCommand(std::string command, ArgParser *args) {
 	else if (command == "queues") queues(args);
 	else if (command == "queue") queue(args);
 	else if (command == "devices") devices(args);
-	else if (command == "ipcdriver") ipcdriver(args);
 	else if (command == "hardware") hardware(args);
 	
 	else if (command == "volumes") volumes(args);
@@ -2074,11 +1982,6 @@ void Debugger::queue(ArgParser *args) {
 void Debugger::devices(ArgParser *args) {
 	if (!args->finish()) return;
 	armdebug->printDevices();
-}
-
-void Debugger::ipcdriver(ArgParser *args) {
-	if (!args->finish()) return;
-	getCurrent()->printIPCDriver();
 }
 
 void Debugger::hardware(ArgParser *args) {

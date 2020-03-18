@@ -90,7 +90,6 @@ public:
 	virtual void printMemoryMap() = 0;
 	virtual void printThreads() = 0;
 	virtual void printThreadDetails(uint32_t id) = 0;
-	virtual void printIPCDriver() = 0;
 };
 
 
@@ -118,7 +117,6 @@ public:
 	void printVolumes();
 	void printFileClients();
 	void printSlcCacheState();
-	void printIPCDriver();
 	
 private:
 	std::string getQueueSuffix(uint32_t id);
@@ -157,7 +155,6 @@ public:
 	void printStateDetailed();
 	void printStackTrace();
 	void printMemoryMap();
-	void printIPCDriver();
 	void printModules();
 	void printModuleDetails(std::string name);
 	void printThreads();
@@ -229,7 +226,6 @@ private:
 	void queues(ArgParser *parser);
 	void queue(ArgParser *parser);
 	void devices(ArgParser *parser);
-	void ipcdriver(ArgParser *parser);
 	void hardware(ArgParser *parser);
 	
 	void volumes(ArgParser *parser);
