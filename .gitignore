@@ -1,0 +1,6 @@
+build/
+files/
+logs/
+main
+main.i64
+oprofile_data/
