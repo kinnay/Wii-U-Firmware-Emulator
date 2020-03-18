@@ -1,6 +1,8 @@
 build/
-files/
-logs/
+files/*
+logs/*
 main
 main.i64
 oprofile_data/
+!files/.gitignore
+!logs/.gitignore
