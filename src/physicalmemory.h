@@ -13,7 +13,7 @@
 
 
 inline bool isHardware(uint32_t addr) {
-	return (addr & 0xFE400000) == 0x0C000000;
+	return (addr & 0xFE400000) == 0x0C000000 || (addr & 0xFE000000) == 0xD0000000;
 }
 
 

@@ -12,7 +12,15 @@
 void DCController::reset() {
 	crtc_interrupt_control = 0;
 	
+	grph_enable = 0;
+	grph_control = 0;
+	grph_primary_surface_addr = 0;
+	grph_secondary_surface_addr = 0;
 	grph_dfq_status = 0;
+	
+	ovl_enable = 0;
+	ovl_control1 = 0;
+	ovl_surface_addr = 0;
 	
 	lut_autofill = 0;
 }
@@ -23,7 +31,15 @@ uint32_t DCController::read(uint32_t addr) {
 		case D1CRTC_STATUS: return 1; //D1CRTC_V_BLANK
 		case D1CRTC_INTERRUPT_CONTROL: return crtc_interrupt_control;
 		
+		case D1GRPH_ENABLE: return grph_enable;
+		case D1GRPH_CONTROL: return grph_control;
+		case D1GRPH_PRIMARY_SURFACE_ADDRESS: return grph_primary_surface_addr;
+		case D1GRPH_SECONDARY_SURFACE_ADDRESS: return grph_secondary_surface_addr;
 		case D1GRPH_DFQ_STATUS: return grph_dfq_status;
+		
+		case D1OVL_ENABLE: return ovl_enable;
+		case D1OVL_CONTROL1: return ovl_control1;
+		case D1OVL_SURFACE_ADDRESS: return ovl_surface_addr;
 		
 		case DC_LUT_AUTOFILL: return lut_autofill;
 	}
@@ -35,6 +51,10 @@ uint32_t DCController::read(uint32_t addr) {
 void DCController::write(uint32_t addr, uint32_t value) {
 	if (addr == D1CRTC_INTERRUPT_CONTROL) crtc_interrupt_control = value;
 	
+	else if (addr == D1GRPH_ENABLE) grph_enable = value;
+	else if (addr == D1GRPH_CONTROL) grph_control = value;
+	else if (addr == D1GRPH_PRIMARY_SURFACE_ADDRESS) grph_primary_surface_addr = value;
+	else if (addr == D1GRPH_SECONDARY_SURFACE_ADDRESS) grph_secondary_surface_addr = value;
 	else if (addr == D1GRPH_DFQ_CONTROL) {
 		if (value & 1) {
 			grph_dfq_status |= 0x100;
@@ -45,6 +65,10 @@ void DCController::write(uint32_t addr, uint32_t value) {
 			grph_dfq_status &= ~0x100;
 		}
 	}
+	
+	else if (addr == D1OVL_ENABLE) ovl_enable = value;
+	else if (addr == D1OVL_CONTROL1) ovl_control1 = value;
+	else if (addr == D1OVL_SURFACE_ADDRESS) ovl_surface_addr = value;
 	
 	else if (addr == DC_LUT_PWL_DATA) {}
 	else if (addr == DC_LUT_AUTOFILL) {
@@ -412,6 +436,51 @@ void DMAController::write(uint32_t addr, uint32_t value) {
 }
 
 
+void HDPHandle::reset() {}
+
+uint32_t HDPHandle::read(uint32_t addr) {
+	Logger::warning("Unknown hdp handle read: 0x%X", addr);
+	return 0;
+}
+
+void HDPHandle::write(uint32_t addr, uint32_t value) {
+	if (addr == HDP_MAP_BASE) map_base = value;
+	else if (addr == HDP_MAP_END) map_end = value;
+	else if (addr == HDP_INPUT_ADDR) input_addr = value;
+	else if (addr == HDP_CONFIG) config = value;
+	else if (addr == HDP_DIMENSIONS) dimensions = value;
+	else {
+		Logger::warning("Unknown hdp handle write: 0x%X (0x%08X)", addr, value);
+	}
+}
+
+
+void HDPController::reset() {
+	for (int i = 0; i < 32; i++) {
+		handles[i].reset();
+	}
+}
+
+uint32_t HDPController::read(uint32_t addr) {
+	if (HDP_HANDLE_START <= addr && addr < HDP_HANDLE_END) {
+		addr -= HDP_HANDLE_START;
+		return handles[addr / 0x18].read(addr % 0x18);
+	}
+	Logger::warning("Unknown hdp read: 0x%X", addr);
+	return 0;
+}
+
+void HDPController::write(uint32_t addr, uint32_t value) {
+	if (HDP_HANDLE_START <= addr && addr < HDP_HANDLE_END) {
+		addr -= HDP_HANDLE_START;
+		handles[addr / 0x18].write(addr % 0x18, value);
+	}
+	else {
+		Logger::warning("Unknown hdp write: 0x%X (0x%08X)", addr, value);
+	}
+}
+
+
 GPUController::GPUController(Hardware *hardware, PhysicalMemory *physmem) :
 	cp(physmem),
 	dma(physmem)
@@ -437,6 +506,7 @@ void GPUController::reset() {
 	dc1.reset();
 	cp.reset();
 	dma.reset();
+	hdp.reset();
 }
 
 void GPUController::trigger_irq(uint32_t type, uint32_t data1, uint32_t data2, uint32_t data3) {
@@ -494,6 +564,7 @@ uint32_t GPUController::read(uint32_t addr) {
 	if (GPU_DC1_START <= addr && addr < GPU_DC1_END) return dc1.read(addr - GPU_DC1_START);
 	if (GPU_CP_START <= addr && addr < GPU_CP_END) return cp.read(addr);
 	if (GPU_DMA_START <= addr && addr < GPU_DMA_END) return dma.read(addr);
+	if (GPU_HDP_START <= addr && addr < GPU_HDP_END) return hdp.read(addr);
 	
 	Logger::warning("Unknown gpu read: 0x%X", addr);
 	return 0;
@@ -531,6 +602,7 @@ void GPUController::write(uint32_t addr, uint32_t value) {
 	else if (GPU_DC1_START <= addr && addr < GPU_DC1_END) dc1.write(addr - GPU_DC1_START, value);
 	else if (GPU_CP_START <= addr && addr < GPU_CP_END) cp.write(addr, value);
 	else if (GPU_DMA_START <= addr && addr < GPU_DMA_END) dma.write(addr, value);
+	else if (GPU_HDP_START <= addr && addr < GPU_HDP_END) hdp.write(addr, value);
 	
 	else {
 		Logger::warning("Unknown gpu write: 0x%X (0x%08X)", addr, value);

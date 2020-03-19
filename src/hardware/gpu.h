@@ -19,8 +19,17 @@ public:
 		D1CRTC_INTERRUPT_CONTROL = 0xDC,
 		
 		// Deep flip queue
+		D1GRPH_ENABLE = 0x100,
+		D1GRPH_CONTROL = 0x104,
+		D1GRPH_PRIMARY_SURFACE_ADDRESS = 0x110,
+		D1GRPH_SECONDARY_SURFACE_ADDRESS = 0x118,
 		D1GRPH_DFQ_CONTROL = 0x150,
 		D1GRPH_DFQ_STATUS = 0x154,
+		
+		// Overlay
+		D1OVL_ENABLE = 0x180,
+		D1OVL_CONTROL1 = 0x184,
+		D1OVL_SURFACE_ADDRESS = 0x190,
 		
 		DC_LUT_PWL_DATA = 0x490,
 		DC_LUT_AUTOFILL = 0x4A0
@@ -34,7 +43,15 @@ public:
 	uint32_t crtc_interrupt_control;
 	
 private:
+	uint32_t grph_enable;
+	uint32_t grph_control;
+	uint32_t grph_primary_surface_addr;
+	uint32_t grph_secondary_surface_addr;
 	uint32_t grph_dfq_status;
+	
+	uint32_t ovl_enable;
+	uint32_t ovl_control1;
+	uint32_t ovl_surface_addr;
 
 	uint32_t lut_autofill;
 };
@@ -199,6 +216,53 @@ private:
 };
 
 
+class HDPHandle {
+public:
+	enum Register {
+		HDP_MAP_BASE = 4,
+		HDP_MAP_END = 8,
+		HDP_INPUT_ADDR = 0xC,
+		HDP_CONFIG = 0x10,
+		HDP_DIMENSIONS = 0x14
+	};
+	
+	void reset();
+	
+	uint32_t read(uint32_t addr);
+	void write(uint32_t addr, uint32_t value);
+	
+private:
+	uint32_t map_base;
+	uint32_t map_end;
+	uint32_t input_addr;
+	uint32_t config;
+	uint32_t dimensions;
+};
+
+
+// Host data path
+class HDPController {
+public:
+	enum Register {
+		HDP_HOST_PATH_CNTL = 0xC202C00,
+		HDP_NONSURFACE_BASE = 0xC202C04,
+		HDP_NONSURFACE_INFO = 0xC202C08,
+		HDP_NONSURFACE_SIZE = 0xC202C0C,
+		
+		HDP_HANDLE_START = 0xC202C10,
+		HDP_HANDLE_END = 0xC202F10
+	};
+	
+	void reset();
+	
+	uint32_t read(uint32_t addr);
+	void write(uint32_t addr, uint32_t value);
+	
+private:
+	HDPHandle handles[32];
+};
+
+
 class GPUController {
 public:
 	enum Register {
@@ -219,6 +283,9 @@ public:
 		
 		GPU_SCRATCH_START = 0xC208500,
 		GPU_SCRATCH_END = 0xC208520,
+		
+		GPU_HDP_START = 0xC202C00,
+		GPU_HDP_END = 0xC203000,
 		
 		GPU_DC0_START = 0xC206000,
 		GPU_DC0_END = 0xC206800,
@@ -251,6 +318,7 @@ private:
 	DCController dc1;
 	CPController cp;
 	DMAController dma;
+	HDPController hdp;
 	
 	uint32_t ih_rb_base;
 	uint32_t ih_rb_rptr;

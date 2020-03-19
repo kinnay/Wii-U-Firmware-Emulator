@@ -2043,8 +2043,22 @@ void Debugger::hardware(ArgParser *args) {
 	Sys::stdout->write("SCRATCH_REG7 = 0x%08X\n", physmem->read<uint32_t>(0xC20851C));
 	Sys::stdout->write("SCRATCH_UMSK = 0x%08X\n", physmem->read<uint32_t>(0xC208540));
 	Sys::stdout->write("SCRATCH_ADDR = 0x%08X\n", physmem->read<uint32_t>(0xC208544));
-	Sys::stdout->write("DC0_INTERRUPT_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC2060DC));
-	Sys::stdout->write("DC1_INTERRUPT_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC2068DC));
+	Sys::stdout->write("D1CRTC_INTERRUPT_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC2060DC));
+	Sys::stdout->write("D1GRPH_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206100));
+	Sys::stdout->write("D1GRPH_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206104));
+	Sys::stdout->write("D1GRPH_PRIMARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206110));
+	Sys::stdout->write("D1GRPH_SECONDARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206118));
+	Sys::stdout->write("D1OVL_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206180));
+	Sys::stdout->write("D1OVL_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206184));
+	Sys::stdout->write("D1OVL_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206190));
+	Sys::stdout->write("D2CRTC_INTERRUPT_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC2068DC));
+	Sys::stdout->write("D2GRPH_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206900));
+	Sys::stdout->write("D2GRPH_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206904));
+	Sys::stdout->write("D2GRPH_PRIMARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206910));
+	Sys::stdout->write("D2GRPH_SECONDARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206918));
+	Sys::stdout->write("D2OVL_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206980));
+	Sys::stdout->write("D2OVL_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206984));
+	Sys::stdout->write("D2OVL_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206990));
 }
 
 void Debugger::volumes(ArgParser *args) {
