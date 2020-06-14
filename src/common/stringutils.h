@@ -4,6 +4,7 @@
 #include "common/typeutils.h"
 
 #include <string>
+#include <ciso646>
 #include <cstdio>
 #include <stdexcept>
 #include <type_traits>

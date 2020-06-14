@@ -6,6 +6,7 @@
 #include "common/stringutils.h"
 #include "math/vector_impl.h"
 
+#include <ciso646>
 #include <initializer_list>
 #include <cmath>
 
