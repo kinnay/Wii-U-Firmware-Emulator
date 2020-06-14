@@ -104,7 +104,7 @@ private:
 	
 	template <class T, EnableIf(Convertible(T, char))>
 	std::string format_char(T value) {
-		return std::string(1, value);
+		return std::string(1, (char)value);
 	}
 	
 	template <class T, EnableIf(Convertible(T, std::string))>
