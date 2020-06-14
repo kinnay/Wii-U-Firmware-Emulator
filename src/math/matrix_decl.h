@@ -4,6 +4,7 @@
 #include "common/typeutils.h"
 #include "math/vector_decl.h"
 
+#include <ciso646>
 #include <initializer_list>
 #include <string>
 
