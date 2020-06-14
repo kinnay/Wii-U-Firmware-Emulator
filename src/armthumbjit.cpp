@@ -6,7 +6,11 @@
 
 #include "common/exceptions.h"
 
+#ifndef _WIN32
 #include <sys/mman.h>
+#else
+#include <Windows.h>
+#endif
 
 #include <cstring>
 
@@ -687,7 +691,11 @@ void ARMThumbJIT::reset() {
 void ARMThumbJIT::invalidate() {
 	for (int i = 0; i < 0x100000; i++) {
 		if (table[i]) {
+#ifndef _WIN32
 			munmap(table[i], sizes[i]);
+#else
+			VirtualFree(table[i], 0, MEM_RELEASE);
+#endif
 			table[i] = nullptr;
 			sizes[i] = 0;
 		}
@@ -733,10 +741,16 @@ char *ARMThumbJIT::generateCode(uint32_t pc) {
 	
 	sizes[pc >> 12] = size;
 	
+#ifndef _WIN32
 	char *jit = (char *)mmap(
 		NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC,
 		MAP_ANONYMOUS | MAP_SHARED, -1, 0
 	);
+#else
+	char *jit = (char *)VirtualAlloc(
+		NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE
+	);
+#endif
 	memcpy(jit, buffer, size);
 	return jit;
 }
