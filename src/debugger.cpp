@@ -96,7 +96,7 @@ bool ArgParser::eof() {
 
 bool ArgParser::finish() {
 	if (!eof()) {
-		Sys::stdout->write("Too many arguments.\n");
+		Sys::out->write("Too many arguments.\n");
 		return false;
 	}
 	return true;
@@ -104,7 +104,7 @@ bool ArgParser::finish() {
 
 bool ArgParser::check() {
 	if (eof()) {
-		Sys::stdout->write("Not enough arguments.\n");
+		Sys::out->write("Not enough arguments.\n");
 		return false;
 	}
 	return true;
@@ -122,7 +122,7 @@ bool ArgParser::integer(uint32_t *value) {
 	ExpressionParser parser;
 	Ref<Node> expr = parser.parse(args[offset++]);
 	if (!expr || !expr->evaluate(context, value)) {
-		Sys::stdout->write("Failed to parse argument.\n");
+		Sys::out->write("Failed to parse argument.\n");
 		return false;
 	}
 	return true;
@@ -202,14 +202,14 @@ void MemoryMap::add(Ref<MemoryRegion> region) {
 
 void MemoryMap::print() {
 	if (regions.size() == 0) {
-		Sys::stdout->write("    no pages mapped\n");
+		Sys::out->write("    no pages mapped\n");
 		return;
 	}
 	
 	std::sort(regions.begin(), regions.end(), MemoryRegion::compare);
 	
 	for (Ref<MemoryRegion> region : regions) {
-		Sys::stdout->write(
+		Sys::out->write(
 			"    %08X-%08X => %08X-%08X (user: %s, system: %s",
 			region->virt, region->virt + region->size,
 			region->phys, region->phys + region->size,
@@ -218,9 +218,9 @@ void MemoryMap::print() {
 		);
 		
 		if (nx) {
-			Sys::stdout->write(", %s", region->executable ? "executable" : "no execute");
+			Sys::out->write(", %s", region->executable ? "executable" : "no execute");
 		}
-		Sys::stdout->write(")\n");
+		Sys::out->write(")\n");
 	}
 }
 
@@ -285,7 +285,7 @@ bool ARMDebugger::translate(uint32_t *address) {
 }
 
 void ARMDebugger::printState() {
-	Sys::stdout->write(
+	Sys::out->write(
 		"R0 = %08X R1 = %08X R2 = %08X R3 = %08X R4 = %08X\n"
 		"R5 = %08X R6 = %08X R7 = %08X R8 = %08X R9 = %08X\n"
 		"R10= %08X R11= %08X R12= %08X\n"
@@ -303,8 +303,8 @@ void ARMDebugger::printState() {
 void ARMDebugger::printStateDetailed() {
 	cpu->core.writeModeRegs();
 	
-	Sys::stdout->write("Current mode: %s\n\n", getModeName(cpu->core.getMode()));
-	Sys::stdout->write(
+	Sys::out->write("Current mode: %s\n\n", getModeName(cpu->core.getMode()));
+	Sys::out->write(
 		"User mode:\n"
 		"    R0 = %08X R1 = %08X R2 = %08X R3 = %08X\n"
 		"    R4 = %08X R5 = %08X R6 = %08X R7 = %08X\n"
@@ -318,7 +318,7 @@ void ARMDebugger::printStateDetailed() {
 		cpu->core.regsUser[12], cpu->core.regsUser[13], cpu->core.regsUser[14],
 		cpu->core.regsUser[15], cpu->core.cpsr, cpu->core.spsr
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"FIQ mode:\n"
 		"    R8 = %08X R9 = %08X R10= %08X R11 = %08X\n"
 		"    R12= %08X SP = %08X LR = %08X SPSR= %08X\n",
@@ -326,27 +326,27 @@ void ARMDebugger::printStateDetailed() {
 		cpu->core.regsFiq[3], cpu->core.regsFiq[4], cpu->core.regsFiq[5],
 		cpu->core.regsFiq[6], cpu->core.spsrFiq
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"IRQ mode:\n"
 		"    SP = %08X LR = %08X SPSR = %08X\n",
 		cpu->core.regsIrq[0], cpu->core.regsIrq[1], cpu->core.spsrIrq
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"SVC mode:\n"
 		"    SP = %08X LR = %08X SPSR = %08X\n",
 		cpu->core.regsSvc[0], cpu->core.regsSvc[1], cpu->core.spsrSvc
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"Abort mode:\n"
 		"    SP = %08X LR = %08X SPSR = %08X\n",
 		cpu->core.regsAbt[0], cpu->core.regsAbt[1], cpu->core.spsrAbt
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"Undefined mode:\n"
 		"    SP = %08X LR = %08X SPSR = %08X\n\n",
 		cpu->core.regsUnd[0], cpu->core.regsUnd[1], cpu->core.spsrUnd
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"Other registers:\n"
 		"    TTBR = %08X FAR  = %08X\n"
 		"    DFSR = %08X IFSR = %08X\n",
@@ -361,7 +361,7 @@ void ARMDebugger::printStackTrace() {
 	uint32_t pc = cpu->core.regs[ARMCore::PC];
 	bool thumb = cpu->core.isThumb();
 	
-	Sys::stdout->write("PC = 0x%08X  LR = 0x%08X  SP = 0x%08X\n", pc, lr, sp);
+	Sys::out->write("PC = 0x%08X  LR = 0x%08X  SP = 0x%08X\n", pc, lr, sp);
 	
 	translate(&sp);
 	translate(&pc);
@@ -392,7 +392,7 @@ void ARMDebugger::printStackTrace() {
 		}
 	}
 	
-	Sys::stdout->write("Stack trace:\n");
+	Sys::out->write("Stack trace:\n");
 	while (true) {
 		if (pc == 0xD400200) break;
 		
@@ -401,7 +401,7 @@ void ARMDebugger::printStackTrace() {
 			
 			uint16_t instr = physmem->read<uint16_t>(pc);
 			if (instr == 0) {
-				Sys::stdout->write("Stack trace may be unreliable.\n");
+				Sys::out->write("Stack trace may be unreliable.\n");
 				break;
 			}
 			
@@ -426,11 +426,11 @@ void ARMDebugger::printStackTrace() {
 				
 				if (pc & 1) {
 					pc &= ~1;
-					Sys::stdout->write("    0x%08X (thumb)\n", pc);
+					Sys::out->write("    0x%08X (thumb)\n", pc);
 				}
 				else {
 					thumb = false;
-					Sys::stdout->write("    0x%08X (arm)\n", pc);
+					Sys::out->write("    0x%08X (arm)\n", pc);
 				}
 				
 				translate(&pc);
@@ -450,7 +450,7 @@ void ARMDebugger::printStackTrace() {
 			
 			uint32_t instr = instrs[0];
 			if (instr == 0) {
-				Sys::stdout->write("Stack trace may be unreliable.\n");
+				Sys::out->write("Stack trace may be unreliable.\n");
 				break;
 			}
 			
@@ -461,10 +461,10 @@ void ARMDebugger::printStackTrace() {
 				if (pc & 1) {
 					thumb = true;
 					pc &= ~1;
-					Sys::stdout->write("    0x%08X (thumb)\n", pc);
+					Sys::out->write("    0x%08X (thumb)\n", pc);
 				}
 				else {
-					Sys::stdout->write("    0x%08X (arm)\n", pc);
+					Sys::out->write("    0x%08X (arm)\n", pc);
 				}
 				
 				translate(&pc);
@@ -482,10 +482,10 @@ void ARMDebugger::printStackTrace() {
 				if (pc & 1) {
 					thumb = true;
 					pc &= ~1;
-					Sys::stdout->write("    0x%08X (thumb)\n", pc);
+					Sys::out->write("    0x%08X (thumb)\n", pc);
 				}
 				else {
-					Sys::stdout->write("    0x%08X (arm)\n", pc);
+					Sys::out->write("    0x%08X (arm)\n", pc);
 				}
 				
 				translate(&pc);
@@ -515,7 +515,7 @@ MemoryRegion::Access AccessProtSystem[] = {
 
 void ARMDebugger::printMemoryMap() {
 	if (!(cpu->core.control & 1)) {
-		Sys::stdout->write("MMU is disabled\n");
+		Sys::out->write("MMU is disabled\n");
 		return;
 	}
 	
@@ -689,7 +689,7 @@ void ARMDebugger::printThreads() {
 			}
 			
 			if (pid < sizeof(ProcessNames) / sizeof(ProcessNames[0])) {
-				Sys::stdout->write(
+				Sys::out->write(
 					" %3i:  %-12s PC=%08X  LR=%08X  (%s)  %s\n", tid,
 					ProcessNames[pid], regs[15], regs[14],
 					StateNames[state], info
@@ -702,7 +702,7 @@ void ARMDebugger::printThreads() {
 
 void ARMDebugger::printThreadDetails(uint32_t id) {
 	if (id >= 180) {
-		Sys::stdout->write("Invalid thread id.\n");
+		Sys::out->write("Invalid thread id.\n");
 		return;
 	}
 	
@@ -710,12 +710,12 @@ void ARMDebugger::printThreadDetails(uint32_t id) {
 	uint32_t state = physmem->read<uint32_t>(thread + 0x50);
 	
 	if (state == 0) {
-		Sys::stdout->write("Thread is not in use.\n");
+		Sys::out->write("Thread is not in use.\n");
 		return;
 	}
 	
 	if (state > 6) {
-		Sys::stdout->write("Thread has invalid state.\n");
+		Sys::out->write("Thread has invalid state.\n");
 		return;
 	}
 	
@@ -736,16 +736,16 @@ void ARMDebugger::printThreadDetails(uint32_t id) {
 	uint32_t pid = physmem->read<uint32_t>(thread + 0x54);
 	
 	if (pid >= sizeof(ProcessNames) / sizeof(ProcessNames[0])) {
-		Sys::stdout->write("Thread has invalid pid.\n");
+		Sys::out->write("Thread has invalid pid.\n");
 		return;
 	}
 	
-	Sys::stdout->write("Thread is owned by %s\n\n", ProcessNames[pid]);
+	Sys::out->write("Thread is owned by %s\n\n", ProcessNames[pid]);
 	
 	uint32_t priority = physmem->read<uint32_t>(thread + 0x4C);
-	Sys::stdout->write("Priority: %i\n\n", priority);
+	Sys::out->write("Priority: %i\n\n", priority);
 	
-	Sys::stdout->write(
+	Sys::out->write(
 		"Registers:\n"
 		"    R0 = %08X R1 = %08X R2 = %08X R3 = %08X\n"
 		"    R4 = %08X R5 = %08X R6 = %08X R7 = %08X\n"
@@ -760,14 +760,14 @@ void ARMDebugger::printThreadDetails(uint32_t id) {
 	
 	uint32_t stackTop = physmem->read<uint32_t>(thread + 0xB4);
 	uint32_t stackSize = physmem->read<uint32_t>(thread + 0xB8);
-	Sys::stdout->write("Stack: 0x%08X - 0x%08X (0x%X bytes)\n\n", stackTop - stackSize, stackTop, stackSize);
+	Sys::out->write("Stack: 0x%08X - 0x%08X (0x%X bytes)\n\n", stackTop - stackSize, stackTop, stackSize);
 	
-	if (state == 1) Sys::stdout->write("This thread is ready to run.\n");
-	else if (state == 2) Sys::stdout->write("This thread is running right now.\n");
-	else if (state == 3) Sys::stdout->write("This thread is suspended.\n");
-	else if (state == 4) Sys::stdout->write("This thread is currently waiting.\n");
-	else if (state == 5) Sys::stdout->write("This thread has been canceled.\n");
-	else if (state == 6) Sys::stdout->write("This thread has triggered an exception.\n");
+	if (state == 1) Sys::out->write("This thread is ready to run.\n");
+	else if (state == 2) Sys::out->write("This thread is running right now.\n");
+	else if (state == 3) Sys::out->write("This thread is suspended.\n");
+	else if (state == 4) Sys::out->write("This thread is currently waiting.\n");
+	else if (state == 5) Sys::out->write("This thread has been canceled.\n");
+	else if (state == 6) Sys::out->write("This thread has triggered an exception.\n");
 }
 
 void ARMDebugger::printMessageQueues() {
@@ -777,7 +777,7 @@ void ARMDebugger::printMessageQueues() {
 		uint32_t buffer = physmem->read<uint32_t>(queue + 0x14);
 		uint8_t pid = physmem->read<uint8_t>(queue + 0x1C);
 		if (capacity != 0 && pid < sizeof(ProcessNames) / sizeof(ProcessNames[0])) {
-			Sys::stdout->write(
+			Sys::out->write(
 				" %3i:  %-12s  Buffer: %08X  Capacity: %i\n",
 				i, ProcessNames[pid], buffer, capacity
 			);
@@ -795,16 +795,16 @@ void ARMDebugger::printMessageQueueDetails(uint32_t id) {
 	uint8_t use = physmem->read<uint8_t>(queue + 0x1D);
 	
 	if (capacity == 0) {
-		Sys::stdout->write("Message queue is not in use.\n");
+		Sys::out->write("Message queue is not in use.\n");
 		return;
 	}
 	
 	if (pid >= sizeof(ProcessNames) / sizeof(ProcessNames[0])) {
-		Sys::stdout->write("Message queue has invalid pid.\n");
+		Sys::out->write("Message queue has invalid pid.\n");
 		return;
 	}
 	
-	Sys::stdout->write(
+	Sys::out->write(
 		"Owner: %-12s Buffer: %08X  Capacity: %i\n",
 		ProcessNames[pid], buffer, capacity
 	);
@@ -815,7 +815,7 @@ void ARMDebugger::printMessageQueueDetails(uint32_t id) {
 			uint32_t handler = physmem->read<uint32_t>(event);
 			uint32_t message = physmem->read<uint32_t>(event + 4);
 			if (handler == queue) {
-				Sys::stdout->write(
+				Sys::out->write(
 					"Message queue is registered as interrupt handler for %s.\n",
 					DeviceNames[i]
 				);
@@ -841,7 +841,7 @@ void ARMDebugger::printDevices() {
 			uint32_t state = physmem->read<uint32_t>(device + 0x18);
 			if (name && state < 7) {
 				translate(&name);
-				Sys::stdout->write(
+				Sys::out->write(
 					" %-24s %-16s (0x%X)\n", physmem->read<std::string>(name),
 					ResourceStates[state], error
 				);
@@ -860,7 +860,7 @@ void ARMDebugger::printFileClients() {
 			if (valid == 1) {
 				std::string device = physmem->read<std::string>(client + 0x20);
 				std::string cwd = physmem->read<std::string>(client + 0xAC);
-				Sys::stdout->write(" %3i:  %-8s  %s\n", i, device, cwd);
+				Sys::out->write(" %3i:  %-8s  %s\n", i, device, cwd);
 			}
 			client += 0x330;
 		}
@@ -884,7 +884,7 @@ void ARMDebugger::printVolumes() {
 			std::string name = physmem->read<std::string>(volume + 0x1C8);
 			std::string format = physmem->read<std::string>(fs + 8);
 			
-			Sys::stdout->write(" %2i:  %-10s %s\n", index, name, format);
+			Sys::out->write(" %2i:  %-10s %s\n", index, name, format);
 			
 			volume = physmem->read<uint32_t>(volume);
 			
@@ -900,7 +900,7 @@ void ARMDebugger::printSlcCacheState() {
 		
 		uint32_t num = physmem->read<uint32_t>(numPtr);
 		if (num == 0) {
-			Sys::stdout->write("No cached areas found.\n");
+			Sys::out->write("No cached areas found.\n");
 		}
 		else {
 			uint32_t indexPtr = 0x1108B8A4;
@@ -914,7 +914,7 @@ void ARMDebugger::printSlcCacheState() {
 				uint64_t startBlock = physmem->read<uint64_t>(addr + 0x10);
 				uint64_t endBlock = physmem->read<uint64_t>(addr + 0x18);
 				
-				Sys::stdout->write(" %3i:  0x%X - 0x%X (%i blocks)\n", i, startBlock, endBlock, endBlock - startBlock);
+				Sys::out->write(" %3i:  0x%X - 0x%X (%i blocks)\n", i, startBlock, endBlock, endBlock - startBlock);
 				
 				index = physmem->read<uint32_t>(addr);
 			}
@@ -973,7 +973,7 @@ bool PPCDebugger::translate(uint32_t *address) {
 }
 
 void PPCDebugger::printState() {
-	Sys::stdout->write(
+	Sys::out->write(
 		"r0  = %08X r1  = %08X r2  = %08X r3  = %08X r4  = %08X\n"
 		"r5  = %08X r6  = %08X r7  = %08X r8  = %08X r9  = %08X\n"
 		"r10 = %08X r11 = %08X r12 = %08X r13 = %08X r14 = %08X\n"
@@ -999,7 +999,7 @@ void PPCDebugger::printState() {
 }
 
 void PPCDebugger::printStateDetailed() {
-	Sys::stdout->write(
+	Sys::out->write(
 		"r0  = %08X r1  = %08X r2  = %08X r3  = %08X r4  = %08X\n"
 		"r5  = %08X r6  = %08X r7  = %08X r8  = %08X r9  = %08X\n"
 		"r10 = %08X r11 = %08X r12 = %08X r13 = %08X r14 = %08X\n"
@@ -1022,8 +1022,8 @@ void PPCDebugger::printStateDetailed() {
 		cpu->core.sprs[PPCCore::LR], cpu->core.sprs[PPCCore::CTR],
 		cpu->core.cr, cpu->core.sprs[PPCCore::XER]
 	);
-	Sys::stdout->write("\n");
-	Sys::stdout->write(
+	Sys::out->write("\n");
+	Sys::out->write(
 		"srr0 = %08X srr1 = %08X dar  = %08X dsisr= %08X\n"
 		"msr  = %08X dec  = %08X dabr = %08X iabr = %08X\n",
 		cpu->core.sprs[PPCCore::SRR0], cpu->core.sprs[PPCCore::SRR1],
@@ -1031,8 +1031,8 @@ void PPCDebugger::printStateDetailed() {
 		cpu->core.msr, cpu->core.sprs[PPCCore::DEC],
 		cpu->core.sprs[PPCCore::DABR], cpu->core.sprs[PPCCore::IABR]
 	);
-	Sys::stdout->write("\n");
-	Sys::stdout->write(
+	Sys::out->write("\n");
+	Sys::out->write(
 		"hid0 = %08X hid1 = %08X hid2 = %08X hid4 = %08X hid5 = %08X\n"
 		"pcsr = %08X scr  = %08X car  = %08X bcr  = %08X pir  = %08X\n"
 		"pvr  = %08X wpar = %08X wpsar= %08X\n",
@@ -1053,10 +1053,10 @@ void PPCDebugger::printStackTrace() {
 	uint32_t lr = cpu->core.sprs[PPCCore::LR];
 	uint32_t pc = cpu->core.pc;
 
-	Sys::stdout->write("\n");
-	Sys::stdout->write("pc = %s\n", formatAddress(pc, modules));
-	Sys::stdout->write("lr = %s\n", formatAddress(lr, modules));
-	Sys::stdout->write("\n");
+	Sys::out->write("\n");
+	Sys::out->write("pc = %s\n", formatAddress(pc, modules));
+	Sys::out->write("lr = %s\n", formatAddress(lr, modules));
+	Sys::out->write("\n");
 	
 	translate(&sp);
 	sp = physmem->read<uint32_t>(sp);
@@ -1065,14 +1065,14 @@ void PPCDebugger::printStackTrace() {
 }
 
 void PPCDebugger::printStackTraceForThread(uint32_t sp, ModuleList &modules) {
-	Sys::stdout->write("Stack trace:\n");
+	Sys::out->write("Stack trace:\n");
 	while (sp) {
 		translate(&sp);
 		
 		uint32_t lr = physmem->read<uint32_t>(sp + 4);
 		if (!lr) break;
 		
-		Sys::stdout->write("    %s\n", formatAddress(lr, modules));
+		Sys::out->write("    %s\n", formatAddress(lr, modules));
 
 		sp = physmem->read<uint32_t>(sp);
 	}
@@ -1086,19 +1086,19 @@ MemoryRegion::Access AccessProt[] = {
 };
 
 void PPCDebugger::printMemoryMap() {
-	Sys::stdout->write("DBAT:\n");
+	Sys::out->write("DBAT:\n");
 	for (int i = 0; i < 8; i++) {
 		uint32_t batu = cpu->core.sprs[PPCCore::DBAT0U + i * 2 + i / 4 * 8];
 		uint32_t batl = cpu->core.sprs[PPCCore::DBAT0L + i * 2 + i / 4 * 8];
-		Sys::stdout->write("    dbat%i: ", i);
+		Sys::out->write("    dbat%i: ", i);
 		printBAT(batu, batl);
 	}
 	
-	Sys::stdout->write("\nIBAT:\n");
+	Sys::out->write("\nIBAT:\n");
 	for (int i = 0; i < 8; i++) {
 		uint32_t batu = cpu->core.sprs[PPCCore::IBAT0U + i * 2 + i / 4 * 8];
 		uint32_t batl = cpu->core.sprs[PPCCore::IBAT0L + i * 2 + i / 4 * 8];
-		Sys::stdout->write("    ibat%i: ", i);
+		Sys::out->write("    ibat%i: ", i);
 		printBAT(batu, batl);
 	}
 	
@@ -1107,7 +1107,7 @@ void PPCDebugger::printMemoryMap() {
 	uint32_t pagemask = sdr1 & 0x1FF;
 	uint32_t hashmask = (pagemask << 10) | 0x3FF;
 	
-	Sys::stdout->write("\nPage table (%08X):\n", pagetbl);
+	Sys::out->write("\nPage table (%08X):\n", pagetbl);
 	
 	if (pagetbl >= 0xFFE00000) {
 		pagetbl = pagetbl - 0xFFE00000 + 0x08000000;
@@ -1178,14 +1178,14 @@ void PPCDebugger::printBAT(uint32_t batu, uint32_t batl) {
 		uint64_t vaddr = batu & 0xFFFE0000;
 		uint64_t paddr = batl & 0xFFFE0000;
 		
-		Sys::stdout->write(
+		Sys::out->write(
 			"%08X-%08X => %08X-%08X (%s, %s, %s)\n",
 			vaddr, vaddr + size, paddr, paddr + size,
 			caching, access, validity
 		);
 	}
 	else {
-		Sys::stdout->write("disabled\n");
+		Sys::out->write("disabled\n");
 	}
 }
 
@@ -1194,7 +1194,7 @@ void PPCDebugger::printModules() {
 	std::sort(modules.begin(), modules.end(), PPCModule::compareText);
 	
 	for (Ref<PPCModule> module : modules) {
-		Sys::stdout->write(" %08X: %s\n", module->text, module->path);
+		Sys::out->write(" %08X: %s\n", module->text, module->path);
 	}
 }
 
@@ -1202,9 +1202,9 @@ void PPCDebugger::printModuleDetails(std::string name) {
 	ModuleList modules = getModules();
 	for (Ref<PPCModule> module : modules) {
 		if (module->path.find(name) != std::string::npos) {
-			Sys::stdout->write("%s:\n", module->path);
-			Sys::stdout->write("    .text: %08X - %08X\n", module->text, module->text + module->textsize);
-			Sys::stdout->write("    .data: %08X - %08X\n", module->data, module->data + module->datasize);
+			Sys::out->write("%s:\n", module->path);
+			Sys::out->write("    .text: %08X - %08X\n", module->text, module->text + module->textsize);
+			Sys::out->write("    .data: %08X - %08X\n", module->data, module->data + module->datasize);
 		}
 	}
 }
@@ -1258,7 +1258,7 @@ void PPCDebugger::printThreads() {
 		
 		std::string state = StringUtils::format("(%s)", stateName);
 		
-		Sys::stdout->write(" %08X:  %-12s  %-10s %-9s  %s\n", addr, owner, core, state, name);
+		Sys::out->write(" %08X:  %-12s  %-10s %-9s  %s\n", addr, owner, core, state, name);
 		
 		thread = physmem->read<uint32_t>(thread + 0x38C);
 	}
@@ -1266,18 +1266,18 @@ void PPCDebugger::printThreads() {
 
 void PPCDebugger::printThreadDetails(uint32_t thread) {
 	if (!(cpu->core.msr & 0x10)) {
-		Sys::stdout->write("MMU is disabled.\n");
+		Sys::out->write("MMU is disabled.\n");
 		return;
 	}
 	
 	if (!translate(&thread)) {
-		Sys::stdout->write("Address translation failed.\n");
+		Sys::out->write("Address translation failed.\n");
 		return;
 	}
 	
 	uint32_t tag = physmem->read<uint32_t>(thread + 0x320);
 	if (tag != 0x74487244) { //tHrD
-		Sys::stdout->write("This is not a valid thread.\n");
+		Sys::out->write("This is not a valid thread.\n");
 		return;
 	}
 	
@@ -1295,19 +1295,19 @@ void PPCDebugger::printThreadDetails(uint32_t thread) {
 	uint32_t stackTop = physmem->read<uint32_t>(thread + 0x398);
 	uint32_t entryPoint = physmem->read<uint32_t>(thread + 0x39C);
 	
-	Sys::stdout->write("Name: %s\n\n", name);
-	Sys::stdout->write("Entry point: %s\n\n", formatAddress(entryPoint, modules));
-	Sys::stdout->write("Stack: 0x%08X - 0x%08X (0x%X bytes)\n\n", stackTop, stackBase, stackBase - stackTop);
+	Sys::out->write("Name: %s\n\n", name);
+	Sys::out->write("Entry point: %s\n\n", formatAddress(entryPoint, modules));
+	Sys::out->write("Stack: 0x%08X - 0x%08X (0x%X bytes)\n\n", stackTop, stackBase, stackBase - stackTop);
 	printStackTraceForThread(sp, modules);
-	Sys::stdout->write("\n");
+	Sys::out->write("\n");
 	
 	uint8_t state = physmem->read<uint8_t>(thread + 0x324);
-	if (state == 1) Sys::stdout->write("This thread is ready to run.\n");
-	else if (state == 2) Sys::stdout->write("This thread is running right now.\n");
+	if (state == 1) Sys::out->write("This thread is ready to run.\n");
+	else if (state == 2) Sys::out->write("This thread is running right now.\n");
 	else if (state == 4) printThreadWait(thread);
-	else if (state == 8) Sys::stdout->write("This thread is dead.\n");
+	else if (state == 8) Sys::out->write("This thread is dead.\n");
 	else {
-		Sys::stdout->write("This thread has an invalid state.\n");
+		Sys::out->write("This thread has an invalid state.\n");
 	}
 }
 
@@ -1323,20 +1323,20 @@ void PPCDebugger::printThreadWait(uint32_t thread) {
 			}
 			
 			uint32_t tag = physmem->read<uint32_t>(parent);
-			if (tag == 0x65566E54) Sys::stdout->write("This thread is waiting for an event: %s\n", name);
-			else if (tag == 0x614C724D) Sys::stdout->write("This thread is waiting for an alarm: %s\n", name);
-			else if (tag == 0x6D557458) Sys::stdout->write("This thread is waiting for a mutex: %s\n", name);
-			else if (tag == 0x634E6456) Sys::stdout->write("This thread is waiting for a condition variable: %s\n", name);
-			else if (tag == 0x73506852) Sys::stdout->write("This thread is waiting for a semaphore: %s\n", name);
-			else if (tag == 0x6D536751) Sys::stdout->write("This thread is waiting for a message queue: %s\n", name);
-			else if (tag == 0x614C6D51) Sys::stdout->write("This thread is waiting for an alarm queue: %s\n", name);
+			if (tag == 0x65566E54) Sys::out->write("This thread is waiting for an event: %s\n", name);
+			else if (tag == 0x614C724D) Sys::out->write("This thread is waiting for an alarm: %s\n", name);
+			else if (tag == 0x6D557458) Sys::out->write("This thread is waiting for a mutex: %s\n", name);
+			else if (tag == 0x634E6456) Sys::out->write("This thread is waiting for a condition variable: %s\n", name);
+			else if (tag == 0x73506852) Sys::out->write("This thread is waiting for a semaphore: %s\n", name);
+			else if (tag == 0x6D536751) Sys::out->write("This thread is waiting for a message queue: %s\n", name);
+			else if (tag == 0x614C6D51) Sys::out->write("This thread is waiting for an alarm queue: %s\n", name);
 			else {
-				Sys::stdout->write("This thread is currently waiting.\n");
+				Sys::out->write("This thread is currently waiting.\n");
 			}
 			return;
 		}
 	}
-	Sys::stdout->write("This thread is currently waiting.\n");
+	Sys::out->write("This thread is currently waiting.\n");
 }
 
 std::string PPCDebugger::formatAddress(uint32_t addr, ModuleList &modules) {
@@ -1423,9 +1423,9 @@ void Debugger::show(int core) {
 	while (debugging) {
 		DebugInterface *debugger = getCurrent();
 		
-		Sys::stdout->write("%s:%08X> ", debugger->name(), debugger->pc());
+		Sys::out->write("%s:%08X> ", debugger->name(), debugger->pc());
 		
-		std::string line = Sys::stdin->readline();
+		std::string line = Sys::in->readline();
 		
 		std::vector<std::string> args;
 		
@@ -1499,13 +1499,13 @@ void Debugger::processCommand(std::string command, ArgParser *args) {
 	else if (command == "slccache") slccache(args);
 	
 	else {
-		Sys::stdout->write("Unknown command.\n");
+		Sys::out->write("Unknown command.\n");
 	}
 }
 
 void Debugger::help(ArgParser *args) {
 	if (!args->finish()) return;
-	Sys::stdout->write(HELP_TEXT);
+	Sys::out->write(HELP_TEXT);
 }
 
 void Debugger::quit(ArgParser *args) {
@@ -1524,7 +1524,7 @@ void Debugger::select(ArgParser *args) {
 	else if (name == "ppc1") core = 2;
 	else if (name == "ppc2") core = 3;
 	else {
-		Sys::stdout->write("Please provide a valid processor name.\n");
+		Sys::out->write("Please provide a valid processor name.\n");
 	}
 }
 
@@ -1559,70 +1559,70 @@ void Debugger::restart(ArgParser *args) {
 #if STATS
 void Debugger::stats(ArgParser *args) {
 	if (!args->finish()) return;
-	Sys::stdout->write("ARM:\n");
-	Sys::stdout->write("    ARM instrs executed:       %i\n", armcpu->armInstrs);
-	Sys::stdout->write(
+	Sys::out->write("ARM:\n");
+	Sys::out->write("    ARM instrs executed:       %i\n", armcpu->armInstrs);
+	Sys::out->write(
 		"    ARM instrs executed (jit): %i (%i%%)\n",
 		armcpu->jit.instrsExecuted, percentage(armcpu->jit.instrsExecuted, armcpu->armInstrs)
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"    ARM instrs compiled (jit): %i (avg usage: %i)\n",
 		armcpu->jit.instrsCompiled, divide(armcpu->jit.instrsExecuted, armcpu->jit.instrsCompiled)
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"    ARM jit memory usage:      %i bytes (%i per instr)\n",
 		armcpu->jit.instrSize, divide(armcpu->jit.instrSize, armcpu->jit.instrsCompiled)
 	);
-	Sys::stdout->write("    \n");
-	Sys::stdout->write("    Thumb instrs executed:       %i\n", armcpu->thumbInstrs);
-	Sys::stdout->write(
+	Sys::out->write("    \n");
+	Sys::out->write("    Thumb instrs executed:       %i\n", armcpu->thumbInstrs);
+	Sys::out->write(
 		"    Thumb instrs executed (jit): %i (%i%%)\n",
 		armcpu->thumbJit.instrsExecuted, percentage(armcpu->thumbJit.instrsExecuted, armcpu->thumbInstrs)
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"    Thumb instrs compiled (jit): %i (avg usage: %i)\n",
 		armcpu->thumbJit.instrsCompiled, divide(armcpu->thumbJit.instrsExecuted, armcpu->thumbJit.instrsCompiled)
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"    Thumb jit memory usage:      %i bytes (%i per instr)\n",
 		armcpu->thumbJit.instrSize, divide(armcpu->thumbJit.instrSize, armcpu->thumbJit.instrsCompiled)
 	);
-	Sys::stdout->write("    \n");
-	Sys::stdout->write("    Number of data reads:  %i\n", armcpu->dataReads);
-	Sys::stdout->write("    Number of data writes: %i\n", armcpu->dataWrites);
-	Sys::stdout->write("    \n");
-	Sys::stdout->write("    MMU cache hits:   %i\n", armcpu->mmu.cache.hits);
-	Sys::stdout->write("    MMU cache misses: %i\n", armcpu->mmu.cache.misses);
+	Sys::out->write("    \n");
+	Sys::out->write("    Number of data reads:  %i\n", armcpu->dataReads);
+	Sys::out->write("    Number of data writes: %i\n", armcpu->dataWrites);
+	Sys::out->write("    \n");
+	Sys::out->write("    MMU cache hits:   %i\n", armcpu->mmu.cache.hits);
+	Sys::out->write("    MMU cache misses: %i\n", armcpu->mmu.cache.misses);
 	printPPCStats(0);
 	printPPCStats(1);
 	printPPCStats(2);
 }
 
 void Debugger::printPPCStats(int index) {
-	Sys::stdout->write("\n");
-	Sys::stdout->write("PPC %i:\n", index);
-	Sys::stdout->write("    Instructions executed:       %i\n", ppccpu[index]->instrsExecuted);
-	Sys::stdout->write(
+	Sys::out->write("\n");
+	Sys::out->write("PPC %i:\n", index);
+	Sys::out->write("    Instructions executed:       %i\n", ppccpu[index]->instrsExecuted);
+	Sys::out->write(
 		"    Instructions executed (jit): %i (%i%%)\n", ppccpu[index]->jit.instrsExecuted,
 		percentage(ppccpu[index]->jit.instrsExecuted, ppccpu[index]->instrsExecuted)
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"    Instructions compiled (jit): %i (avg usage: %i)\n", ppccpu[index]->jit.instrsCompiled,
 		divide(ppccpu[index]->jit.instrsExecuted, ppccpu[index]->jit.instrsCompiled)
 	);
-	Sys::stdout->write(
+	Sys::out->write(
 		"    JIT memory usage:            %i bytes (%i per instr)\n", ppccpu[index]->jit.instrSize,
 		divide(ppccpu[index]->jit.instrSize, ppccpu[index]->jit.instrsCompiled)
 	);
-	Sys::stdout->write("    \n");
-	Sys::stdout->write("    MMU cache hits:   %i\n", ppccpu[index]->mmu.cache.hits);
-	Sys::stdout->write("    MMU cache misses: %i\n", ppccpu[index]->mmu.cache.misses);
-	Sys::stdout->write("    \n");
-	Sys::stdout->write("    DSI exceptions    %i\n", ppccpu[index]->core.dsiExceptions);
-	Sys::stdout->write("    ISI exceptions:   %i\n", ppccpu[index]->core.isiExceptions);
-	Sys::stdout->write("    External intr:    %i\n", ppccpu[index]->core.externalInterrupts);
-	Sys::stdout->write("    Decrementer intr: %i\n", ppccpu[index]->core.decrementerInterrupts);
-	Sys::stdout->write("    System calls:     %i\n", ppccpu[index]->core.systemCalls);
+	Sys::out->write("    \n");
+	Sys::out->write("    MMU cache hits:   %i\n", ppccpu[index]->mmu.cache.hits);
+	Sys::out->write("    MMU cache misses: %i\n", ppccpu[index]->mmu.cache.misses);
+	Sys::out->write("    \n");
+	Sys::out->write("    DSI exceptions    %i\n", ppccpu[index]->core.dsiExceptions);
+	Sys::out->write("    ISI exceptions:   %i\n", ppccpu[index]->core.isiExceptions);
+	Sys::out->write("    External intr:    %i\n", ppccpu[index]->core.externalInterrupts);
+	Sys::out->write("    Decrementer intr: %i\n", ppccpu[index]->core.decrementerInterrupts);
+	Sys::out->write("    System calls:     %i\n", ppccpu[index]->core.systemCalls);
 }
 #endif
 
@@ -1638,7 +1638,7 @@ void Debugger::metrics(ArgParser *args) {
 	if (mode == "category") pmode = PPCMetrics::CATEGORY;
 	else if (mode == "frequency") pmode = PPCMetrics::FREQUENCY;
 	else {
-		Sys::stdout->write("Please provide a valid sort order.\n");
+		Sys::out->write("Please provide a valid sort order.\n");
 		return;
 	}
 	
@@ -1646,7 +1646,7 @@ void Debugger::metrics(ArgParser *args) {
 	else if (name == "ppc1") ppccpu[1]->metrics.print(pmode);
 	else if (name == "ppc2") ppccpu[2]->metrics.print(pmode);
 	else {
-		Sys::stdout->write("Please provide a valid processor name.\n");
+		Sys::out->write("Please provide a valid processor name.\n");
 	}
 }
 
@@ -1659,7 +1659,7 @@ void Debugger::syscalls(ArgParser *args) {
 	else if (name == "ppc1") printSyscalls(1);
 	else if (name == "ppc2") printSyscalls(2);
 	else {
-		Sys::stdout->write("Please provide a valid processor name.\n");
+		Sys::out->write("Please provide a valid processor name.\n");
 	}
 }
 
@@ -1677,12 +1677,12 @@ void Debugger::printSyscalls(int core) {
 		total += pair.second;
 	}
 	
-	Sys::stdout->write("Syscalls executed: %i\n", total);
-	Sys::stdout->write("\n");
+	Sys::out->write("Syscalls executed: %i\n", total);
+	Sys::out->write("\n");
 	
-	Sys::stdout->write("Sorted by frequency:\n");
+	Sys::out->write("Sorted by frequency:\n");
 	for (std::pair<uint32_t, uint64_t> instr : list) {
-		Sys::stdout->write(
+		Sys::out->write(
 			"    0x%04X: %6i (%2i%%)\n", instr.first,
 			instr.second, percentage(instr.second, total)
 		);
@@ -1703,17 +1703,17 @@ void Debugger::breakp(ArgParser *args) {
 		std::sort(breakpoints.begin(), breakpoints.end());
 		
 		if (breakpoints.size() == 0) {
-			Sys::stdout->write("No breakpoints are installed.\n");
+			Sys::out->write("No breakpoints are installed.\n");
 		}
 		else {
 			if (breakpoints.size() == 1) {
-				Sys::stdout->write("1 breakpoint:\n");
+				Sys::out->write("1 breakpoint:\n");
 			}
 			else {
-				Sys::stdout->write("%i breakpoints:\n", breakpoints.size());
+				Sys::out->write("%i breakpoints:\n", breakpoints.size());
 			}
 			for (uint32_t bp : breakpoints) {
-				Sys::stdout->write("    0x%08X\n", bp);
+				Sys::out->write("    0x%08X\n", bp);
 			}
 		}
 	}
@@ -1735,10 +1735,10 @@ void Debugger::breakp(ArgParser *args) {
 		bool exists = cpu->isBreakpoint(address);
 		if (command == "add") {
 			if (exists) {
-				Sys::stdout->write("Breakpoint at 0x%X already exists.\n", address);
+				Sys::out->write("Breakpoint at 0x%X already exists.\n", address);
 			}
 			else {
-				Sys::stdout->write("Added breakpoint at 0x%X.\n", address);
+				Sys::out->write("Added breakpoint at 0x%X.\n", address);
 				if (core == 0) armcpu->addBreakpoint(address);
 				else {
 					for (int i = 0; i < 3; i++) {
@@ -1749,10 +1749,10 @@ void Debugger::breakp(ArgParser *args) {
 		}
 		else {
 			if (!exists) {
-				Sys::stdout->write("Breakpoint at 0x%X does not exists.\n", address);
+				Sys::out->write("Breakpoint at 0x%X does not exists.\n", address);
 			}
 			else {
-				Sys::stdout->write("Removed breakpoint at 0x%X.\n", address);
+				Sys::out->write("Removed breakpoint at 0x%X.\n", address);
 				if (core == 0) armcpu->removeBreakpoint(address);
 				else {
 					for (int i = 0; i < 3; i++) {
@@ -1763,7 +1763,7 @@ void Debugger::breakp(ArgParser *args) {
 		}
 	}
 	else {
-		Sys::stdout->write("Unknown breakpoint command: %s\n", command);
+		Sys::out->write("Unknown breakpoint command: %s\n", command);
 	}
 }
 #endif
@@ -1783,20 +1783,20 @@ void Debugger::watch(ArgParser *args) {
 		}
 		
 		if (total == 0) {
-			Sys::stdout->write("No watchpoints are installed.\n");
+			Sys::out->write("No watchpoints are installed.\n");
 		}
 		else {
 			if (total == 1) {
-				Sys::stdout->write("1 watchpoint:\n");
+				Sys::out->write("1 watchpoint:\n");
 			}
 			else {
-				Sys::stdout->write("%i watchpoints:\n", total);
+				Sys::out->write("%i watchpoints:\n", total);
 			}
 			
 			for (int virt = 0; virt < 2; virt++) {
 				for (int write = 0; write < 2; write++) {
 					for (uint32_t wp : cpu->watchpoints[write][virt]) {
-						Sys::stdout->write(
+						Sys::out->write(
 							"    0x%08X (%s, %s)\n", wp,
 							virt ? "virtual" : "physical",
 							write ? "write" : "read"
@@ -1823,12 +1823,12 @@ void Debugger::watch(ArgParser *args) {
 		if (!args->finish()) return;
 		
 		if (mode != "phys" && mode != "virt") {
-			Sys::stdout->write("Please specify either 'phys' or 'virt'.\n");
+			Sys::out->write("Please specify either 'phys' or 'virt'.\n");
 			return;
 		}
 		
 		if (type != "read" && type != "write") {
-			Sys::stdout->write("Please specify either 'read' or 'write'.\n");
+			Sys::out->write("Please specify either 'read' or 'write'.\n");
 			return;
 		}
 		
@@ -1840,25 +1840,25 @@ void Debugger::watch(ArgParser *args) {
 		bool exists = cpu->isWatchpoint(write, virt, address, 1);
 		if (command == "add") {
 			if (exists) {
-				Sys::stdout->write("Watchpoint (%s) at %s address 0x%X already exists.\n", type, mode, address);
+				Sys::out->write("Watchpoint (%s) at %s address 0x%X already exists.\n", type, mode, address);
 			}
 			else {
-				Sys::stdout->write("Added watchpoint (%s) at %s address 0x%X.\n", type, mode, address);
+				Sys::out->write("Added watchpoint (%s) at %s address 0x%X.\n", type, mode, address);
 				cpu->addWatchpoint(write, virt, address);
 			}
 		}
 		else {
 			if (!exists) {
-				Sys::stdout->write("Watchpoint (%s) at %s address 0x%X does not exists.\n", type, mode, address);
+				Sys::out->write("Watchpoint (%s) at %s address 0x%X does not exists.\n", type, mode, address);
 			}
 			else {
-				Sys::stdout->write("Removed watchpoint (%s) at %s address 0x%X.\n", type, mode, address);
+				Sys::out->write("Removed watchpoint (%s) at %s address 0x%X.\n", type, mode, address);
 				cpu->removeWatchpoint(write, virt, address);
 			}
 		}
 	}
 	else {
-		Sys::stdout->write("Unknown watchpoint command: %s\n", command);
+		Sys::out->write("Unknown watchpoint command: %s\n", command);
 	}
 }
 #endif
@@ -1870,7 +1870,7 @@ void Debugger::state(ArgParser *args) {
 		if (!args->finish()) return;
 		
 		if (param != "full") {
-			Sys::stdout->write("Invalid argument.");
+			Sys::out->write("Invalid argument.");
 			return;
 		}
 		
@@ -1886,7 +1886,7 @@ void Debugger::print(ArgParser *args) {
 	if (!args->integer(&value)) return;
 	if (!args->finish()) return;
 	
-	Sys::stdout->write("0x%X (%i)\n", value, value);
+	Sys::out->write("0x%X (%i)\n", value, value);
 }
 
 void Debugger::trace(ArgParser *args) {
@@ -1904,12 +1904,12 @@ void Debugger::read(ArgParser *args) {
 	
 	if (mode == "virt") {
 		if (!getCurrent()->translate(&address)) {
-			Sys::stdout->write("Address translation failed.\n");
+			Sys::out->write("Address translation failed.\n");
 			return;
 		}
 	}
 	else if (mode != "phys") {
-		Sys::stdout->write("Please specify either 'phys' or 'virt'.\n");
+		Sys::out->write("Please specify either 'phys' or 'virt'.\n");
 		return;
 	}
 	
@@ -1922,7 +1922,7 @@ void Debugger::read(ArgParser *args) {
 		}
 	}
 	
-	Sys::stdout->write("%s\n\n%s\n", buffer.hexstring(), text);
+	Sys::out->write("%s\n\n%s\n", buffer.hexstring(), text);
 }
 
 void Debugger::translate(ArgParser *args) {
@@ -1931,10 +1931,10 @@ void Debugger::translate(ArgParser *args) {
 	if (!args->finish()) return;
 	
 	if (getCurrent()->translate(&addr)) {
-		Sys::stdout->write("0x%08X\n", addr);
+		Sys::out->write("0x%08X\n", addr);
 	}
 	else {
-		Sys::stdout->write("Address translation failed.\n");
+		Sys::out->write("Address translation failed.\n");
 	}
 }
 
@@ -1986,79 +1986,79 @@ void Debugger::devices(ArgParser *args) {
 
 void Debugger::hardware(ArgParser *args) {
 	if (!args->finish()) return;
-	Sys::stdout->write("PI_CPU0_INTMR = 0x%08X\n", physmem->read<uint32_t>(0xC000078));
-	Sys::stdout->write("PI_CPU0_INTSR = 0x%08X\n", physmem->read<uint32_t>(0xC00007C)); 
-	Sys::stdout->write("PI_CPU1_INTMR = 0x%08X\n", physmem->read<uint32_t>(0xC000080));
-	Sys::stdout->write("PI_CPU1_INTSR = 0x%08X\n", physmem->read<uint32_t>(0xC000084));
-	Sys::stdout->write("PI_CPU2_INTMR = 0x%08X\n", physmem->read<uint32_t>(0xC000088));
-	Sys::stdout->write("PI_CPU2_INTSR = 0x%08X\n", physmem->read<uint32_t>(0xC00008C));
-	Sys::stdout->write("\n");
-	Sys::stdout->write("WG_CPU0_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC000040));
-	Sys::stdout->write("WG_CPU0_TOP = 0x%08X\n", physmem->read<uint32_t>(0xC000044));
-	Sys::stdout->write("WG_CPU0_PTR = 0x%08X\n", physmem->read<uint32_t>(0xC000048));
-	Sys::stdout->write("WG_CPU0_THRESHOLD = 0x%08X\n", physmem->read<uint32_t>(0xC00004C));
-	Sys::stdout->write("WG_CPU1_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC000050));
-	Sys::stdout->write("WG_CPU1_TOP = 0x%08X\n", physmem->read<uint32_t>(0xC000054));
-	Sys::stdout->write("WG_CPU1_PTR = 0x%08X\n", physmem->read<uint32_t>(0xC000058));
-	Sys::stdout->write("WG_CPU1_THRESHOLD = 0x%08X\n", physmem->read<uint32_t>(0xC00005C));
-	Sys::stdout->write("WG_CPU2_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC000060));
-	Sys::stdout->write("WG_CPU2_TOP = 0x%08X\n", physmem->read<uint32_t>(0xC000064));
-	Sys::stdout->write("WG_CPU2_PTR = 0x%08X\n", physmem->read<uint32_t>(0xC000068));
-	Sys::stdout->write("WG_CPU2_THRESHOLD = 0x%08X\n", physmem->read<uint32_t>(0xC00006C));
-	Sys::stdout->write("\n");
-	Sys::stdout->write("LT_ARM_INTMR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000478));
-	Sys::stdout->write("LT_ARM_INTSR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000470));
-	Sys::stdout->write("LT_ARM_INTMR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD00047C));
-	Sys::stdout->write("LT_ARM_INTSR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD000474));
-	Sys::stdout->write("LT_PPC0_INTMR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000448));
-	Sys::stdout->write("LT_PPC0_INTSR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000440));
-	Sys::stdout->write("LT_PPC0_INTMR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD00044C));
-	Sys::stdout->write("LT_PPC0_INTSR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD000444));
-	Sys::stdout->write("LT_PPC1_INTMR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000458));
-	Sys::stdout->write("LT_PPC1_INTSR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000450));
-	Sys::stdout->write("LT_PPC1_INTMR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD00045C));
-	Sys::stdout->write("LT_PPC1_INTSR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD000454));
-	Sys::stdout->write("LT_PPC2_INTMR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000468));
-	Sys::stdout->write("LT_PPC2_INTSR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000460));
-	Sys::stdout->write("LT_PPC2_INTMR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD00046C));
-	Sys::stdout->write("LT_PPC2_INTSR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD000464));
-	Sys::stdout->write("\n");
-	Sys::stdout->write("IH_RB_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC203E04));
-	Sys::stdout->write("IH_RB_RPTR = 0x%08X\n", physmem->read<uint32_t>(0xC203E08));
-	Sys::stdout->write("IH_RB_WPTR_ADDR_LO = 0x%08X\n", physmem->read<uint32_t>(0xC203E14));
-	Sys::stdout->write("CP_RB_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC20C100));
-	Sys::stdout->write("CP_RB_RPTR_ADDR = 0x%08X\n", physmem->read<uint32_t>(0xC20C10C));
-	Sys::stdout->write("CP_RB_WPTR = 0x%08X\n", physmem->read<uint32_t>(0xC20C114));
-	Sys::stdout->write("DRMDMA_RB_CNTL = 0x%08X\n", physmem->read<uint32_t>(0xC20D000));
-	Sys::stdout->write("DRMDMA_RB_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC20D004));
-	Sys::stdout->write("DRMDMA_RB_RPTR = 0x%08X\n", physmem->read<uint32_t>(0xC20D008));
-	Sys::stdout->write("DRMDMA_RB_WPTR = 0x%08X\n", physmem->read<uint32_t>(0xC20D00C));
-	Sys::stdout->write("SCRATCH_REG0 = 0x%08X\n", physmem->read<uint32_t>(0xC208500));
-	Sys::stdout->write("SCRATCH_REG1 = 0x%08X\n", physmem->read<uint32_t>(0xC208504));
-	Sys::stdout->write("SCRATCH_REG2 = 0x%08X\n", physmem->read<uint32_t>(0xC208508));
-	Sys::stdout->write("SCRATCH_REG3 = 0x%08X\n", physmem->read<uint32_t>(0xC20850C));
-	Sys::stdout->write("SCRATCH_REG4 = 0x%08X\n", physmem->read<uint32_t>(0xC208510));
-	Sys::stdout->write("SCRATCH_REG5 = 0x%08X\n", physmem->read<uint32_t>(0xC208514));
-	Sys::stdout->write("SCRATCH_REG6 = 0x%08X\n", physmem->read<uint32_t>(0xC208518));
-	Sys::stdout->write("SCRATCH_REG7 = 0x%08X\n", physmem->read<uint32_t>(0xC20851C));
-	Sys::stdout->write("SCRATCH_UMSK = 0x%08X\n", physmem->read<uint32_t>(0xC208540));
-	Sys::stdout->write("SCRATCH_ADDR = 0x%08X\n", physmem->read<uint32_t>(0xC208544));
-	Sys::stdout->write("D1CRTC_INTERRUPT_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC2060DC));
-	Sys::stdout->write("D1GRPH_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206100));
-	Sys::stdout->write("D1GRPH_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206104));
-	Sys::stdout->write("D1GRPH_PRIMARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206110));
-	Sys::stdout->write("D1GRPH_SECONDARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206118));
-	Sys::stdout->write("D1OVL_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206180));
-	Sys::stdout->write("D1OVL_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206184));
-	Sys::stdout->write("D1OVL_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206190));
-	Sys::stdout->write("D2CRTC_INTERRUPT_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC2068DC));
-	Sys::stdout->write("D2GRPH_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206900));
-	Sys::stdout->write("D2GRPH_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206904));
-	Sys::stdout->write("D2GRPH_PRIMARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206910));
-	Sys::stdout->write("D2GRPH_SECONDARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206918));
-	Sys::stdout->write("D2OVL_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206980));
-	Sys::stdout->write("D2OVL_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206984));
-	Sys::stdout->write("D2OVL_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206990));
+	Sys::out->write("PI_CPU0_INTMR = 0x%08X\n", physmem->read<uint32_t>(0xC000078));
+	Sys::out->write("PI_CPU0_INTSR = 0x%08X\n", physmem->read<uint32_t>(0xC00007C)); 
+	Sys::out->write("PI_CPU1_INTMR = 0x%08X\n", physmem->read<uint32_t>(0xC000080));
+	Sys::out->write("PI_CPU1_INTSR = 0x%08X\n", physmem->read<uint32_t>(0xC000084));
+	Sys::out->write("PI_CPU2_INTMR = 0x%08X\n", physmem->read<uint32_t>(0xC000088));
+	Sys::out->write("PI_CPU2_INTSR = 0x%08X\n", physmem->read<uint32_t>(0xC00008C));
+	Sys::out->write("\n");
+	Sys::out->write("WG_CPU0_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC000040));
+	Sys::out->write("WG_CPU0_TOP = 0x%08X\n", physmem->read<uint32_t>(0xC000044));
+	Sys::out->write("WG_CPU0_PTR = 0x%08X\n", physmem->read<uint32_t>(0xC000048));
+	Sys::out->write("WG_CPU0_THRESHOLD = 0x%08X\n", physmem->read<uint32_t>(0xC00004C));
+	Sys::out->write("WG_CPU1_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC000050));
+	Sys::out->write("WG_CPU1_TOP = 0x%08X\n", physmem->read<uint32_t>(0xC000054));
+	Sys::out->write("WG_CPU1_PTR = 0x%08X\n", physmem->read<uint32_t>(0xC000058));
+	Sys::out->write("WG_CPU1_THRESHOLD = 0x%08X\n", physmem->read<uint32_t>(0xC00005C));
+	Sys::out->write("WG_CPU2_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC000060));
+	Sys::out->write("WG_CPU2_TOP = 0x%08X\n", physmem->read<uint32_t>(0xC000064));
+	Sys::out->write("WG_CPU2_PTR = 0x%08X\n", physmem->read<uint32_t>(0xC000068));
+	Sys::out->write("WG_CPU2_THRESHOLD = 0x%08X\n", physmem->read<uint32_t>(0xC00006C));
+	Sys::out->write("\n");
+	Sys::out->write("LT_ARM_INTMR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000478));
+	Sys::out->write("LT_ARM_INTSR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000470));
+	Sys::out->write("LT_ARM_INTMR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD00047C));
+	Sys::out->write("LT_ARM_INTSR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD000474));
+	Sys::out->write("LT_PPC0_INTMR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000448));
+	Sys::out->write("LT_PPC0_INTSR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000440));
+	Sys::out->write("LT_PPC0_INTMR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD00044C));
+	Sys::out->write("LT_PPC0_INTSR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD000444));
+	Sys::out->write("LT_PPC1_INTMR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000458));
+	Sys::out->write("LT_PPC1_INTSR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000450));
+	Sys::out->write("LT_PPC1_INTMR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD00045C));
+	Sys::out->write("LT_PPC1_INTSR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD000454));
+	Sys::out->write("LT_PPC2_INTMR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000468));
+	Sys::out->write("LT_PPC2_INTSR_ALL = 0x%08X\n", physmem->read<uint32_t>(0xD000460));
+	Sys::out->write("LT_PPC2_INTMR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD00046C));
+	Sys::out->write("LT_PPC2_INTSR_LT = 0x%08X\n", physmem->read<uint32_t>(0xD000464));
+	Sys::out->write("\n");
+	Sys::out->write("IH_RB_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC203E04));
+	Sys::out->write("IH_RB_RPTR = 0x%08X\n", physmem->read<uint32_t>(0xC203E08));
+	Sys::out->write("IH_RB_WPTR_ADDR_LO = 0x%08X\n", physmem->read<uint32_t>(0xC203E14));
+	Sys::out->write("CP_RB_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC20C100));
+	Sys::out->write("CP_RB_RPTR_ADDR = 0x%08X\n", physmem->read<uint32_t>(0xC20C10C));
+	Sys::out->write("CP_RB_WPTR = 0x%08X\n", physmem->read<uint32_t>(0xC20C114));
+	Sys::out->write("DRMDMA_RB_CNTL = 0x%08X\n", physmem->read<uint32_t>(0xC20D000));
+	Sys::out->write("DRMDMA_RB_BASE = 0x%08X\n", physmem->read<uint32_t>(0xC20D004));
+	Sys::out->write("DRMDMA_RB_RPTR = 0x%08X\n", physmem->read<uint32_t>(0xC20D008));
+	Sys::out->write("DRMDMA_RB_WPTR = 0x%08X\n", physmem->read<uint32_t>(0xC20D00C));
+	Sys::out->write("SCRATCH_REG0 = 0x%08X\n", physmem->read<uint32_t>(0xC208500));
+	Sys::out->write("SCRATCH_REG1 = 0x%08X\n", physmem->read<uint32_t>(0xC208504));
+	Sys::out->write("SCRATCH_REG2 = 0x%08X\n", physmem->read<uint32_t>(0xC208508));
+	Sys::out->write("SCRATCH_REG3 = 0x%08X\n", physmem->read<uint32_t>(0xC20850C));
+	Sys::out->write("SCRATCH_REG4 = 0x%08X\n", physmem->read<uint32_t>(0xC208510));
+	Sys::out->write("SCRATCH_REG5 = 0x%08X\n", physmem->read<uint32_t>(0xC208514));
+	Sys::out->write("SCRATCH_REG6 = 0x%08X\n", physmem->read<uint32_t>(0xC208518));
+	Sys::out->write("SCRATCH_REG7 = 0x%08X\n", physmem->read<uint32_t>(0xC20851C));
+	Sys::out->write("SCRATCH_UMSK = 0x%08X\n", physmem->read<uint32_t>(0xC208540));
+	Sys::out->write("SCRATCH_ADDR = 0x%08X\n", physmem->read<uint32_t>(0xC208544));
+	Sys::out->write("D1CRTC_INTERRUPT_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC2060DC));
+	Sys::out->write("D1GRPH_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206100));
+	Sys::out->write("D1GRPH_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206104));
+	Sys::out->write("D1GRPH_PRIMARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206110));
+	Sys::out->write("D1GRPH_SECONDARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206118));
+	Sys::out->write("D1OVL_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206180));
+	Sys::out->write("D1OVL_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206184));
+	Sys::out->write("D1OVL_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206190));
+	Sys::out->write("D2CRTC_INTERRUPT_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC2068DC));
+	Sys::out->write("D2GRPH_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206900));
+	Sys::out->write("D2GRPH_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206904));
+	Sys::out->write("D2GRPH_PRIMARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206910));
+	Sys::out->write("D2GRPH_SECONDARY_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206918));
+	Sys::out->write("D2OVL_ENABLE = 0x%08X\n", physmem->read<uint32_t>(0xC206980));
+	Sys::out->write("D2OVL_CONTROL = 0x%08X\n", physmem->read<uint32_t>(0xC206984));
+	Sys::out->write("D2OVL_SURFACE_ADDRESS = 0x%08X\n", physmem->read<uint32_t>(0xC206990));
 }
 
 void Debugger::volumes(ArgParser *args) {

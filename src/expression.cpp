@@ -109,10 +109,10 @@ bool Tokenizer::handle(char c) {
 
 void Tokenizer::error(char c) {
 	if (c) {
-		Sys::stdout->write("Unexpected character: %c\n", c);
+		Sys::out->write("Unexpected character: %c\n", c);
 	}
 	else {
-		Sys::stdout->write("Unexpected end of input.\n");
+		Sys::out->write("Unexpected end of input.\n");
 	}
 }
 
@@ -176,7 +176,7 @@ bool Tokenizer::state_number(char c) {
 	}
 	
 	if (number > (0xFFFFFFFF - digit) / base) {
-		Sys::stdout->write("Number is too big.\n");
+		Sys::out->write("Number is too big.\n");
 		return false;
 	}
 	
@@ -207,7 +207,7 @@ bool EvalContext::get(std::string name, uint32_t *value) {
 		return true;
 	}
 	
-	Sys::stdout->write("Unknown variable: %s\n", name);
+	Sys::out->write("Unknown variable: %s\n", name);
 	return false;
 }
 
@@ -270,7 +270,7 @@ bool Node_Var::evaluate(Ref<EvalContext> context, uint32_t *value) {
 Ref<Node> Parser::parse(Ref<TokenList> tokens) {
 	Ref<Node> expr = parse_expr(tokens);
 	if (!expr || !tokens->eof()) {
-		Sys::stdout->write("Syntax error in expression.\n");
+		Sys::out->write("Syntax error in expression.\n");
 		return nullptr;
 	}
 	return expr;

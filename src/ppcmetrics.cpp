@@ -131,8 +131,8 @@ void PPCMetrics::reset() {
 void PPCMetrics::print(PrintMode mode) {
 	uint64_t total = count(PPCInstructions::All);
 	
-	Sys::stdout->write("Instructions executed: %i\n", total);
-	Sys::stdout->write("\n");
+	Sys::out->write("Instructions executed: %i\n", total);
+	Sys::out->write("\n");
 	
 	if (mode == CATEGORY) {
 		uint64_t branch = count(PPCInstructions::Branch);
@@ -144,47 +144,47 @@ void PPCMetrics::print(PrintMode mode) {
 		uint64_t caching = count(PPCInstructions::Caching);
 		uint64_t system = count(PPCInstructions::System);
 		
-		Sys::stdout->write(
+		Sys::out->write(
 			"Branch instructions:   %10i (%i%%)\n",
 			branch, percentage(branch, total)
 		);
-		Sys::stdout->write(
+		Sys::out->write(
 			"Load/store instrs:     %10i (%i%%)\n",
 			loadstore, percentage(loadstore, total)
 		);
-		Sys::stdout->write(
+		Sys::out->write(
 			"Integer instructions:  %10i (%i%%)\n",
 			integer, percentage(integer, total)
 		);
-		Sys::stdout->write(
+		Sys::out->write(
 			"Floating point instrs: %10i (%i%%)\n",
 			floatingpoint, percentage(floatingpoint, total)
 		);
-		Sys::stdout->write(
+		Sys::out->write(
 			"Paired single instrs:  %10i (%i%%)\n",
 			pairedsingles, percentage(pairedsingles, total)
 		);
-		Sys::stdout->write(
+		Sys::out->write(
 			"Condition register op: %10i (%i%%)\n",
 			condition, percentage(condition, total)
 		);
-		Sys::stdout->write(
+		Sys::out->write(
 			"Cache/synchronization: %10i (%i%%)\n",
 			caching, percentage(caching, total)
 		);
-		Sys::stdout->write(
+		Sys::out->write(
 			"System instructions:   %10i (%i%%)\n",
 			system, percentage(system, total)
 		);
-		Sys::stdout->write("\n");
+		Sys::out->write("\n");
 	}
 	else {
 		std::vector<std::pair<std::string, uint64_t>> list(instrs.begin(), instrs.end());
 		std::sort(list.begin(), list.end(), compareFreq);
 		
-		Sys::stdout->write("Sorted by frequency:\n");
+		Sys::out->write("Sorted by frequency:\n");
 		for (std::pair<std::string, uint64_t> instr : list) {
-			Sys::stdout->write(
+			Sys::out->write(
 				"    %-11s: %10i (%2i%%)\n", instr.first,
 				instr.second, percentage(instr.second, total)
 			);

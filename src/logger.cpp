@@ -14,7 +14,7 @@ void ConsoleLogger::write(std::string text) {
 	size_t pos = buffer.find('\n');
 	while (pos != std::string::npos) {
 		std::string message = buffer.substr(0, pos);
-		Sys::stdout->write("%s> %s\n", name, message);
+		Sys::out->write("%s> %s\n", name, message);
 		buffer.erase(0, pos + 1);
 		pos = buffer.find('\n');
 	}

@@ -25,6 +25,6 @@ public:
 	}
 };
 
-Ref<OutputTextStream> Sys::stdout = new StdOut();
-Ref<OutputTextStream> Sys::stderr = new StdErr();
-Ref<InputTextStream> Sys::stdin = new StdIn();
+Ref<OutputTextStream> Sys::out = new StdOut();
+Ref<OutputTextStream> Sys::err = new StdErr();
+Ref<InputTextStream> Sys::in = new StdIn();

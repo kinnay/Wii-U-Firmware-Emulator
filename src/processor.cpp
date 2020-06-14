@@ -57,7 +57,7 @@ void Processor::mainLoop() {
 #if BREAKPOINTS
 void Processor::checkBreakpoints(uint32_t pc) {
 	if (isBreakpoint(pc)) {
-		Sys::stdout->write("Breakpoint hit at 0x%X\n", pc);
+		Sys::out->write("Breakpoint hit at 0x%X\n", pc);
 		
 		emulator->signal(index);
 		paused = true;
@@ -85,7 +85,7 @@ void Processor::removeBreakpoint(uint32_t addr) {
 #if WATCHPOINTS
 void Processor::checkWatchpoints(bool write, bool virt, uint32_t addr, int length) {
 	if (isWatchpoint(write, virt, addr, length)) {
-		Sys::stdout->write(
+		Sys::out->write(
 			"Watchpoint (%s) hit at %s address 0x%08X\n",
 			write ? "write" : "read",
 			virt ? "virtual" : "physical",
