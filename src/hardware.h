@@ -14,16 +14,20 @@
 #include "common/logger.h"
 #include "common/buffer.h"
 #include "common/sha1.h"
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/fcntl.h>
+
 #include <openssl/aes.h>
-#include <unistd.h>
 #include <map>
 #include <vector>
 #include <mutex>
 #include <cstdint>
+
+#ifndef _WIN32
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/fcntl.h>
+#include <unistd.h>
+#endif
 
 
 class PhysicalMemory;

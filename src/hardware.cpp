@@ -6,6 +6,7 @@
 #include "common/buffer.h"
 #include "common/fileutils.h"
 #include "common/endian.h"
+#include "common/memorymappedfile.h"
 #include <openssl/aes.h>
 #include <cstring>
 
@@ -795,25 +796,8 @@ void NANDBank::process_command(int command, int length) {
 
 
 NANDController::NANDController(Hardware *hardware, PhysicalMemory *physmem) {
-	int fdslc = open("files/slc.bin", O_RDWR);
-	if (fdslc < 0) {
-		runtime_error("Failed to open slc.bin");
-	}
-	
-	int fdcmpt = open("files/slccmpt.bin", O_RDWR);
-	if (fdcmpt < 0) {
-		runtime_error("Failed to open slccmpt.bin");
-	}
-	
-	slc = (uint8_t *)mmap(
-		NULL, 0x21000000, PROT_READ | PROT_WRITE, MAP_SHARED, fdslc, 0
-	);
-	slccmpt = (uint8_t *)mmap(
-		NULL, 0x21000000, PROT_READ | PROT_WRITE, MAP_SHARED, fdcmpt, 0
-	);
-	
-	close(fdslc);
-	close(fdcmpt);
+	slc = memory_mapped_file_open("files/slc.bin", 0x21000000);
+	slccmpt = memory_mapped_file_open("files/slccmpt.bin", 0x21000000);
 	
 	main.prepare(hardware, physmem, slc, slccmpt);
 	for (int i = 0; i < 8; i++) {
@@ -822,8 +806,8 @@ NANDController::NANDController(Hardware *hardware, PhysicalMemory *physmem) {
 }
 
 NANDController::~NANDController() {
-	munmap(slc, 0x21000000);
-	munmap(slccmpt, 0x21000000);
+	memory_mapped_file_close(slc, 0x21000000);
+	memory_mapped_file_close(slccmpt, 0x21000000);
 }
 
 void NANDController::reset() {
