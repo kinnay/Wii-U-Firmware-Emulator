@@ -51,12 +51,7 @@ void Emulator::reset() {
 void Emulator::run() {
 	running = true;
 	
-	struct sigaction sa;
-	sa.sa_handler = signal_handler;
-	sa.sa_flags = 0;
-	sigemptyset(&sa.sa_mask);
-	
-	sigaction(SIGINT, &sa, nullptr);
+	::signal(SIGINT, signal_handler);
 	
 	debugger.show(0);
 	
