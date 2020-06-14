@@ -12,7 +12,7 @@
 
 
 static const int CPSR = offsetof(ARMProcessor, core.cpsr);
-static_assert(CPSR < 0x80);
+static_assert(CPSR < 0x80, "offsetof core.cpsr < 0x80");
 
 #define REG(i) offsetof(ARMProcessor, core.regs[ARMCore::i])
 #define GPR(exp) offsetof(ARMProcessor, core.regs) + 4 * (exp)

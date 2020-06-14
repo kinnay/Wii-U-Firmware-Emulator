@@ -13,7 +13,7 @@
 
 static const int PC = offsetof(PPCProcessor, core.pc);
 static const int CR = offsetof(PPCProcessor, core.cr);
-static_assert(CR < 0x80);
+static_assert(CR < 0x80, "offsetof core.cr < 0x80");
 
 #define REG(i) (offsetof(PPCProcessor, core.regs) + (i) * 4)
 #define SPR(r) (offsetof(PPCProcessor, core.sprs[PPCCore::r]))
