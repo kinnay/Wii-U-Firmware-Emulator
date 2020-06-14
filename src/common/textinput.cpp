@@ -6,16 +6,16 @@
 int TextInput::askint(const char *msg, int min, int max) {
 	int value;
 	while (true) {
-		Sys::stdout->write(msg);
+		Sys::out->write(msg);
 	
-		std::string text = Sys::stdin->readline();
+		std::string text = Sys::in->readline();
 		if (StringUtils::parseint(text, &value)) {
 			if (value >= min && value <= max) {
 				break;
 			}
 		}
 		
-		Sys::stdout->write("Please enter a valid number\n");
+		Sys::out->write("Please enter a valid number\n");
 	}
 	return value;
 }

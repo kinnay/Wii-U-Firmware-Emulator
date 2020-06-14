@@ -7,7 +7,7 @@
 
 class Sys {
 public:
-	static Ref<OutputTextStream> stdout;
-	static Ref<OutputTextStream> stderr;
-	static Ref<InputTextStream> stdin;
+	static Ref<OutputTextStream> out;
+	static Ref<OutputTextStream> err;
+	static Ref<InputTextStream> in;
 };

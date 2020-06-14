@@ -74,7 +74,7 @@ void Emulator::run() {
 		}
 		
 		if (keyboard_interrupt) {
-			Sys::stdout->write("\n");
+			Sys::out->write("\n");
 			
 			debugger.show(-1);
 		}

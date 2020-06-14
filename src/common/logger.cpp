@@ -5,14 +5,14 @@ void Logger::init(Level lev, OutputTextStream *stream) {
 	level = lev;
 	
 	if (!stream) {
-		stream = Sys::stderr;
+		stream = Sys::err;
 	}
 	logger = stream;
 }
 
 void Logger::prepare() {
 	if (!logger) {
-		logger = Sys::stderr;
+		logger = Sys::err;
 	}
 }
 
