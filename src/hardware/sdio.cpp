@@ -1,6 +1,7 @@
 
 #include "hardware/sdio.h"
 #include "common/logger.h"
+#include "common/memorymappedfile.h"
 #include "physicalmemory.h"
 #include "hardware.h"
 
@@ -8,20 +9,11 @@
 SDIOCard::~SDIOCard() {}
 
 MLCCard::MLCCard() {
-	int fd = open("files/mlc.bin", O_RDWR);
-	if (fd < 0) {
-		runtime_error("Failed to open mlc.bin");
-	}
-	
-	data = (uint8_t *)mmap(
-		NULL, 0x76E000000, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0
-	);
-	
-	close(fd);
+	data = memory_mapped_file_open("files/mlc.bin", 0x76E000000);
 }
 
 MLCCard::~MLCCard() {
-	munmap(data, 0x76E000000);
+	memory_mapped_file_close(data, 0x76E000000);
 }
 
 Buffer MLCCard::read(uint64_t offset, uint32_t size) {
