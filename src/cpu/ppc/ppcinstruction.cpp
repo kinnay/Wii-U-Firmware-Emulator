@@ -348,6 +348,13 @@ void PPCInstr_addze(PPCInstruction *instr, PPCProcessor *cpu) {
 	cpu->core.regs[instr->rD()] = (uint32_t)result;
 }
 
+void PPCInstr_addme(PPCInstruction *instr, PPCProcessor *cpu) {
+	uint64_t result = (uint64_t)cpu->core.regs[instr->rA()] + cpu->core.getCarry() + 0xFFFFFFFF;
+	cpu->core.setCarry(result >> 32);
+	if (instr->rc()) updateConditions(&cpu->core, (uint32_t)result);
+	cpu->core.regs[instr->rD()] = (uint32_t)result;
+}
+
 void PPCInstr_subfe(PPCInstruction *instr, PPCProcessor *cpu) {
 	uint64_t result = (uint64_t)(uint32_t)~cpu->core.regs[instr->rA()] + cpu->core.regs[instr->rB()] + cpu->core.getCarry();
 	cpu->core.setCarry(result >> 32);
@@ -578,6 +585,49 @@ void PPCInstr_stmw(PPCInstruction *instr, PPCProcessor *cpu) {
 	for (int reg = instr->rS(); reg < 32; reg++) {
 		if (!cpu->write<uint32_t>(addr, cpu->core.regs[reg])) return;
 		addr += 4;
+	}
+}
+
+void PPCInstr_lswi(PPCInstruction *instr, PPCProcessor *cpu) {
+	uint32_t addr = instr->rA() ? cpu->core.regs[instr->rA()] : 0;
+	
+	int count = instr->nb();
+	if (count == 0) {
+		count = 32;
+	}
+	
+	int r = instr->rD() - 1;
+	for (int i = 0; i < count; i++) {
+		int byte = i % 4;
+		if (byte == 0) {
+			r = (r + 1) % 32;
+			cpu->core.regs[r] = 0;
+		}
+		
+		uint8_t value;
+		if (!cpu->read<uint8_t>(addr++, &value)) return;
+		
+		cpu->core.regs[r] |= value << (8 * (3 - byte));
+	}
+}
+
+void PPCInstr_stswi(PPCInstruction *instr, PPCProcessor *cpu) {
+	uint32_t addr = instr->rA() ? cpu->core.regs[instr->rA()] : 0;
+	
+	int count = instr->nb();
+	if (count == 0) {
+		count = 32;
+	}
+	
+	int r = instr->rS() - 1;
+	for (int i = 0; i < count; i++) {
+		int byte = i % 4;
+		if (byte == 0) {
+			r = (r + 1) % 32;
+		}
+		
+		uint8_t value = cpu->core.regs[r] >> (8 * (3 - byte));
+		if (!cpu->write<uint8_t>(addr++, value)) return;
 	}
 }
 
@@ -1067,6 +1117,7 @@ void PPCInstruction::execute(PPCProcessor *cpu) {
 		else if (type == 202) PPCInstr_addze(this, cpu);
 		else if (type == 210) PPCInstr_mtsr(this, cpu);
 		else if (type == 215) PPCInstr_storex<uint8_t>(this, cpu);
+		else if (type == 234) PPCInstr_addme(this, cpu);
 		else if (type == 235) PPCInstr_mullw(this, cpu);
 		else if (type == 247) PPCInstr_storeux<uint8_t>(this, cpu);
 		else if (type == 279) PPCInstr_loadx<uint16_t>(this, cpu);
@@ -1086,8 +1137,10 @@ void PPCInstruction::execute(PPCProcessor *cpu) {
 		else if (type == 536) PPCInstr_srw(this, cpu);
 		else if (type == 567) PPCInstr_lfsux(this, cpu);
 		else if (type == 595) PPCInstr_mfsr(this, cpu);
+		else if (type == 597) PPCInstr_lswi(this, cpu);
 		else if (type == 631) PPCInstr_lfdux(this, cpu);
 		else if (type == 695) PPCInstr_stfsux(this, cpu);
+		else if (type == 725) PPCInstr_stswi(this, cpu);
 		else if (type == 759) PPCInstr_stfdux(this, cpu);
 		else if (type == 792) PPCInstr_sraw(this, cpu);
 		else if (type == 824) PPCInstr_srawi(this, cpu);

@@ -204,6 +204,7 @@ void PPCCodeGenerator::generateInstr(PPCInstruction instr) {
 		else if (type == 202) generateUnimplemented(instr);
 		else if (type == 210) generateUnimplemented(instr);
 		else if (type == 215) generateUnimplemented(instr);
+		else if (type == 234) generateUnimplemented(instr);
 		else if (type == 235) generateUnimplemented(instr);
 		else if (type == 247) generateUnimplemented(instr);
 		else if (type == 266) generateAdd(instr);
@@ -227,12 +228,14 @@ void PPCCodeGenerator::generateInstr(PPCInstruction instr) {
 		else if (type == 536) generateUnimplemented(instr);
 		else if (type == 567) generateUnimplemented(instr);
 		else if (type == 595) generateUnimplemented(instr);
+		else if (type == 597) generateUnimplemented(instr);
 		else if (type == 598) generator.ret(); // sync
 		else if (type == 599) generateLfdx(instr);
 		else if (type == 631) generateUnimplemented(instr);
 		else if (type == 662) generateStwbrx(instr);
 		else if (type == 663) generateStfsx(instr);
 		else if (type == 695) generateUnimplemented(instr);
+		else if (type == 725) generateUnimplemented(instr);
 		else if (type == 727) generateStfdx(instr);
 		else if (type == 759) generateUnimplemented(instr);
 		else if (type == 792) generateUnimplemented(instr);

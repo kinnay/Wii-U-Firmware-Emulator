@@ -60,11 +60,12 @@ PPCGroup PPCInstructions::LoadStore = {
 	"stw", "stwx", "stwu", "stwux", "",
 	"lwbrx", "stwbrx", "",
 	"lwarx", "stwcx", "",
+	"lswi", "stswi", "",
 	"lmw", "stmw"
 };
 
 PPCGroup PPCInstructions::Integer = {
-	"add", "addc", "addic", "adde", "addze", "",
+	"add", "addc", "addic", "adde", "addze", "addme", "",
 	"subf", "subfc", "subfic", "subfe", "subfze", "",
 	"mulli", "mullw", "mulhw", "mulhwu", "",
 	"divw", "divwu", "",
@@ -306,6 +307,7 @@ const char *PPCMetrics::decode(PPCInstruction instr) {
 		else if (type == 202) return "addze";
 		else if (type == 210) return "mtsr";
 		else if (type == 215) return "stbx";
+		else if (type == 234) return "addme";
 		else if (type == 235) return "mullw";
 		else if (type == 247) return "stbux";
 		else if (type == 266) return "add";
@@ -329,12 +331,14 @@ const char *PPCMetrics::decode(PPCInstruction instr) {
 		else if (type == 536) return "srw";
 		else if (type == 567) return "lfsux";
 		else if (type == 595) return "mfsr";
+		else if (type == 597) return "lswi";
 		else if (type == 598) return "sync";
 		else if (type == 599) return "lfdx";
 		else if (type == 631) return "lfdux";
 		else if (type == 662) return "stwbrx";
 		else if (type == 663) return "stfsx";
 		else if (type == 695) return "stfsux";
+		else if (type == 725) return "stswi";
 		else if (type == 727) return "stfdx";
 		else if (type == 759) return "stfdux";
 		else if (type == 792) return "sraw";

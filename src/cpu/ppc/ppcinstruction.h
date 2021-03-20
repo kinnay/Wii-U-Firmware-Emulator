@@ -27,6 +27,7 @@ struct PPCInstruction {
 	}
 	inline int sr() { return (value >> 16) & 0xF; }
 	inline int sh() { return (value >> 11) & 0x1F; }
+	inline int nb() { return (value >> 11) & 0x1F; }
 	inline int mb() { return (value >> 6) & 0x1F; }
 	inline int me() { return (value >> 1) & 0x1F; }
 	inline int bo() { return (value >> 21) & 0x1F; }
