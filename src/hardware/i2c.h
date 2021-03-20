@@ -63,19 +63,19 @@ public:
 		I2C_INT_STATE = 0x14
 	};
 	
-	I2CController(Hardware *hardware, I2CDevice *device, bool espresso);
+	I2CController(I2CDevice *device, bool espresso);
 	
 	void reset();
-	void update();
 	
 	uint32_t read(uint32_t addr);
 	void write(uint32_t addr, uint32_t value);
+	
+	bool check_interrupts();
 	
 private:
 	void process_write();
 	void trigger_interrupt(int type);
 	
-	Hardware *hardware;
 	I2CDevice *device;
 	bool espresso;
 

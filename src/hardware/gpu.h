@@ -6,7 +6,6 @@
 #include <cstdint>
 
 
-class Hardware;
 class PhysicalMemory;
 
 
@@ -67,9 +66,15 @@ public:
 	
 private:
 	enum Opcode {
+		PM4_CONTEXT_CONTROL = 0x28,
+		PM4_DRAW_INDEX_AUTO = 0x2D,
 		PM4_INDIRECT_BUFFER = 0x32,
 		PM4_MEM_WRITE = 0x3D,
-		PM4_EVENT_WRITE_EOP = 0x47
+		PM4_ME_INITIALIZE = 0x44,
+		PM4_EVENT_WRITE = 0x46,
+		PM4_EVENT_WRITE_EOP = 0x47,
+		PM4_SET_CONFIG_REG = 0x68,
+		PM4_SET_CONTEXT_REG = 0x69
 	};
 
 	enum State {
@@ -216,6 +221,24 @@ private:
 };
 
 
+// HDP_MAP_BASE:
+//   23 -  0: address >> 8
+// 
+// HDP_MAP_END:
+//   23 -  0: address >> 8
+// 
+// HDP_INPUT_ADDR:
+//   27 -  0: address >> 8
+// 	 
+// HDP_CONFIG:
+//   16 -  7: bytes per pixel (log)
+//    6 -  5: swap mode
+//    4 -  0: tile mode << 1
+// 
+// HDP_DIMENSIONS:
+//   29 -  8: image mask
+//    7 -  0: row mask
+
 class HDPHandle {
 public:
 	enum Register {
@@ -230,6 +253,8 @@ public:
 	
 	uint32_t read(uint32_t addr);
 	void write(uint32_t addr, uint32_t value);
+	
+	bool check(uint32_t addr);
 	
 private:
 	uint32_t map_base;
@@ -250,7 +275,10 @@ public:
 		HDP_NONSURFACE_SIZE = 0xC202C0C,
 		
 		HDP_HANDLE_START = 0xC202C10,
-		HDP_HANDLE_END = 0xC202F10
+		HDP_HANDLE_END = 0xC202F10,
+		
+		HDP_TILING_START = 0xD0000000,
+		HDP_TILING_END = 0xD2000000
 	};
 	
 	void reset();
@@ -259,6 +287,8 @@ public:
 	void write(uint32_t addr, uint32_t value);
 	
 private:
+	HDPHandle *find_handle(uint32_t addr);
+	
 	HDPHandle handles[32];
 };
 
@@ -278,11 +308,16 @@ public:
 		
 		GPU_GRBM_SOFT_RESET = 0xC208020,
 		
+		GPU_WAIT_UNTIL = 0xC208040,
+		
 		GPU_SCRATCH_UMSK = 0xC208540,
 		GPU_SCRATCH_ADDR = 0xC208544,
 		
 		GPU_SCRATCH_START = 0xC208500,
 		GPU_SCRATCH_END = 0xC208520,
+		
+		GPU_GB_TILING_CONFIG = 0xC2098F0,
+		GPU_CC_RB_BACKEND_DISABLE = 0xC2098F4,
 		
 		GPU_HDP_START = 0xC202C00,
 		GPU_HDP_END = 0xC203000,
@@ -297,10 +332,13 @@ public:
 		GPU_CP_END = 0xC20C800,
 		
 		GPU_DMA_START = 0xC20D000,
-		GPU_DMA_END = 0xC20D800
+		GPU_DMA_END = 0xC20D800,
+		
+		GPU_TILING_START = 0xD0000000,
+		GPU_TILING_END = 0xD2000000
 	};
 	
-	GPUController(Hardware *hardware, PhysicalMemory *physmem);
+	GPUController(PhysicalMemory *physmem);
 	
 	void reset();
 	void update();
@@ -308,10 +346,11 @@ public:
 	uint32_t read(uint32_t addr);
 	void write(uint32_t addr, uint32_t value);
 	
+	bool check_interrupts();
+	
 private:
 	void trigger_irq(uint32_t type, uint32_t data1, uint32_t data2, uint32_t data3);
 
-	Hardware *hardware;
 	PhysicalMemory *physmem;
 	
 	DCController dc0;
@@ -330,6 +369,9 @@ private:
 	uint32_t scratch[8];
 	uint32_t scratch_umsk;
 	uint32_t scratch_addr;
+	
+	uint32_t gb_tiling_config;
+	uint32_t cc_rb_backend_disable;
 	
 	uint32_t timer;
 };

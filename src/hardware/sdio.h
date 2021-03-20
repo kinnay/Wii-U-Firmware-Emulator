@@ -4,7 +4,6 @@
 #include "common/buffer.h"
 
 
-class Hardware;
 class PhysicalMemory;
 
 
@@ -92,7 +91,7 @@ public:
 		STATE_DIS = 8
 	};
 	
-	SDIOController(Hardware *hardware, PhysicalMemory *physmem, Type type);
+	SDIOController(PhysicalMemory *physmem, Type type);
 	~SDIOController();
 	
 	void reset();
@@ -101,6 +100,8 @@ public:
 	uint32_t read(uint32_t addr);
 	void write(uint32_t addr, uint32_t value);
 	
+	bool check_interrupts();
+	
 private:
 	void process_app_command(int command);
 	void process_command(int command);
@@ -108,7 +109,6 @@ private:
 	uint8_t read_register(int function, int address);
 	void write_register(int function, int address, uint8_t value);
 	
-	Hardware *hardware;
 	PhysicalMemory *physmem;
 	SDIOCard *card;
 	Type type;

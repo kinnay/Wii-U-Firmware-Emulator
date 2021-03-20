@@ -11,12 +11,16 @@ public:
 		value = 0;
 	}
 	
-	inline uint32_t get(uint32_t mask) const {
+	inline uint32_t getfield(uint32_t mask) const {
 		return value & mask;
 	}
 	
 	inline void setfield(uint32_t mask, uint32_t value) {
 		this->value = (this->value & ~mask) | value;
+	}
+	
+	inline bool get(uint32_t mask) const {
+		return value & mask;
 	}
 	
 	inline void set(uint32_t mask, bool enable) {

@@ -1,7 +1,8 @@
 
+#include "emulator.h"
+
 #include "common/fileutils.h"
 #include "common/sys.h"
-#include "emulator.h"
 
 #include <thread>
 #include <chrono>
@@ -19,27 +20,28 @@ void signal_handler(int signal) {
 
 
 Emulator::Emulator() :
-	hardware(&physmem, &ppc[0], &ppc[1], &ppc[2]),
 	physmem(&hardware),
-	armcpu(this),
+	hardware(this),
+	debugger(this),
+	arm(this),
 	ppc {
 		{this, &reservation, 0},
 		{this, &reservation, 1},
 		{this, &reservation, 2}
-	},
-	debugger(this)
+	}
 {
 	reset();
 }
 
 void Emulator::reset() {
 	Buffer buffer = FileUtils::load("files/boot1.bin");
-	physmem.write(0x0D400200, buffer.get(), buffer.size());
+	physmem.write(0xD400200, buffer);
 	
-	armcpu.reset();
-	armcpu.core.regs[ARMCore::PC] = 0x0D400200;
-	armcpu.enable();
+	arm.reset();
+	arm.core.regs[ARMCore::PC] = 0xD400200;
+	arm.enable();
 	
+	reservation.reset();
 	for (int i = 0; i < 3; i++) {
 		ppc[i].disable();
 		ppc[i].reset();
@@ -59,7 +61,7 @@ void Emulator::run() {
 		keyboard_interrupt = false;
 		core = -1;
 		
-		armcpu.start();
+		arm.start();
 		for (int i = 0; i < 3; i++) {
 			ppc[i].start();
 		}
@@ -80,7 +82,7 @@ void Emulator::run() {
 }
 
 void Emulator::pause() {
-	armcpu.pause();
+	arm.pause();
 	for (int i = 0; i < 3; i++) {
 		ppc[i].pause();
 	}

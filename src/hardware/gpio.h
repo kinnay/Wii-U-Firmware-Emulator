@@ -116,13 +116,15 @@ public:
 		LT_GPIO_OWNER = 0x3C
 	};
 	
-	GPIOController(Hardware *hardware, GPIOGroup *group);
+	GPIOController(GPIOGroup *group);
 	
 	void reset();
 	void update();
 	
 	uint32_t read(uint32_t addr);
 	void write(uint32_t addr, uint32_t value);
+	
+	bool check_interrupts(bool ppc);
 	
 private:
 	uint32_t gpio_enable;
@@ -133,6 +135,5 @@ private:
 	uint32_t gpio_intmask;
 	uint32_t gpio_owner;
 	
-	Hardware *hardware;
 	GPIOGroup *group;
 };

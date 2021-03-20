@@ -1,11 +1,11 @@
 # Wii U Firmware Emulator
 This emulator emulates the Wii U processors and hardware at the lowest level. It's currently able to emulate all the way through boot1, IOSU and Cafe OS until hbm.rpx calls OSPanic for some reason.
 
-This emulator used to be written in a combination of Python and C++. You can still find the source code of this emulator in the branch 'old'.
+This emulator used to be written in both Python and C++. You can still find the source code of this emulator in the branch 'old'.
 
 ## Instructions
 1. Make sure you have a linux system, a g++ compiler that supports c++14 and the OpenSSL library.
-2. Dump the following files from your Wii U (with hexFW for example) and put them into the 'files' folder: `boot1.bin`, `otp.bin`, `seeprom.bin`, `mlc.bin`, `slc.bin` and `slccmpt.bin`. This emulator may write to some of these files, use a backup if you want to keep your original dumps.
+2. Dump the following files from your Wii U (with hexFW for example) and put them into the 'files' folder: `boot1.bin`, `otp.bin`, `seeprom.bin`, `mlc.bin`, `slc.bin` and `slccmpt.bin`. This emulator may write to some of these files. Use a backup if you want to keep your original dumps.
 3. Create `files/espresso_key.bin` and put the espresso ancast key into it.
 4. Run `make` to compile the emulator
 
@@ -46,18 +46,19 @@ Using this emulator you can actually see what boot1, IOSU and Cafe OS look like 
 | `watch clear` | Remove all watchpoints. Only valid if `WATCHPOINTS` is enabled. |
 | `state (full)` | Print all general purpose registers on the current processor and some other important registers. If `full` is passed, many other special registers are printed as well. |
 | `print <expr>` | Evaluate the given expression and print the result. |
-| `trace` | Print stack trace on the current processor |
+| `trace` | Print stack trace on the current processor. |
 | `read virt/phys <address> <length>` | Read `length` bytes at the given virtual or physical `address` and print them both in hex and ascii characters. If a virtual address is given, the MMU of the current processor is used to translate the address. |
 | `translate <address>` | Translate the given virtual address and print the physical address, using the MMU of the current processor. |
 | `memmap` | Print the virtual memory map of the current processor. |
 | `modules` | Print the list of loaded RPL files and the starting address of their .text segment. |
 | `module <name>` | Print more information about a specific module. |
 | `threads` | Print thread list for IOSU or COS (depending on the current processor). |
-| `thread <id>` | Print more information about a specific thread for IOSU or COS (depending on the current processor). If a thread is waiting, this command tries to figure out what it is waiting for. If a PPC processor is begin debugged, this command also tries to print a stack trace for the given thread. |
+| `thread <id>` | Print more information about a specific thread for IOSU or COS (depending on the current processor). If a thread is waiting, this command tries to figure out what it is waiting for. If a PPC processor is being debugged, this command also tries to print a stack trace for the given thread. |
 | `queues` | Print list of message queues in IOSU. |
 | `queue <id>` | Print more information about a specific message queue in IOSU. |
 | `devices` | Print the state of all ipc devices in IOSU. |
 | `hardware` | Print the content of a few hardware registers (`PI`/`GPU`/`LATTE`). |
+| `ipc` | Lists pending IPC requests from the PPC cores. |
 | `volumes` | Print list of filesystem volumes in IOSU. |
 | `fileclients` | Print list of filesystem clients. |
 | `slccache` | Print information about SLC cache in IOSU. |

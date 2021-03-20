@@ -1,10 +1,9 @@
 
 #pragma once
 
-#include "hardware.h"
-
 #include "common/endian.h"
 #include "common/buffer.h"
+#include "hardware.h"
 
 #include <string>
 
@@ -12,9 +11,7 @@
 #include <cstddef>
 
 
-inline bool isHardware(uint32_t addr) {
-	return (addr & 0xFE400000) == 0x0C000000 || (addr & 0xFE000000) == 0xD0000000;
-}
+bool isHardware(uint32_t addr);
 
 
 class PhysicalMemory {

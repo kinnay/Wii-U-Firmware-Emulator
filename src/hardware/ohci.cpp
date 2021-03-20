@@ -1,6 +1,5 @@
 
 #include "hardware/ohci.h"
-#include "hardware.h"
 #include "physicalmemory.h"
 
 
@@ -58,8 +57,7 @@ const char *OHCIStateNames[] = {
 	"USBReset", "USBResume", "USBOperational", "USBSuspend"
 };
 
-OHCIController::OHCIController(Hardware *hardware, PhysicalMemory *physmem, int index) {
-	this->hardware = hardware;
+OHCIController::OHCIController(PhysicalMemory *physmem, int index) {
 	this->physmem = physmem;
 	this->index = index;
 }
@@ -173,14 +171,14 @@ void OHCIController::update() {
 			
 			process_periodic();
 		}
-		
-		if (interrupt_enable & interrupt_status) {
-			if (index == 0) hardware->trigger_irq_all(Hardware::ARM, 5);
-			else if (index == 1) hardware->trigger_irq_all(Hardware::ARM, 6);
-			else if (index == 2) hardware->trigger_irq_lt(Hardware::ARM, 3);
-			else if (index == 3) hardware->trigger_irq_lt(Hardware::ARM, 5);
-		}
 	}
+}
+
+bool OHCIController::check_interrupts() {
+	if (state == USBOperational) {
+		return interrupt_enable & interrupt_status;
+	}
+	return false;
 }
 
 void OHCIController::process_periodic() {

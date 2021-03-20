@@ -1,6 +1,5 @@
 
 #include "hardware/gpu.h"
-#include "hardware.h"
 #include "physicalmemory.h"
 
 #include "common/exceptions.h"
@@ -135,7 +134,8 @@ void PM4Processor::execute() {
 	}
 	else if (type == 3) {
 		int opcode = (args[0] >> 8) & 0xFF;
-		if (opcode == PM4_INDIRECT_BUFFER) {
+		if (opcode == PM4_CONTEXT_CONTROL) {}
+		else if (opcode == PM4_INDIRECT_BUFFER) {
 			uint32_t addr = args.at(1) & ~3;
 			uint32_t size = args.at(3);
 			PM4Processor processor(physmem);
@@ -156,6 +156,7 @@ void PM4Processor::execute() {
 				physmem->write<uint64_t>(addr & ~7, datalo | ((uint64_t)datahi << 32));
 			}
 		}
+		else if (opcode == PM4_ME_INITIALIZE) {} // Micro-engine initialization
 		else if (opcode == PM4_EVENT_WRITE_EOP) {
 			uint32_t addr = args.at(2);
 			int datasel = args.at(3) >> 29;
@@ -174,6 +175,20 @@ void PM4Processor::execute() {
 			}
 			if (intsel == 1 || intsel == 2) {
 				retired = true;
+			}
+		}
+		else if (opcode == PM4_SET_CONFIG_REG) {
+			uint32_t addr = 0xC208000 + args.at(1) * 4;
+			for (size_t i = 2; i < args.size(); i++) {
+				physmem->write<uint32_t>(addr, args[i]);
+				addr += 4;
+			}
+		}
+		else if (opcode == PM4_SET_CONTEXT_REG) {
+			uint32_t addr = 0xC228000 + args.at(1) * 4;
+			for (size_t i = 2; i < args.size(); i++) {
+				physmem->write<uint32_t>(addr, args[i]);
+				addr += 4;
 			}
 		}
 		else {
@@ -454,6 +469,10 @@ void HDPHandle::write(uint32_t addr, uint32_t value) {
 	}
 }
 
+bool HDPHandle::check(uint32_t addr) {
+	return map_base != map_end && addr >= map_base && addr <= map_end;
+}
+
 
 void HDPController::reset() {
 	for (int i = 0; i < 32; i++) {
@@ -465,6 +484,15 @@ uint32_t HDPController::read(uint32_t addr) {
 	if (HDP_HANDLE_START <= addr && addr < HDP_HANDLE_END) {
 		addr -= HDP_HANDLE_START;
 		return handles[addr / 0x18].read(addr % 0x18);
+	}
+	else if (HDP_TILING_START <= addr && addr < HDP_TILING_END) {
+		HDPHandle *handle = find_handle(addr - HDP_TILING_START);
+		if (!handle) {
+			return 0;
+		}
+		
+		Logger::warning("Tiling aperture not implemented");
+		return 0;
 	}
 	Logger::warning("Unknown hdp read: 0x%X", addr);
 	return 0;
@@ -480,12 +508,20 @@ void HDPController::write(uint32_t addr, uint32_t value) {
 	}
 }
 
+HDPHandle *HDPController::find_handle(uint32_t addr) {
+	for (int i = 0; i < 32; i++) {
+		if (handles[i].check(addr)) {
+			return &handles[i];
+		}
+	}
+	return nullptr;
+}
 
-GPUController::GPUController(Hardware *hardware, PhysicalMemory *physmem) :
+
+GPUController::GPUController(PhysicalMemory *physmem) :
 	cp(physmem),
 	dma(physmem)
 {
-	this->hardware = hardware;
 	this->physmem = physmem;
 }
 
@@ -501,6 +537,9 @@ void GPUController::reset() {
 	ih_rb_wptr_addr = 0;
 	
 	rlc_ucode_addr = 0;
+	
+	gb_tiling_config = 0;
+	cc_rb_backend_disable = 0;
 	
 	dc0.reset();
 	dc1.reset();
@@ -532,10 +571,10 @@ void GPUController::update() {
 	if (cp.check_interrupts()) {
 		trigger_irq(0xB5, 0, 0, 0);
 	}
-	
-	if (ih_rb_wptr_addr && physmem->read<uint32_t>(ih_rb_wptr_addr) != ih_rb_rptr) {
-		hardware->trigger_irq_pi(Hardware::PPC, 23);
-	}
+}
+
+bool GPUController::check_interrupts() {
+	return ih_rb_wptr_addr && physmem->read<uint32_t>(ih_rb_wptr_addr) != ih_rb_rptr;
 }
 
 uint32_t GPUController::read(uint32_t addr) {
@@ -553,6 +592,9 @@ uint32_t GPUController::read(uint32_t addr) {
 		
 		case GPU_SCRATCH_UMSK: return scratch_umsk;
 		case GPU_SCRATCH_ADDR: return scratch_addr >> 8;
+		
+		case GPU_GB_TILING_CONFIG: return gb_tiling_config;
+		case GPU_CC_RB_BACKEND_DISABLE: return cc_rb_backend_disable;
 	}
 	
 	if (GPU_SCRATCH_START <= addr && addr < GPU_SCRATCH_END) {
@@ -565,6 +607,7 @@ uint32_t GPUController::read(uint32_t addr) {
 	if (GPU_CP_START <= addr && addr < GPU_CP_END) return cp.read(addr);
 	if (GPU_DMA_START <= addr && addr < GPU_DMA_END) return dma.read(addr);
 	if (GPU_HDP_START <= addr && addr < GPU_HDP_END) return hdp.read(addr);
+	if (GPU_TILING_START <= addr && addr < GPU_TILING_END) return hdp.read(addr);
 	
 	Logger::warning("Unknown gpu read: 0x%X", addr);
 	return 0;
@@ -587,8 +630,13 @@ void GPUController::write(uint32_t addr, uint32_t value) {
 		}
 	}
 	
+	else if (addr == GPU_WAIT_UNTIL) {}
+	
 	else if (addr == GPU_SCRATCH_UMSK) scratch_umsk = value;
 	else if (addr == GPU_SCRATCH_ADDR) scratch_addr = value << 8;
+	
+	else if (addr == GPU_GB_TILING_CONFIG) gb_tiling_config = value;
+	else if (addr == GPU_CC_RB_BACKEND_DISABLE) cc_rb_backend_disable = value;
 	
 	else if (GPU_SCRATCH_START <= addr && addr < GPU_SCRATCH_END) {
 		uint32_t index = (addr - GPU_SCRATCH_START) / 4;
@@ -603,6 +651,7 @@ void GPUController::write(uint32_t addr, uint32_t value) {
 	else if (GPU_CP_START <= addr && addr < GPU_CP_END) cp.write(addr, value);
 	else if (GPU_DMA_START <= addr && addr < GPU_DMA_END) dma.write(addr, value);
 	else if (GPU_HDP_START <= addr && addr < GPU_HDP_END) hdp.write(addr, value);
+	else if (GPU_TILING_START <= addr && addr < GPU_TILING_END) hdp.write(addr, value);
 	
 	else {
 		Logger::warning("Unknown gpu write: 0x%X (0x%08X)", addr, value);

@@ -4,7 +4,6 @@
 #include <cstdint>
 
 
-class Hardware;
 class PhysicalMemory;
 
 
@@ -46,20 +45,16 @@ public:
 		PI_INTMR = 4
 	};
 	
-	PIInterruptController(Hardware *hardware);
-	
 	void reset();
-	void update();
 	
 	uint32_t read(uint32_t addr);
 	void write(uint32_t addr, uint32_t value);
 	
-	void trigger_irq(int irq);
+	void set_irq(int irq, bool state);
+	
 	bool check_interrupts();
 	
 private:
-	Hardware *hardware;
-	
 	uint32_t intsr;
 	uint32_t intmr;
 };
@@ -75,15 +70,16 @@ public:
 		PI_INTERRUPT_END = 0xC000090
 	};
 	
-	PIController(Hardware *hardware, PhysicalMemory *physmem);
+	PIController(PhysicalMemory *physmem);
 	
 	void reset();
-	void update();
 	
 	uint32_t read(uint32_t addr);
 	void write(uint32_t addr, uint32_t value);
 	
-	void trigger_irq(int core, int irq);
+	void set_irq(int irq, bool state);
+	void set_irq(int core, int irq, bool state);
+	
 	bool check_interrupts(int core);
 	
 	WGController wg[3];

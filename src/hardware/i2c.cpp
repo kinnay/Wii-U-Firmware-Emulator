@@ -1,6 +1,5 @@
 
 #include "hardware/i2c.h"
-#include "hardware.h"
 #include "common/logger.h"
 #include <cstring>
 
@@ -113,10 +112,9 @@ bool HDMIController::check_interrupts() {
 }
 
 
-I2CController::I2CController(Hardware *hardware, I2CDevice *device, bool espresso) {
-	this->hardware = hardware;
-	this->espresso = espresso;
+I2CController::I2CController(I2CDevice *device, bool espresso) {
 	this->device = device;
+	this->espresso = espresso;
 }
 
 void I2CController::reset() {
@@ -199,13 +197,6 @@ void I2CController::trigger_interrupt(int type) {
 	int_state |= 1 << type;
 }
 
-void I2CController::update() {
-	if (int_state & int_mask) {
-		if (espresso) {
-			hardware->trigger_irq_lt(Hardware::PPC, 13);
-		}
-		else {
-			hardware->trigger_irq_lt(Hardware::ARM, 14);
-		}
-	}
+bool I2CController::check_interrupts() {
+	return int_state & int_mask;
 }

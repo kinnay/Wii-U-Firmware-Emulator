@@ -6,7 +6,6 @@
 #include <cstdint>
 
 
-class Hardware;
 class PhysicalMemory;
 
 
@@ -72,13 +71,15 @@ public:
 		USBReset, USBResume, USBOperational, USBSuspend
 	};
 	
-	OHCIController(Hardware *hardware, PhysicalMemory *physmem, int index);
+	OHCIController(PhysicalMemory *physmem, int index);
 	
 	void reset();
 	void update();
 	
 	uint32_t read(uint32_t addr);
 	void write(uint32_t addr, uint32_t value);
+	
+	bool check_interrupts();
 	
 private:
 	void process_periodic();
@@ -110,6 +111,5 @@ private:
 	USBDummyDevice devices[4];
 	
 	int index;
-	Hardware *hardware;
 	PhysicalMemory *physmem;
 };

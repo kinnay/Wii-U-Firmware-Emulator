@@ -1,5 +1,5 @@
 
-FLAGS = -std=c++14 -O2 -fno-stack-protector -Wno-invalid-offsetof
+FLAGS = -std=c++14 -O2 -g -flto -Wno-invalid-offsetof
 
 LDFLAGS = $(FLAGS) -pthread
 SRCFLAGS = $(FLAGS) -Isrc -MMD

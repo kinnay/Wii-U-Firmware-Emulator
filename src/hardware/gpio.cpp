@@ -141,8 +141,7 @@ void GPIOLatte::write(int pin, bool state) {
 }
 
 
-GPIOController::GPIOController(Hardware *hardware, GPIOGroup *group) {
-	this->hardware = hardware;
+GPIOController::GPIOController(GPIOGroup *group) {
 	this->group = group;
 }
 
@@ -221,10 +220,9 @@ void GPIOController::write(uint32_t addr, uint32_t value) {
 
 void GPIOController::update() {
 	gpio_intflag |= ~(gpio_intlvl ^ group->read());
-	if (gpio_intflag & gpio_intmask & ~gpio_owner) {
-		hardware->trigger_irq_all(Hardware::ARM, 11);
-	}
-	if (gpio_intflag & gpio_intmask & gpio_owner) {
-		hardware->trigger_irq_all(Hardware::PPC, 10);
-	}
+}
+
+bool GPIOController::check_interrupts(bool ppc) {
+	uint32_t owner = ppc ? gpio_owner : ~gpio_owner;
+	return gpio_intflag & gpio_intmask & owner;
 }

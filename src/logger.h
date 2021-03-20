@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <string>
-
 #include "common/filestreamout.h"
+
+#include <string>
 
 
 class ConsoleLogger {

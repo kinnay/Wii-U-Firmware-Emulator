@@ -17,22 +17,12 @@ public:
 		FIQ_MASK_LT = 0x14
 	};
 	
-	IRQController(Hardware *hardware, int index);
-	
 	void reset();
-	void update();
 	
 	uint32_t read(uint32_t addr);
 	void write(uint32_t addr, uint32_t value);
 	
-	void trigger_irq_all(int type);
-	void trigger_irq_lt(int type);
-	
 	bool check_interrupts();
-	
-private:
-	Hardware *hardware;
-	int index;
 	
 	uint32_t intsr_all;
 	uint32_t intsr_lt;

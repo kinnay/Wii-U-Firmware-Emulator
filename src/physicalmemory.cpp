@@ -1,7 +1,16 @@
 
 #include "physicalmemory.h"
+#include "hardware.h"
+
 #include "common/exceptions.h"
+
 #include <cstring>
+
+
+bool isHardware(uint32_t addr) {
+	return (addr & 0xFE400000) == 0x0C000000 || (addr & 0xFE000000) == 0xD0000000;
+}
+
 
 PhysicalMemory::PhysicalMemory(Hardware *hardware) {
 	this->hardware = hardware;
@@ -69,4 +78,3 @@ Buffer PhysicalMemory::read(uint32_t addr, size_t size) {
 void PhysicalMemory::write(uint32_t addr, Buffer buffer) {
 	write(addr, buffer.get(), buffer.size());
 }
-

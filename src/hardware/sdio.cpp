@@ -5,6 +5,10 @@
 #include "physicalmemory.h"
 #include "hardware.h"
 
+#include <sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 
 SDIOCard::~SDIOCard() {}
 
@@ -35,8 +39,7 @@ uint32_t SDIOCardData[] = {
 	0x400E0032, 0x5B590000, 0xFFFF7F80, 0x0A400001
 };
 
-SDIOController::SDIOController(Hardware *hardware, PhysicalMemory *physmem, Type type) {
-	this->hardware = hardware;
+SDIOController::SDIOController(PhysicalMemory *physmem, Type type) {
 	this->physmem = physmem;
 	this->type = type;
 	
@@ -249,11 +252,6 @@ void SDIOController::write_register(int function, int address, uint8_t value) {
 	}
 }
 
-void SDIOController::update() {
-	if (int_status & int_enable & int_signal) {
-		if (type == TYPE_SD) hardware->trigger_irq_all(Hardware::ARM, 6);
-		else if (type == TYPE_WIFI) hardware->trigger_irq_all(Hardware::ARM, 7);
-		else if (type == TYPE_MLC) hardware->trigger_irq_lt(Hardware::ARM, 0);
-		else if (type == TYPE_UNK) hardware->trigger_irq_lt(Hardware::ARM, 1);
-	}
+bool SDIOController::check_interrupts() {
+	return int_status & int_enable & int_signal;
 }

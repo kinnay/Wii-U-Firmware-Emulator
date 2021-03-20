@@ -52,17 +52,9 @@ void WGController::write_data(uint32_t value) {
 }
 
 
-PIInterruptController::PIInterruptController(Hardware *hardware) {
-	this->hardware = hardware;
-}
-
 void PIInterruptController::reset() {
 	intsr = 0;
 	intmr = 0;
-}
-
-void PIInterruptController::update() {
-	intsr = 0;
 }
 
 uint32_t PIInterruptController::read(uint32_t addr) {
@@ -83,8 +75,13 @@ void PIInterruptController::write(uint32_t addr, uint32_t value) {
 	}
 }
 
-void PIInterruptController::trigger_irq(int irq) {
-	intsr |= 1 << irq;
+void PIInterruptController::set_irq(int irq, bool state) {
+	if (state) {
+		intsr |= 1 << irq;
+	}
+	else {
+		intsr &= ~(1 << irq);
+	}
 }
 
 bool PIInterruptController::check_interrupts() {
@@ -92,20 +89,13 @@ bool PIInterruptController::check_interrupts() {
 }
 
 
-PIController::PIController(Hardware *hardware, PhysicalMemory *physmem) :
-	wg {physmem, physmem, physmem},
-	interrupt {hardware, hardware, hardware}
+PIController::PIController(PhysicalMemory *physmem) :
+	wg {physmem, physmem, physmem}
 	{}
 
 void PIController::reset() {
 	for (int i = 0; i < 3; i++) wg[i].reset();
 	for (int i = 0; i < 3; i++) interrupt[i].reset();
-}
-
-void PIController::update() {
-	for (int i = 0; i < 3; i++) {
-		interrupt[i].update();
-	}
 }
 
 uint32_t PIController::read(uint32_t addr) {
@@ -135,9 +125,16 @@ void PIController::write(uint32_t addr, uint32_t value) {
 	}
 }
 
-void PIController::trigger_irq(int core, int irq) {
-	interrupt[core].trigger_irq(irq);
+void PIController::set_irq(int irq, bool state) {
+	for (int i = 0; i < 3; i++) {
+		interrupt[i].set_irq(irq, state);
+	}
 }
+
+void PIController::set_irq(int core, int irq, bool state) {
+	interrupt[core].set_irq(irq, state);
+}
+
 bool PIController::check_interrupts(int core) {
 	return interrupt[core].check_interrupts();
 }
