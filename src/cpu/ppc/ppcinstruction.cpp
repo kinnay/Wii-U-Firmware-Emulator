@@ -244,6 +244,12 @@ void PPCInstr_or(PPCInstruction *instr, PPCProcessor *cpu) {
 	cpu->core.regs[instr->rA()] = result;
 }
 
+void PPCInstr_orc(PPCInstruction *instr, PPCProcessor *cpu) {
+	uint32_t result = cpu->core.regs[instr->rS()] | ~cpu->core.regs[instr->rB()];
+	if (instr->rc()) updateConditions(&cpu->core, result);
+	cpu->core.regs[instr->rA()] = result;
+}
+
 void PPCInstr_and(PPCInstruction *instr, PPCProcessor *cpu) {
 	uint32_t result = cpu->core.regs[instr->rS()] & cpu->core.regs[instr->rB()];
 	if (instr->rc()) updateConditions(&cpu->core, result);
@@ -755,6 +761,12 @@ void PPCInstr_fmr(PPCInstruction *instr, PPCProcessor *cpu) {
 }
 
 void PPCInstr_frsp(PPCInstruction *instr, PPCProcessor *cpu) {
+	float result = 1 / cpu->core.fprs[instr->rB()].ps0;
+	cpu->core.fprs[instr->rD()].ps0 = result;
+	cpu->core.fprs[instr->rD()].ps1 = result;
+}
+
+void PPCInstr_fres(PPCInstruction *instr, PPCProcessor *cpu) {
 	cpu->core.fprs[instr->rD()].ps0 = (float)cpu->core.fprs[instr->rB()].dbl;
 }
 
@@ -1035,6 +1047,24 @@ void PPCInstr_ps_muls1(PPCInstruction *instr, PPCProcessor *cpu) {
 	cpu->core.fprs[instr->rD()].ps1 = cpu->core.fprs[instr->rA()].ps1 * cpu->core.fprs[instr->rC()].ps1;
 }
 
+void PPCInstr_ps_madds0(PPCInstruction *instr, PPCProcessor *cpu) {
+	cpu->core.fprs[instr->rD()].ps0 = cpu->core.fprs[instr->rA()].ps0 * cpu->core.fprs[instr->rC()].ps0 + cpu->core.fprs[instr->rB()].ps0;
+	cpu->core.fprs[instr->rD()].ps1 = cpu->core.fprs[instr->rA()].ps1 * cpu->core.fprs[instr->rC()].ps0 + cpu->core.fprs[instr->rB()].ps1;
+}
+
+void PPCInstr_ps_madds1(PPCInstruction *instr, PPCProcessor *cpu) {
+	cpu->core.fprs[instr->rD()].ps0 = cpu->core.fprs[instr->rA()].ps0 * cpu->core.fprs[instr->rC()].ps1 + cpu->core.fprs[instr->rB()].ps0;
+	cpu->core.fprs[instr->rD()].ps1 = cpu->core.fprs[instr->rA()].ps1 * cpu->core.fprs[instr->rC()].ps1 + cpu->core.fprs[instr->rB()].ps1;
+}
+
+void PPCInstr_ps_cmpo0(PPCInstruction *instr, PPCProcessor *cpu) {
+	float left = cpu->core.fprs[instr->rA()].ps0;
+	float right = cpu->core.fprs[instr->rB()].ps0;
+	cpu->core.cr.set(PPCCore::LT >> (4 * instr->crfD()), left < right);
+	cpu->core.cr.set(PPCCore::GT >> (4 * instr->crfD()), left > right);
+	cpu->core.cr.set(PPCCore::EQ >> (4 * instr->crfD()), left == right);
+}
+
 void PPCInstruction::execute(PPCProcessor *cpu) {
 	int type = opcode();
 	if (type == 4) {
@@ -1042,6 +1072,7 @@ void PPCInstruction::execute(PPCProcessor *cpu) {
 		if (type == 18) PPCInstr_ps_div(this, cpu);
 		else if (type == 20) PPCInstr_ps_sub(this, cpu);
 		else if (type == 21) PPCInstr_ps_add(this, cpu);
+		else if (type == 32) PPCInstr_ps_cmpo0(this, cpu);
 		else if (type == 40) PPCInstr_ps_neg(this, cpu);
 		else if (type == 72) PPCInstr_ps_mr(this, cpu);
 		else if (type == 136) PPCInstr_ps_nabs(this, cpu);
@@ -1056,6 +1087,8 @@ void PPCInstruction::execute(PPCProcessor *cpu) {
 			else if (type == 11) PPCInstr_ps_sum1(this, cpu);
 			else if (type == 12) PPCInstr_ps_muls0(this, cpu);
 			else if (type == 13) PPCInstr_ps_muls1(this, cpu);
+			else if (type == 14) PPCInstr_ps_madds0(this, cpu);
+			else if (type == 15) PPCInstr_ps_madds1(this, cpu);
 			else if (type == 25) PPCInstr_ps_mul(this, cpu);
 			else if (type == 28) PPCInstr_ps_msub(this, cpu);
 			else if (type == 29) PPCInstr_ps_madd(this, cpu);
@@ -1129,6 +1162,7 @@ void PPCInstruction::execute(PPCProcessor *cpu) {
 		else if (type == 371) PPCInstr_mftb(this, cpu);
 		else if (type == 375) PPCInstr_loadux<int16_t>(this, cpu);
 		else if (type == 407) PPCInstr_storex<uint16_t>(this, cpu);
+		else if (type == 412) PPCInstr_orc(this, cpu);
 		else if (type == 439) PPCInstr_storeux<uint16_t>(this, cpu);
 		else if (type == 444) PPCInstr_or(this, cpu);
 		else if (type == 459) PPCInstr_divwu(this, cpu);
@@ -1171,6 +1205,7 @@ void PPCInstruction::execute(PPCProcessor *cpu) {
 		if (type == 18) PPCInstr_fdivs(this, cpu);
 		else if (type == 20) PPCInstr_fsubs(this, cpu);
 		else if (type == 21) PPCInstr_fadds(this, cpu);
+		else if (type == 24) PPCInstr_fres(this, cpu);
 		else if (type == 25) PPCInstr_fmuls(this, cpu);
 		else if (type == 28) PPCInstr_fmsubs(this, cpu);
 		else if (type == 29) PPCInstr_fmadds(this, cpu);

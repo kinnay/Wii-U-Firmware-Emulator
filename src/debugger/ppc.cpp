@@ -383,6 +383,7 @@ void PPCDebugger::printThreads() {
 		std::string core = StringUtils::format("[%s]", ThreadAffinity[affinity]);
 		
 		uint8_t stateId = physmem->read<uint8_t>(thread + 0x324);
+		uint32_t priority = physmem->read<uint32_t>(thread + 0x32C);
 		
 		std::string stateName = "invalid";
 		if (stateId == 1) stateName = "ready";
@@ -392,7 +393,7 @@ void PPCDebugger::printThreads() {
 		
 		std::string state = StringUtils::format("(%s)", stateName);
 		
-		Sys::out->write(" %08X:  %-12s  %-10s %-9s  %s\n", addr, owner, core, state, name);
+		Sys::out->write(" %08X:  %-12s  %-10s p=%-2i %-9s  %s\n", addr, owner, core, priority, state, name);
 		
 		thread = physmem->read<uint32_t>(thread + 0x38C);
 	}

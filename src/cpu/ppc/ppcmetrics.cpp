@@ -70,7 +70,7 @@ PPCGroup PPCInstructions::Integer = {
 	"mulli", "mullw", "mulhw", "mulhwu", "",
 	"divw", "divwu", "",
 	"and", "andi", "andis", "andc", "",
-	"or", "ori", "oris", "nor", "",
+	"or", "ori", "oris", "orc", "nor", "",
 	"xor", "xori", "xoris", "",
 	"slw", "srw", "sraw", "srawi", "",
 	"rlwimi", "rlwinm", "rlwnm", "",
@@ -88,7 +88,7 @@ PPCGroup PPCInstructions::FloatingPoint = {
 	"fmadd", "fmsub", "fnmadd", "fnmsub", "",
 	"fadds", "fsubs", "fmuls", "fdivs",
 	"fmadds", "fmsubs", "fnmadds", "fnmsubs", "",
-	"fsel", "frsp", "fctiwz", "stfiwx", "",
+	"fsel", "frsp", "fres", "fctiwz", "stfiwx", "",
 	"fcmpu", "mffs", "mtfsf", "",
 	"frsqrte"
 };
@@ -98,8 +98,10 @@ PPCGroup PPCInstructions::PairedSingles = {
 	"ps_mr", "ps_neg", "ps_abs", "ps_nabs", "",
 	"ps_add", "ps_sub", "ps_mul", "ps_div", "",
 	"ps_madd", "ps_msub", "ps_nmadd", "ps_nmsub", "",
-	"ps_sum0", "ps_sum1", "ps_muls0", "ps_muls1", "",
-	"ps_merge00", "ps_merge01", "ps_merge10", "ps_merge11",
+	"ps_sum0", "ps_sum1", "ps_muls0", "ps_muls1",
+	"ps_madds0", "ps_madds1", "",
+	"ps_merge00", "ps_merge01", "ps_merge10", "ps_merge11", ""
+	"ps_cmpo0"
 };
 
 PPCGroup PPCInstructions::Caching = {
@@ -215,6 +217,7 @@ const char *PPCMetrics::decode(PPCInstruction instr) {
 		if (type == 18) return "ps_div";
 		else if (type == 20) return "ps_sub";
 		else if (type == 21) return "ps_add";
+		else if (type == 32) return "ps_cmpo0";
 		else if (type == 40) return "ps_neg";
 		else if (type == 72) return "ps_mr";
 		else if (type == 136) return "ps_nabs";
@@ -230,6 +233,8 @@ const char *PPCMetrics::decode(PPCInstruction instr) {
 			else if (type == 11) return "ps_sum1";
 			else if (type == 12) return "ps_muls0";
 			else if (type == 13) return "ps_muls1";
+			else if (type == 14) return "ps_madds0";
+			else if (type == 15) return "ps_madds1";
 			else if (type == 25) return "ps_mul";
 			else if (type == 28) return "ps_msub";
 			else if (type == 29) return "ps_madd";
@@ -320,6 +325,7 @@ const char *PPCMetrics::decode(PPCInstruction instr) {
 		else if (type == 371) return "mftb";
 		else if (type == 375) return "lhaux";
 		else if (type == 407) return "sthx";
+		else if (type == 412) return "orc";
 		else if (type == 439) return "sthux";
 		else if (type == 444) return "or";
 		else if (type == 459) return "divwu";
@@ -380,6 +386,7 @@ const char *PPCMetrics::decode(PPCInstruction instr) {
 		if (type == 18) return "fdivs";
 		else if (type == 20) return "fsubs";
 		else if (type == 21) return "fadds";
+		else if (type == 24) return "fres";
 		else if (type == 25) return "fmuls";
 		else if (type == 28) return "fmsubs";
 		else if (type == 29) return "fmadds";
