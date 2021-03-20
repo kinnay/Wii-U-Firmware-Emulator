@@ -1,5 +1,5 @@
 # Wii U Firmware Emulator
-This emulator emulates the Wii U processors and hardware at the lowest level. It's currently able to emulate all the way through boot1, IOSU and Cafe OS until hbm.rpx calls OSPanic for some reason.
+This emulator emulates the Wii U processors and hardware at the lowest level. It's currently able to emulate all the way through boot1, IOSU and Cafe OS until men.rpx crashes somewhere in AXInit.
 
 This emulator used to be written in both Python and C++. You can still find the source code of this emulator in the branch 'old'.
 
