@@ -760,13 +760,13 @@ void PPCInstr_fmr(PPCInstruction *instr, PPCProcessor *cpu) {
 	cpu->core.fprs[instr->rD()].ps0 = cpu->core.fprs[instr->rB()].ps0;
 }
 
-void PPCInstr_frsp(PPCInstruction *instr, PPCProcessor *cpu) {
+void PPCInstr_fres(PPCInstruction *instr, PPCProcessor *cpu) {
 	float result = 1 / cpu->core.fprs[instr->rB()].ps0;
 	cpu->core.fprs[instr->rD()].ps0 = result;
 	cpu->core.fprs[instr->rD()].ps1 = result;
 }
 
-void PPCInstr_fres(PPCInstruction *instr, PPCProcessor *cpu) {
+void PPCInstr_frsp(PPCInstruction *instr, PPCProcessor *cpu) {
 	cpu->core.fprs[instr->rD()].ps0 = (float)cpu->core.fprs[instr->rB()].dbl;
 }
 
