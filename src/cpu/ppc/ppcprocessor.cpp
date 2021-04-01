@@ -7,7 +7,7 @@
 
 
 PPCProcessor::PPCProcessor(Emulator *emulator, PPCReservation *reservation, int index) :
-	Processor(emulator, index + 1),
+	Processor(emulator, index + 1, true),
 	mmu(&emulator->physmem, &core),
 	jit(&emulator->physmem, this)
 {

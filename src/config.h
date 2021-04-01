@@ -6,3 +6,4 @@
 #define WATCHPOINTS 1
 #define BREAKPOINTS 1
 #define SYSLOG 1
+#define DSPDMA 1

@@ -28,7 +28,8 @@ Emulator::Emulator() :
 		{this, &reservation, 0},
 		{this, &reservation, 1},
 		{this, &reservation, 2}
-	}
+	},
+	dsp(this)
 {
 	reset();
 }
@@ -65,6 +66,7 @@ void Emulator::run() {
 		for (int i = 0; i < 3; i++) {
 			ppc[i].start();
 		}
+		dsp.start();
 		
 		while (core == -1 && !keyboard_interrupt) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -86,6 +88,7 @@ void Emulator::pause() {
 	for (int i = 0; i < 3; i++) {
 		ppc[i].pause();
 	}
+	dsp.pause();
 }
 
 void Emulator::signal(int core) {

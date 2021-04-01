@@ -6,10 +6,11 @@
 #include <algorithm>
 
 
-Processor::Processor(Emulator *emulator, int index) {
+Processor::Processor(Emulator *emulator, int index, bool threaded) {
 	this->emulator = emulator;
 	this->physmem = &emulator->physmem;
 	this->hardware = &emulator->hardware;
+	this->threaded = threaded;
 	this->index = index;
 	enabled = false;
 	paused = true;
@@ -17,31 +18,44 @@ Processor::Processor(Emulator *emulator, int index) {
 
 void Processor::start() {
 	paused = false;
-	if (enabled) {
+	if (threaded && enabled) {
 		thread = std::thread(threadFunc, this);
 	}
 }
 
 void Processor::pause() {
 	paused = true;
-	if (thread.joinable()) {
+	if (threaded && thread.joinable()) {
 		thread.join();
 	}
 }
 
 void Processor::enable() {
 	enabled = true;
-	if (!paused) {
+	if (threaded && !paused) {
 		thread = std::thread(threadFunc, this);
 	}
 }
 
 void Processor::disable() {
 	enabled = false;
-	if (thread.joinable()) {
+	if (threaded && thread.joinable()) {
 		thread.join();
 	}
 	reset();
+}
+
+bool Processor::isPaused() {
+	return paused;
+}
+
+bool Processor::isEnabled() {
+	return enabled;
+}
+
+void Processor::setEnabled(bool enabled) {
+	if (enabled) enable();
+	else disable();
 }
 
 void Processor::threadFunc(Processor *cpu) {
@@ -86,7 +100,7 @@ void Processor::removeBreakpoint(uint32_t addr) {
 void Processor::checkWatchpoints(bool write, bool virt, uint32_t addr, int length) {
 	if (isWatchpoint(write, virt, addr, length)) {
 		Sys::out->write(
-			"Watchpoint (%s) hit at %s address 0x%08X\n",
+			"Watchpoint (%s) hit at %s address 0x%X\n",
 			write ? "write" : "read",
 			virt ? "virtual" : "physical",
 			addr

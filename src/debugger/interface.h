@@ -14,8 +14,7 @@ public:
 	virtual Ref<EvalContext> getContext() = 0;
 	virtual Processor *getProcessor() = 0;
 	virtual bool translate(uint32_t *address) = 0;
-	
-	virtual void step() = 0;
+	virtual std::string format() = 0;
 	
 	virtual void printState() = 0;
 	virtual void printStateDetailed() = 0;

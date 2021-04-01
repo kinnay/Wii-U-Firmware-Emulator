@@ -15,7 +15,7 @@ const char *HELP_TEXT =
 	"    help\n"
 	"    exit\n"
 	"    quit\n"
-	"    select arm/ppc0/ppc1/ppc2\n"
+	"    select arm/ppc0/ppc1/ppc2/dsp\n"
 	"\n"
 	"Emulation:\n"
 	"    step (<steps>)\n"
@@ -53,7 +53,8 @@ const char *HELP_TEXT =
 	"    trace\n"
 	"\n"
 	"Memory state:\n"
-	"    read virt/phys <address> <length>\n"
+	"    read virt/phys <address> <length>  // ARM + PPC\n"
+	"    read code/data <address> <length>  // DSP\n"
 	"    translate <address>\n"
 	"    memmap\n"
 	"\n"
@@ -129,6 +130,7 @@ Debugger::Debugger(Emulator *emulator) {
 	ppc[0] = new PPCDebugger(physmem, &emulator->ppc[0], 0);
 	ppc[1] = new PPCDebugger(physmem, &emulator->ppc[1], 1);
 	ppc[2] = new PPCDebugger(physmem, &emulator->ppc[2], 2);
+	dsp = new DSPDebugger(&emulator->dsp);
 	
 	core = 0;
 }
@@ -138,8 +140,12 @@ Ref<DebugInterface> Debugger::getInterface() {
 	if (core == 1) return ppc[0];
 	if (core == 2) return ppc[1];
 	if (core == 3) return ppc[2];
+	if (core == 4) return dsp;
 	return nullptr;
 }
+
+bool Debugger::isPPC() { return core == 1 || core == 2 || core == 3; }
+bool Debugger::isDSP() { return core == 4; }
 
 void Debugger::show(int core) {
 	emulator->pause();
@@ -152,7 +158,8 @@ void Debugger::show(int core) {
 	while (debugging) {
 		DebugInterface *debugger = getInterface();
 		
-		Sys::out->write("%s:%08X> ", debugger->name(), debugger->pc());
+		std::string format = StringUtils::format("%%s:%s> ", debugger->format());
+		Sys::out->write(format, debugger->name(), debugger->pc());
 		
 		std::string line = Sys::in->readline();
 
@@ -253,6 +260,7 @@ void Debugger::select(ArgParser *args) {
 	else if (name == "ppc0") core = 1;
 	else if (name == "ppc1") core = 2;
 	else if (name == "ppc2") core = 3;
+	else if (name == "dsp") core = 4;
 	else {
 		Sys::out->write("Please provide a valid processor name.\n");
 	}
@@ -266,6 +274,11 @@ void Debugger::step(ArgParser *args) {
 	}
 	
 	Processor *proc = getInterface()->getProcessor();
+	if (!proc->isEnabled()) {
+		Sys::out->write("Processor is disabled.\n");
+		return;
+	}
+	
 	for (uint32_t i = 0; i < count; i++) {
 		proc->step();
 	}
@@ -295,6 +308,7 @@ void Debugger::stats(ArgParser *args) {
 	for (int i = 0; i < 3; i++) {
 		ppc[i]->printStats();
 	}
+	dsp->printStats();
 }
 #endif
 
@@ -367,7 +381,8 @@ void Debugger::breakp(ArgParser *args) {
 	std::string command;
 	if (!args->string(&command)) return;
 	
-	Processor *cpu = getInterface()->getProcessor();
+	DebugInterface *interface = getInterface();
+	Processor *cpu = interface->getProcessor();
 	if (command == "list") {
 		if (!args->finish()) return;
 		
@@ -385,18 +400,21 @@ void Debugger::breakp(ArgParser *args) {
 				Sys::out->write("%i breakpoints:\n", breakpoints.size());
 			}
 			for (uint32_t bp : breakpoints) {
-				Sys::out->write("    0x%08X\n", bp);
+				std::string format = StringUtils::format("    0x%s\n", interface->format());
+				Sys::out->write(format, bp);
 			}
 		}
 	}
 	else if (command == "clear") {
 		if (!args->finish()) return;
 		
-		if (core == 0) arm->getProcessor()->breakpoints.clear();
-		else {
+		if (isPPC()) {
 			for (int i = 0; i < 3; i++) {
 				ppc[i]->getProcessor()->breakpoints.clear();
 			}
+		}
+		else {
+			cpu->breakpoints.clear();
 		}
 	}
 	else if (command == "add" || command == "del") {
@@ -411,11 +429,13 @@ void Debugger::breakp(ArgParser *args) {
 			}
 			else {
 				Sys::out->write("Added breakpoint at 0x%X.\n", address);
-				if (core == 0) arm->getProcessor()->addBreakpoint(address);
-				else {
+				if (isPPC()) {
 					for (int i = 0; i < 3; i++) {
 						ppc[i]->getProcessor()->addBreakpoint(address);
 					}
+				}
+				else {
+					cpu->addBreakpoint(address);
 				}
 			}
 		}
@@ -425,11 +445,13 @@ void Debugger::breakp(ArgParser *args) {
 			}
 			else {
 				Sys::out->write("Removed breakpoint at 0x%X.\n", address);
-				if (core == 0) arm->getProcessor()->removeBreakpoint(address);
-				else {
+				if (isPPC()) {
 					for (int i = 0; i < 3; i++) {
 						ppc[i]->getProcessor()->removeBreakpoint(address);
 					}
+				}
+				else {
+					cpu->removeBreakpoint(address);
 				}
 			}
 		}
@@ -445,7 +467,8 @@ void Debugger::watch(ArgParser *args) {
 	std::string command;
 	if (!args->string(&command)) return;
 	
-	Processor *cpu = getInterface()->getProcessor();
+	DebugInterface *interface = getInterface();
+	Processor *cpu = interface->getProcessor();
 	if (command == "list") {
 		if (!args->finish()) return;
 		
@@ -468,8 +491,9 @@ void Debugger::watch(ArgParser *args) {
 			for (int virt = 0; virt < 2; virt++) {
 				for (int write = 0; write < 2; write++) {
 					for (uint32_t wp : cpu->watchpoints[write][virt]) {
+						std::string format = StringUtils::format("    0x%s (%%s, %%s)\n", interface->format());
 						Sys::out->write(
-							"    0x%08X (%s, %s)\n", wp,
+							format, wp,
 							virt ? "virtual" : "physical",
 							write ? "write" : "read"
 						);
@@ -506,6 +530,11 @@ void Debugger::watch(ArgParser *args) {
 		
 		bool write = type == "write";
 		bool virt = mode == "virt";
+		
+		if (virt && isDSP()) {
+			Sys::out->write("DSP does not have virtual memory.\n");
+			return;
+		}
 		
 		mode = virt ? "virtual" : "physical";
 		
@@ -574,27 +603,42 @@ void Debugger::read(ArgParser *args) {
 	if (!args->integer(&length)) return;
 	if (!args->finish()) return;
 	
-	if (mode == "virt") {
-		if (!getInterface()->translate(&address)) {
-			Sys::out->write("Address translation failed.\n");
-			return;
-		}
-	}
-	else if (mode != "phys") {
-		Sys::out->write("Please specify either 'phys' or 'virt'.\n");
+	if (mode != "phys" && mode != "virt" && mode != "code" && mode != "data") {
+		Sys::out->write("Please specify either 'phys', 'virt', 'code' or 'data'.\n");
 		return;
 	}
 	
-	Buffer buffer = physmem->read(address, length);
-	
-	std::string text = buffer.tostring();
-	for (int i = 0; i < text.size(); i++) {
-		if (!StringUtils::is_printable(text[i])) {
-			text[i] = ' ';
+	Buffer data;
+	if (mode == "code" || mode == "data") {
+		data = dsp->read(address, length, mode == "code");
+	}
+	else {
+		DebugInterface *interface = getInterface();
+		if (mode == "virt") {
+			if (!interface->translate(&address)) {
+				Sys::out->write("Address translation failed.\n");
+				return;
+			}
 		}
+		
+		if (address + length < address) {
+			length = ~address + 1;
+		}
+		
+		data = physmem->read(address, length);
 	}
 	
-	Sys::out->write("%s\n\n%s\n", buffer.hexstring(), text);
+	Sys::out->write("%s\n", data.hexstring());
+	
+	if (mode == "phys" || mode == "virt") {
+		std::string text = data.tostring();
+		for (int i = 0; i < text.size(); i++) {
+			if (!StringUtils::is_printable(text[i])) {
+				text[i] = ' ';
+			}
+		}
+		Sys::out->write("\n%s\n", text);
+	}
 }
 
 void Debugger::translate(ArgParser *args) {
@@ -603,7 +647,8 @@ void Debugger::translate(ArgParser *args) {
 	if (!args->finish()) return;
 	
 	if (getInterface()->translate(&addr)) {
-		Sys::out->write("0x%08X\n", addr);
+		std::string format = StringUtils::format("0x%s\n", getInterface()->format());
+		Sys::out->write(format, addr);
 	}
 	else {
 		Sys::out->write("Address translation failed.\n");

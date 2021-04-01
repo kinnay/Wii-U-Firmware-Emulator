@@ -19,6 +19,7 @@ This emulator used to be written in both Python and C++. You can still find the 
 | `WATCHPOINTS` | Enables memory watchpoints in the debugger. |
 | `BREAKPOINTS` | Enables instruction breakpoints in the debugger. |
 | `SYSLOG` | Writes the system log into `logs/syslog.txt`. |
+| `DSPDMA` | Logs DSP DMA transfers to `logs/dspdma.txt`. |
 
 Additionally, you can adjust the log level in `src/main.cpp`. To disable warnings about unimplemented hardware features set the log level to `ERROR` or `NONE`.
 
@@ -30,7 +31,7 @@ Using this emulator you can actually see what boot1, IOSU and Cafe OS look like 
 | `help` | Print list of commands. |
 | `exit` | Stop the emulator. |
 | `quit` | Same as `exit`. |
-| `select arm/ppc0/ppc1/ppc2` | Select a processor to debug. |
+| `select arm/ppc0/ppc1/ppc2/dsp` | Select a processor to debug. |
 | `step (<steps>)` | Execute a fixed number of instructions on the current processor. |
 | `run` | Continue emulation normally. |
 | `reset` | Reset the emulator to its initial state. |
@@ -48,6 +49,7 @@ Using this emulator you can actually see what boot1, IOSU and Cafe OS look like 
 | `print <expr>` | Evaluate the given expression and print the result. |
 | `trace` | Print stack trace on the current processor. |
 | `read virt/phys <address> <length>` | Read `length` bytes at the given virtual or physical `address` and print them both in hex and ascii characters. If a virtual address is given, the MMU of the current processor is used to translate the address. |
+| `read code/data <address> <length>` | Read `length` bytes at the given DSP memory address and print them in hex. |
 | `translate <address>` | Translate the given virtual address and print the physical address, using the MMU of the current processor. |
 | `memmap` | Print the virtual memory map of the current processor. |
 | `modules` | Print the list of loaded RPL files and the starting address of their .text segment. |

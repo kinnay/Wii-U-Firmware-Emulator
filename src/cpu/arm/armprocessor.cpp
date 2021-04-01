@@ -10,7 +10,7 @@
 
 
 ARMProcessor::ARMProcessor(Emulator *emulator) :
-	Processor(emulator, 0),
+	Processor(emulator, 0, true),
 	mmu(&emulator->physmem, &core),
 	jit(&emulator->physmem, this),
 	thumb(&emulator->physmem, this)

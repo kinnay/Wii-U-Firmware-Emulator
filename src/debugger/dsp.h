@@ -1,16 +1,19 @@
 
 #pragma once
 
-#include "cpu/arm/armprocessor.h"
+#include "cpu/dsp.h"
+
 #include "debugger/interface.h"
 #include "debugger/expression.h"
-#include "config.h"
-#include <string>
-#include <cstdint>
 
-class ARMDebugger : public DebugInterface {
+#include "config.h"
+
+#include <utility>
+
+
+class DSPDebugger : public DebugInterface {
 public:
-	ARMDebugger(PhysicalMemory *physmem, ARMProcessor *cpu);
+	DSPDebugger(DSPInterpreter *cpu);
 	
 	uint32_t pc();
 	std::string name();
@@ -25,20 +28,17 @@ public:
 	void printMemoryMap();
 	void printThreads();
 	void printThreadDetails(uint32_t id);
-	void printMessageQueues();
-	void printMessageQueueDetails(uint32_t id);
-	void printDevices();
-	void printVolumes();
-	void printFileClients();
-	void printSlcCacheState();
+	
+	Buffer read(uint32_t address, uint32_t length, bool code);
 	
 	#if STATS
 	void printStats();
 	#endif
 	
 private:
-	std::string getQueueSuffix(uint32_t id);
+	void printStack(int index);
 	
-	PhysicalMemory *physmem;
-	ARMProcessor *cpu;
+	std::pair<void *, uint32_t> getPtr(uint32_t address, bool code);
+	
+	DSPInterpreter *cpu;
 };

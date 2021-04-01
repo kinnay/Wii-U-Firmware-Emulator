@@ -33,6 +33,10 @@ std::string PPCDebugger::name() {
 	return StringUtils::format("PPC%i", cpu->core.sprs[PPCCore::PIR]);
 }
 
+std::string PPCDebugger::format() {
+	return "%08X";
+}
+
 Ref<EvalContext> PPCDebugger::getContext() {
 	Ref<EvalContext> context = new EvalContext();
 	
@@ -54,10 +58,6 @@ Ref<EvalContext> PPCDebugger::getContext() {
 
 uint32_t PPCDebugger::pc() {
 	return cpu->core.pc;
-}
-
-void PPCDebugger::step() {
-	cpu->step();
 }
 
 bool PPCDebugger::translate(uint32_t *address) {
@@ -393,7 +393,7 @@ void PPCDebugger::printThreads() {
 		
 		std::string state = StringUtils::format("(%s)", stateName);
 		
-		Sys::out->write(" %08X:  %-12s  %-10s p=%-2i %-9s  %s\n", addr, owner, core, priority, state, name);
+		Sys::out->write(" %08X:  %-12s  %-10s  p=%-2i  %-9s  %s\n", addr, owner, core, priority, state, name);
 		
 		thread = physmem->read<uint32_t>(thread + 0x38C);
 	}

@@ -8,6 +8,7 @@
 #include "debugger/expression.h"
 #include "debugger/ppc.h"
 #include "debugger/arm.h"
+#include "debugger/dsp.h"
 
 #include "physicalmemory.h"
 #include "config.h"
@@ -49,6 +50,9 @@ private:
 	void processCommand(std::string command, ArgParser *args);
 	
 	Ref<DebugInterface> getInterface();
+	
+	bool isPPC();
+	bool isDSP();
 	
 	void help(ArgParser *parser);
 	void quit(ArgParser *parser);
@@ -99,6 +103,7 @@ private:
 	Emulator *emulator;
 	PhysicalMemory *physmem;
 	
+	Ref<DSPDebugger> dsp;
 	Ref<ARMDebugger> arm;
 	Ref<PPCDebugger> ppc[3];
 	

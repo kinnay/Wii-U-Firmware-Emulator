@@ -1,7 +1,13 @@
 
 #pragma once
 
+#include "cpu/dsp.h"
+
 #include <cstdint>
+
+
+class Emulator;
+
 
 class DSPController {
 public:
@@ -13,35 +19,19 @@ public:
 		DSP_CONTROL_STATUS = 0xC28000A
 	};
 	
-	void reset();
+	DSPController(Emulator *physmem);
 	
-	uint32_t read(uint32_t addr);
-	void write(uint32_t addr, uint32_t value);
+	void reset();
+	void update();
+	
+	uint16_t read(uint32_t addr);
+	void write(uint32_t addr, uint16_t value);
 	
 	bool check_interrupts();
-	
+
 private:
-	enum MessageOut {
-		DSP_INIT = 0xDCD10000
-	};
+	DSPInterpreter *interpreter;
 	
-	enum State {
-		STATE_NEXT,
-		STATE_ARGUMENT
-	};
-	
-	void accept(uint32_t mail);
-	void process(uint32_t message, uint32_t arg);
-	
-	void send_mail(MessageOut message);
-	
-	uint32_t mailbox_in;
-	uint32_t mailbox_out;
-	
-	bool halted;
 	bool int_status;
-	bool int_mask;
-	
-	uint32_t message;
-	State state;
+	bool int_enabled;
 };

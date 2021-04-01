@@ -5,38 +5,39 @@
 
 #include <cstdint>
 
+template<class T>
 class Bits {
 public:
 	Bits() {
 		value = 0;
 	}
 	
-	inline uint32_t getfield(uint32_t mask) const {
+	inline T getfield(T mask) const {
 		return value & mask;
 	}
 	
-	inline void setfield(uint32_t mask, uint32_t value) {
+	inline void setfield(T mask, T value) {
 		this->value = (this->value & ~mask) | value;
 	}
 	
-	inline bool get(uint32_t mask) const {
+	inline bool get(T mask) const {
 		return value & mask;
 	}
 	
-	inline void set(uint32_t mask, bool enable) {
+	inline void set(T mask, bool enable) {
 		if (enable) value |= mask;
 		else value &= ~mask;
 	}
 
-	inline uint32_t operator =(uint32_t value) {
+	inline T operator =(T value) {
 		this->value = value;
 		return value;
 	}
 	
-	inline operator uint32_t() const {
+	inline operator T() const {
 		return value;
 	}
 	
 private:
-	uint32_t value;
+	T value;
 };

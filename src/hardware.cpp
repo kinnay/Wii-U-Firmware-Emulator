@@ -9,6 +9,7 @@
 
 Hardware::Hardware(Emulator *emulator) :
 	latte(emulator),
+	dsp(emulator),
 	
 	pi(&emulator->physmem),
 	aes(&emulator->physmem),
@@ -147,6 +148,7 @@ void Hardware::write(uint32_t addr, uint16_t value) {
 
 void Hardware::update() {
 	ai.update();
+	dsp.update();
 	gpu.update();
 	latte.update();
 	

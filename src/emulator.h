@@ -4,6 +4,7 @@
 #include "cpu/ppc/ppcreservation.h"
 #include "cpu/ppc/ppcprocessor.h"
 #include "cpu/arm/armprocessor.h"
+#include "cpu/dsp.h"
 
 #include "debugger/debugger.h"
 
@@ -26,6 +27,7 @@ public:
 	PPCReservation reservation;
 	PPCProcessor ppc[3];
 	ARMProcessor arm;
+	DSPInterpreter dsp;
 	
 	Hardware hardware;
 	Debugger debugger;

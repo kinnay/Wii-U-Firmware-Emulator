@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include "physicalmemory.h"
-#include "hardware.h"
 #include "config.h"
 
 #include <vector>
@@ -11,16 +9,24 @@
 
 
 class Emulator;
+class PhysicalMemory;
+class Hardware;
+
 
 class Processor {
 public:
-	Processor(Emulator *emulator, int index);
+	Processor(Emulator *emulator, int index, bool threaded);
 	
 	void start();
 	void pause();
 	
 	void enable();
 	void disable();
+	
+	bool isPaused();
+	bool isEnabled();
+	
+	void setEnabled(bool enabled);
 	
 	virtual void reset() = 0;
 	virtual void step() = 0;
@@ -61,6 +67,7 @@ private:
 	void mainLoop();
 	
 	std::thread thread;
+	bool threaded;
 	bool enabled;
 	bool paused;
 };

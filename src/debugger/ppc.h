@@ -30,8 +30,7 @@ public:
 	Ref<EvalContext> getContext();
 	Processor *getProcessor();
 	bool translate(uint32_t *address);
-	
-	void step();
+	std::string format();
 	
 	void printState();
 	void printStateDetailed();

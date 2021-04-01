@@ -3,6 +3,6 @@ files/*
 logs/*
 main
 main.i64
-oprofile_data/
-!files/.gitignore
+!files/dsp_irom.bin
+!files/dsp_drom.bin
 !logs/.gitignore

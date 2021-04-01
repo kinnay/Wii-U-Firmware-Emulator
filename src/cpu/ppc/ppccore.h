@@ -110,7 +110,7 @@ public:
 	bool getCarry();
 	void setCarry(bool carry);
 	
-	Bits cr;
+	Bits<uint32_t> cr;
 	uint32_t pc;
 	uint32_t regs[32];
 	uint32_t sprs[0x200];

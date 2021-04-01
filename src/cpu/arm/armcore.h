@@ -59,8 +59,8 @@ public:
 	
 	void triggerException(ExceptionType type);
 	
-	Bits cpsr;
-	Bits spsr;
+	Bits<uint32_t> cpsr;
+	Bits<uint32_t> spsr;
 	
 	uint32_t regs[16];
 	uint32_t regsUser[16];
@@ -70,11 +70,11 @@ public:
 	uint32_t regsAbt[2];
 	uint32_t regsUnd[2];
 	
-	Bits spsrFiq;
-	Bits spsrIrq;
-	Bits spsrSvc;
-	Bits spsrAbt;
-	Bits spsrUnd;
+	Bits<uint32_t> spsrFiq;
+	Bits<uint32_t> spsrIrq;
+	Bits<uint32_t> spsrSvc;
+	Bits<uint32_t> spsrAbt;
+	Bits<uint32_t> spsrUnd;
 	
 	uint32_t control;
 	uint32_t domain;

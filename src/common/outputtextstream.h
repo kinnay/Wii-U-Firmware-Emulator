@@ -7,7 +7,7 @@
 class OutputTextStream : public RefCountedObj {
 public:
 	template <class... Args>
-	void write(const char *str, Args... args) {
+	void write(std::string str, Args... args) {
 		std::string s = StringUtils::format(str, args...);
 		write(s);
 	}

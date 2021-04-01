@@ -57,6 +57,10 @@ std::string ARMDebugger::name() {
 	return "ARM";
 }
 
+std::string ARMDebugger::format() {
+	return "%08X";
+}
+
 Ref<EvalContext> ARMDebugger::getContext() {
 	Ref<EvalContext> context = new EvalContext();
 	
@@ -80,10 +84,6 @@ Ref<EvalContext> ARMDebugger::getContext() {
 
 uint32_t ARMDebugger::pc() {
 	return cpu->core.regs[ARMCore::PC];
-}
-
-void ARMDebugger::step() {
-	cpu->step();
 }
 
 bool ARMDebugger::translate(uint32_t *address) {
