@@ -59,6 +59,9 @@ public:
 		
 		WPAR = 0x1C9,
 		
+		DMAU = 0x1CA,
+		DMAL = 0x1CB,
+		
 		HID5 = 0x1D0,
 		
 		PCSR = 0x1D2,

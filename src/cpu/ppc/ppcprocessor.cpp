@@ -3,6 +3,7 @@
 #include "ppcinstruction.h"
 #include "emulator.h"
 
+#include "common/exceptions.h"
 #include "common/logger.h"
 
 
@@ -35,6 +36,31 @@ void PPCProcessor::reset() {
 	#endif
 	
 	timer = 0;
+}
+
+void PPCProcessor::copy(uint32_t dst, uint32_t src, uint32_t length) {
+	#if WATCHPOINTS
+	checkWatchpoints(false, true, src, length);
+	checkWatchpoints(true, true, dst, length);
+	#endif
+		
+	bool supervisor = !(core.msr & 0x4000);
+	
+	if (!mmu.translate(&dst, MemoryAccess::DataWrite, supervisor)) {
+		runtime_error("LC DMA address translation failed");
+	}
+	
+	if (!mmu.translate(&src, MemoryAccess::DataRead, supervisor)) {
+		runtime_error("LC DMA address translation failed");
+	}
+	
+	#if WATCHPOINTS
+	checkWatchpoints(false, false, src, length);
+	checkWatchpoints(true, false, dst, length);
+	#endif
+
+	Buffer data = physmem->read(src, length);
+	physmem->write(dst, data);
 }
 
 void PPCProcessor::step() {

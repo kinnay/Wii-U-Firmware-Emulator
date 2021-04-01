@@ -74,6 +74,8 @@ public:
 		return true;
 	}
 	
+	void copy(uint32_t dst, uint32_t src, uint32_t size);
+	
 	void step();
 	void reset();
 	

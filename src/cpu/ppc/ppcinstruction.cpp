@@ -510,6 +510,22 @@ void PPCInstr_mfspr(PPCInstruction *instr, PPCProcessor *cpu) {
 void PPCInstr_mtspr(PPCInstruction *instr, PPCProcessor *cpu) {
 	PPCCore::SPR spr = convertSpr(instr->spr());
 	cpu->core.sprs[spr] = cpu->core.regs[instr->rS()];
+	
+	if (spr == PPCCore::DMAL) {
+		uint32_t dmau = cpu->core.sprs[PPCCore::DMAU];
+		uint32_t dmal = cpu->core.sprs[PPCCore::DMAL];
+		if (dmal & 2) {
+			uint32_t length = ((dmau & 0x1F) << 7) | ((dmal & 0xC) << 3);
+			uint32_t memaddr = dmau & ~0x1F;
+			uint32_t lcaddr = dmal & ~0x1F;
+			if (dmal & 0x10) {
+				cpu->copy(lcaddr, memaddr, length);
+			}
+			else {
+				cpu->copy(memaddr, lcaddr, length);
+			}
+		}
+	}
 }
 
 void PPCInstr_sc(PPCInstruction *instr, PPCProcessor *cpu) {
