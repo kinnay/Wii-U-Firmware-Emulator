@@ -110,7 +110,7 @@ void PM4Processor::process(uint32_t value) {
 		}
 		else if (type == 2) {}
 		else {
-			runtime_error("Unknown pm4 packet type: %i", type);
+			Logger::warning("Unknown pm4 packet type: %i", type);
 		}
 	}
 	else if (state == STATE_ARGUMENTS) {
@@ -196,7 +196,7 @@ void PM4Processor::execute() {
 		}
 	}
 	else {
-		runtime_error("Unknown pm4 packet type: %i", type);
+		Logger::warning("Unknown pm4 packet type: %i", type);
 	}
 }
 
