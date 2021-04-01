@@ -9,11 +9,11 @@ SRC += $(shell find src/ -type f -name "*.c")
 OBJS = $(patsubst src/%,build/%.o,$(SRC))
 
 main: $(OBJS)
-	g++-8 -o $@ $(LDFLAGS) $(OBJS) -lcrypto
+	g++ -o $@ $(LDFLAGS) $(OBJS) -lcrypto
 
 build/%.o: src/%
 	mkdir -p $(dir $@)
-	g++-8 $(SRCFLAGS) -c -o $@ $<
+	g++ $(SRCFLAGS) -c -o $@ $<
 	
 clean:
 	rm -rf build
