@@ -3,15 +3,18 @@ CXX ?= g++
 
 FLAGS = -std=c++14 -O2 -g -flto -Wno-invalid-offsetof
 
-LDFLAGS = $(FLAGS) -pthread
-SRCFLAGS = $(FLAGS) -Isrc -MMD
+READLINE_CFLAGS = $(shell pkg-config --cflags readline)
+READLINE_LIBS = $(shell pkg-config --libs readline)
+
+LDFLAGS = $(FLAGS) $(READLINE_LIBS) -pthread
+SRCFLAGS = $(FLAGS) $(READLINE_CFLAGS) -Isrc -MMD
 
 SRC = $(shell find src/ -type f -name "*.cpp")
 SRC += $(shell find src/ -type f -name "*.c")
 OBJS = $(patsubst src/%,build/%.o,$(SRC))
 
 main: $(OBJS)
-	$(CXX) -o $@ $(LDFLAGS) $(OBJS) -lcrypto
+	$(CXX) -o $@ $(LDFLAGS) -lhistory $(OBJS) -lcrypto
 
 build/%.o: src/%
 	mkdir -p $(dir $@)

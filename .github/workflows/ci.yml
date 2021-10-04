@@ -27,4 +27,6 @@ jobs:
 
     - name: Build
       run: |
+        nm -CD --defined-only /usr/lib/x86_64-linux-gnu/libreadline.so
+        nm -CD --defined-only /usr/lib/x86_64-linux-gnu/libhistory.so
         make
