@@ -1,4 +1,6 @@
 
+CXX ?= g++
+
 FLAGS = -std=c++14 -O2 -g -flto -Wno-invalid-offsetof
 
 LDFLAGS = $(FLAGS) -pthread
@@ -9,11 +11,11 @@ SRC += $(shell find src/ -type f -name "*.c")
 OBJS = $(patsubst src/%,build/%.o,$(SRC))
 
 main: $(OBJS)
-	g++ -o $@ $(LDFLAGS) $(OBJS) -lcrypto
+	$(CXX) -o $@ $(LDFLAGS) $(OBJS) -lcrypto
 
 build/%.o: src/%
 	mkdir -p $(dir $@)
-	g++ $(SRCFLAGS) -c -o $@ $<
+	$(CXX) $(SRCFLAGS) -c -o $@ $<
 	
 clean:
 	rm -rf build
