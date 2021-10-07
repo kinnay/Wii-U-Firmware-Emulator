@@ -26,9 +26,6 @@ void PPCMMU::translatePhysical(uint32_t *addr) {
 }
 
 bool PPCMMU::translateVirtual(uint32_t *addr, MemoryAccess type, bool supervisor) {
-	if ((uint64_t)physmem % 8 != 0) {
-		*(int *)0 = 0;
-	}
 	if (type == MemoryAccess::Instruction) {
 		if (!(core->msr & 0x20)) return true;
 		if (cache.translate(addr, type, supervisor)) return true;
