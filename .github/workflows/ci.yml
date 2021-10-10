@@ -27,4 +27,4 @@ jobs:
 
     - name: Build
       run: |
-        make
+        make -j$(nproc)
