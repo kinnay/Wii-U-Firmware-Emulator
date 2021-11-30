@@ -3,13 +3,13 @@
 #include "debugger/expression.h"
 #include "debugger/common.h"
 #include "emulator.h"
+#include "history.h"
 
 #include "common/sys.h"
 #include "common/buffer.h"
-#include "common/history.h"
 
-#include <algorithm>
 #include <readline/readline.h>
+#include <algorithm>
 
 
 const char *HELP_TEXT =
@@ -173,6 +173,7 @@ void Debugger::show(int core) {
 		}
 		
 		History::append(line);
+		
 		std::string current;
 		for (char c : std::string(line)) {
 			if (c == ' ') {
