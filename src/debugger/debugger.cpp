@@ -3,10 +3,12 @@
 #include "debugger/expression.h"
 #include "debugger/common.h"
 #include "emulator.h"
+#include "history.h"
 
 #include "common/sys.h"
 #include "common/buffer.h"
 
+#include <readline/readline.h>
 #include <algorithm>
 
 
@@ -159,14 +161,21 @@ void Debugger::show(int core) {
 		DebugInterface *debugger = getInterface();
 		
 		std::string format = StringUtils::format("%%s:%s> ", debugger->format());
-		Sys::out->write(format, debugger->name(), debugger->pc());
+		std::string prompt = StringUtils::format(format, debugger->name(), debugger->pc());
 		
-		std::string line = Sys::in->readline();
-
 		std::vector<std::string> args;
 		
+		char *line = readline(prompt.c_str());
+		if (!line) {
+			ArgParser parser(debugger->getContext(), args);
+			quit(&parser);
+			return;
+		}
+		
+		History::append(line);
+		
 		std::string current;
-		for (char c : line) {
+		for (char c : std::string(line)) {
 			if (c == ' ') {
 				if (!current.empty()) {
 					args.push_back(current);

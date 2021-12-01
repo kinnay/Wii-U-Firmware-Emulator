@@ -11,12 +11,12 @@ SRC += $(shell find src/ -type f -name "*.c")
 OBJS = $(patsubst src/%,build/%.o,$(SRC))
 
 main: $(OBJS)
-	$(CXX) -o $@ $(LDFLAGS) $(OBJS) -lcrypto
+	$(CXX) -o $@ $(LDFLAGS) $(OBJS) -lreadline -lhistory -lcrypto
 
 build/%.o: src/%
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(CXX) $(SRCFLAGS) -c -o $@ $<
-	
+
 clean:
 	rm -rf build
 	rm -f main
