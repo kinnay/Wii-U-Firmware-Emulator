@@ -19,7 +19,7 @@ void signal_handler(int signal) {
 }
 
 
-Emulator::Emulator() :
+Emulator::Emulator(bool boot0) :
 	physmem(&hardware),
 	hardware(this),
 	debugger(this),
@@ -29,17 +29,20 @@ Emulator::Emulator() :
 		{this, &reservation, 1},
 		{this, &reservation, 2}
 	},
-	dsp(this)
+	dsp(this),
+	boot0(boot0)
 {
 	reset();
 }
 
 void Emulator::reset() {
-	Buffer buffer = FileUtils::load("files/boot1.bin");
-	physmem.write(0xD400200, buffer);
-	
+
+	Buffer buffer = FileUtils::load(boot0 ? "files/boot0.bin" : "files/boot1.bin");
+	uint32_t load_address = boot0 ? 0xFFFF0000 : 0xD400200;
+	physmem.write(load_address, buffer);
+
 	arm.reset();
-	arm.core.regs[ARMCore::PC] = 0xD400200;
+	arm.core.regs[ARMCore::PC] = load_address;
 	arm.enable();
 	
 	reservation.reset();
