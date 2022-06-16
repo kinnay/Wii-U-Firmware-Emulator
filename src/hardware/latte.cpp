@@ -60,8 +60,8 @@ void LatteController::reset() {
 	aipprot = 0;
 	aipctrl = 0;
 	di_reset = 0;
-	spare = 0;
-	boot0 = 0;
+	spare0 = 0;
+	spare1 = 0;
 	clock_info = 0;
 	resets_compat = 0;
 	ifpower = 0;
@@ -117,8 +117,8 @@ uint32_t LatteController::read(uint32_t addr) {
 		case LT_AIP_PROT: return aipprot;
 		case LT_AIP_IOCTRL: return aipctrl;
 		case LT_DI_RESET: return di_reset;
-		case LT_SPARE: return spare;
-		case LT_BOOT0: return boot0;
+		case LT_SPARE0: return spare0;
+		case LT_SPARE1: return spare1;
 		case LT_CLOCKINFO: return clock_info;
 		case LT_RESETS_COMPAT: return resets_compat;
 		case LT_IFPOWER: return ifpower;
@@ -182,8 +182,18 @@ void LatteController::write(uint32_t addr, uint32_t value) {
 	else if (addr == LT_AIP_IOCTRL) aipctrl = value;
 	else if (addr == LT_USB_RESET) {}
 	else if (addr == LT_DI_RESET) di_reset = value;
-	else if (addr == LT_SPARE) spare = value;
-	else if (addr == LT_BOOT0) boot0 = value;
+	else if (addr == LT_SPARE0) {
+		spare0 = value;
+
+		// boot0 writes to spare0 and waits for spare1 flags to change
+		if (value & 0x2000000) {
+			spare1 |= 0b1001;
+		}
+		else if (value & 0x10000) {
+			spare1 &= ~0b1001;
+		}
+	}
+	else if (addr == LT_SPARE1) spare1 = value;
 	else if (addr == LT_CLOCKINFO) clock_info = value;
 	else if (addr == LT_RESETS_COMPAT) {
 		uint32_t changed = resets_compat ^ value;

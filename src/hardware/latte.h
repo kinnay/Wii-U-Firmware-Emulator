@@ -59,8 +59,8 @@ public:
 		LT_AIP_IOCTRL = 0xD000074,
 		LT_USB_RESET = 0xD000088,
 		LT_DI_RESET = 0xD000180,
-		LT_SPARE = 0xD000188,
-		LT_BOOT0 = 0xD00018C,
+		LT_SPARE0 = 0xD000188,
+		LT_SPARE1 = 0xD00018C,
 		LT_CLOCKINFO = 0xD000190,
 		LT_RESETS_COMPAT = 0xD000194,
 		LT_IFPOWER = 0xD000198,
@@ -139,8 +139,8 @@ private:
 	uint32_t aipprot;
 	uint32_t aipctrl;
 	uint32_t di_reset;
-	uint32_t spare;
-	uint32_t boot0;
+	uint32_t spare0;
+	uint32_t spare1;
 	uint32_t clock_info;
 	uint32_t resets_compat;
 	uint32_t ifpower;
