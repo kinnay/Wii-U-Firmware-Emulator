@@ -38,6 +38,7 @@ private:
 	uint32_t iv[4];
 	
 	::AES_KEY aeskey;
+	uint8_t aesiv[16];
 	
 	PhysicalMemory *physmem;
 };

@@ -55,13 +55,15 @@ void AESController::write(uint32_t addr, uint32_t value) {
 					else {
 						AES_set_encrypt_key((uint8_t *)key, 128, &aeskey);
 					}
+
+					memcpy(aesiv, iv, 16);
 				}
 				
 				if (value & 0x8000000) {
-					AES_cbc_encrypt(data.get(), data.get(), size, &aeskey, (uint8_t *)iv, AES_DECRYPT);
+					AES_cbc_encrypt(data.get(), data.get(), size, &aeskey, aesiv, AES_DECRYPT);
 				}
 				else {
-					AES_cbc_encrypt(data.get(), data.get(), size, &aeskey, (uint8_t *)iv, AES_ENCRYPT);
+					AES_cbc_encrypt(data.get(), data.get(), size, &aeskey, aesiv, AES_ENCRYPT);
 				}
 			}
 			
