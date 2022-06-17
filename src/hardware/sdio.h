@@ -9,9 +9,51 @@ class PhysicalMemory;
 
 class SDIOCard {
 public:
+	SDIOCard();
 	virtual ~SDIOCard();
 	
 	virtual Buffer read(uint64_t offset, uint32_t size) = 0;
+
+	union CardSpecificData {
+		struct {
+			uint32_t tranSpeed : 8;
+			uint32_t nsac : 8;
+			uint32_t taac : 8;
+			uint32_t reserved0 : 6;
+			uint32_t csdStructure : 2;
+
+			uint32_t cSize_hi : 6;
+			uint32_t reserved1 : 6;
+			uint32_t dsrImp : 1;
+			uint32_t readBlkMisalign : 1;
+			uint32_t writeBlkMisalign : 1;
+			uint32_t readBlPartial : 1;
+			uint32_t readBlLen : 4;
+			uint32_t ccc : 12;
+
+			uint32_t wpGrpSize : 7;
+			uint32_t sectorSize : 7;
+			uint32_t eraseBlkEnable : 1;
+			uint32_t reserved2 : 1;
+			uint32_t cSize_lo : 16;
+
+			uint32_t crc : 8;
+			uint32_t reserved5 : 2;
+			uint32_t fileFormat : 2;
+			uint32_t twpWriteProtect : 1;
+			uint32_t permWriteProtect : 1;
+			uint32_t copy : 1;
+			uint32_t fileFormatGrp : 1;
+			uint32_t reserved4 : 5;
+			uint32_t writeGrpEnable : 1;
+			uint32_t writeBlLen : 4;
+			uint32_t r2wFactor : 3;
+			uint32_t reserved3 : 2;
+			uint32_t wpGrpEnable : 1;
+		} __attribute__((packed));
+		uint32_t data[4];
+	};
+	CardSpecificData csd;
 };
 
 
@@ -23,6 +65,7 @@ public:
 	Buffer read(uint64_t offset, uint32_t size);
 	
 private:
+	bool is32gb;
 	uint8_t *data;
 };
 
