@@ -10,30 +10,30 @@
 #include <fcntl.h>
 
 SDIOCard::SDIOCard() : csd() {
-	csd.csdStructure = 1; // version 2
+	csd.csd_structure = 1; // version 2
 	csd.taac = 0xE; // 1 ms
 	csd.nsac = 0;
-	csd.tranSpeed = 0x32; // 25 Mbit/s
+	csd.tran_speed = 0x32; // 25 Mbit/s
 	csd.ccc = 0x5B5;
-	csd.readBlLen = 0x9; // 512 bytes
-	csd.readBlPartial = 0;
-	csd.writeBlkMisalign = 0;
-	csd.readBlkMisalign = 0;
-	csd.dsrImp = 0;
-	csd.cSize_hi = 0;
-	csd.cSize_lo = 0;
-	csd.eraseBlkEnable = 0x1;
-	csd.sectorSize = 0x7F; // 128 blocks
-	csd.wpGrpSize = 0;
-	csd.wpGrpEnable = 0;
-	csd.r2wFactor = 0x2; // x4
-	csd.writeBlLen = 0x9; // 512 bytes
-	csd.writeGrpEnable = 0;
-	csd.fileFormatGrp = 0;
+	csd.read_bl_len = 0x9; // 512 bytes
+	csd.read_bl_partial = 0;
+	csd.write_blk_misalign = 0;
+	csd.read_blk_misalign = 0;
+	csd.dsr_imp = 0;
+	csd.csize_hi = 0;
+	csd.csize_lo = 0;
+	csd.erase_blk_enable = 0x1;
+	csd.sector_size = 0x7F; // 128 blocks
+	csd.wp_grp_size = 0;
+	csd.wp_grp_enable = 0;
+	csd.r2w_factor = 0x2; // x4
+	csd.write_bl_len = 0x9; // 512 bytes
+	csd.write_grp_enable = 0;
+	csd.file_format_grp = 0;
 	csd.copy = 0;
-	csd.permWriteProtect = 0;
-	csd.twpWriteProtect = 0;
-	csd.fileFormat = 0;
+	csd.perm_write_protect = 0;
+	csd.twp_write_protect = 0;
+	csd.file_format = 0;
 	csd.crc = 0x01;
 }
 
@@ -48,15 +48,15 @@ MLCCard::MLCCard() {
 	loff_t size = ftello64(f);
 	fclose(f);
 
-	is32gb = size >= 0x1DB800000;
+	is_32gb = size >= 0x1DB800000;
 
-	csd.cSize_lo = is32gb ? 0xFFFF : 0x3FFF;
+	csd.csize_lo = is_32gb ? 0xFFFF : 0x3FFF;
 
-	data = memory_mapped_file_open("files/mlc.bin", is32gb ? 0x76E000000 : 0x1DB800000);
+	data = memory_mapped_file_open("files/mlc.bin", is_32gb ? 0x76E000000 : 0x1DB800000);
 }
 
 MLCCard::~MLCCard() {
-	memory_mapped_file_close(data, is32gb ? 0x76E000000 : 0x1DB800000);
+	memory_mapped_file_close(data, is_32gb ? 0x76E000000 : 0x1DB800000);
 }
 
 Buffer MLCCard::read(uint64_t offset, uint32_t size) {
