@@ -9,15 +9,54 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+SDIOCard::SDIOCard() : csd() {
+	csd.csd_structure = 1; // version 2
+	csd.taac = 0xE; // 1 ms
+	csd.nsac = 0;
+	csd.tran_speed = 0x32; // 25 Mbit/s
+	csd.ccc = 0x5B5;
+	csd.read_bl_len = 0x9; // 512 bytes
+	csd.read_bl_partial = 0;
+	csd.write_blk_misalign = 0;
+	csd.read_blk_misalign = 0;
+	csd.dsr_imp = 0;
+	csd.csize_hi = 0;
+	csd.csize_lo = 0;
+	csd.erase_blk_enable = 0x1;
+	csd.sector_size = 0x7F; // 128 blocks
+	csd.wp_grp_size = 0;
+	csd.wp_grp_enable = 0;
+	csd.r2w_factor = 0x2; // x4
+	csd.write_bl_len = 0x9; // 512 bytes
+	csd.write_grp_enable = 0;
+	csd.file_format_grp = 0;
+	csd.copy = 0;
+	csd.perm_write_protect = 0;
+	csd.twp_write_protect = 0;
+	csd.file_format = 0;
+	csd.crc = 0x01;
+}
 
 SDIOCard::~SDIOCard() {}
 
 MLCCard::MLCCard() {
-	data = memory_mapped_file_open("files/mlc.bin", 0x76E000000);
+	FILE* f = fopen64("files/mlc.bin", "rb");
+	if (!f) {
+		runtime_error("Failed to open \"files/mlc.bin\"");
+	}
+	fseek(f, 0, SEEK_END);
+	loff_t size = ftello64(f);
+	fclose(f);
+
+	is_32gb = size >= 0x1DB800000;
+
+	csd.csize_lo = is_32gb ? 0xFFFF : 0x3FFF;
+
+	data = memory_mapped_file_open("files/mlc.bin", is_32gb ? 0x76E000000 : 0x1DB800000);
 }
 
 MLCCard::~MLCCard() {
-	memory_mapped_file_close(data, 0x76E000000);
+	memory_mapped_file_close(data, is_32gb ? 0x76E000000 : 0x1DB800000);
 }
 
 Buffer MLCCard::read(uint64_t offset, uint32_t size) {
@@ -33,10 +72,6 @@ Buffer DummyCard::read(uint64_t offset, uint32_t size) {
 
 uint8_t SDIOCardInfo[] = {
 	0x22, 0x04, 0x00, 0xFF, 0xFF, 0x32, 0xFF, 0x00
-};
-
-uint32_t SDIOCardData[] = {
-	0x400E0032, 0x5B590000, 0xFFFF7F80, 0x0A400001
 };
 
 SDIOController::SDIOController(PhysicalMemory *physmem, Type type) {
@@ -179,10 +214,10 @@ void SDIOController::process_command(int command) {
 	}
 	else if (command == SEND_IF_COND) result0 = argument & 0xFFF;
 	else if (command == SEND_CSD) {
-		result3 = (SDIOCardData[0] >> 8) | (SDIOCardData[3] << 24);
-		result2 = (SDIOCardData[1] >> 8) | (SDIOCardData[0] << 24);
-		result1 = (SDIOCardData[2] >> 8) | (SDIOCardData[1] << 24);
-		result0 = (SDIOCardData[3] >> 8) | (SDIOCardData[2] << 24);
+		result3 = (card->csd.data[0] >> 8) | (card->csd.data[3] << 24);
+		result2 = (card->csd.data[1] >> 8) | (card->csd.data[0] << 24);
+		result1 = (card->csd.data[2] >> 8) | (card->csd.data[1] << 24);
+		result0 = (card->csd.data[3] >> 8) | (card->csd.data[2] << 24);
 	}
 	else if (command == SEND_STATUS) {
 		state = STATE_TRAN;
