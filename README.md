@@ -1,13 +1,14 @@
 # Wii U Firmware Emulator
-This emulator emulates the Wii U processors and hardware at the lowest level. It's currently able to emulate all the way through boot1, IOSU and Cafe OS up to the Wii U menu.
+This emulator emulates the Wii U processors and hardware at the lowest level. It's currently able to emulate all the way through boot0, boot1, IOSU and Cafe OS up to the Wii U menu.
 
 This emulator used to be written in both Python and C++. You can still find the source code of this emulator in the branch 'old'.
 
 ## Instructions
 1. Make sure you have a linux system, a g++ compiler that supports c++14 and the OpenSSL library.
-2. Dump the following files from your Wii U (with hexFW for example) and put them into the 'files' folder: `boot1.bin`, `otp.bin`, `seeprom.bin`, `mlc.bin`, `slc.bin` and `slccmpt.bin`. This emulator may write to some of these files. Use a backup if you want to keep your original dumps.
-3. Create `files/espresso_key.bin` and put the espresso ancast key into it.
-4. Run `make` to compile the emulator
+2. Dump the following files from your Wii U (with the Wii U NAND Dumper and minute for example) and put them into the 'files' folder: `boot0.bin`, `otp.bin`, `seeprom.bin`, `mlc.bin`, `slc.bin` and `slccmpt.bin`. This emulator may write to some of these files. Use a backup if you want to keep your original dumps.
+3. Edit `files/otp.bin` and insert the boot1 ancast key at offset `0x3A0`.
+4. Create `files/espresso_key.bin` and put the espresso ancast key into it.
+5. Run `make` to compile the emulator.
 
 ## Configuration
 `src/config.h` contains a few macros that enable/disable certain features of the emulator, such as breakpoints. Enabling a feature adds interesting commands to the debugger but may slow down the emulator a bit.

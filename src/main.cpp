@@ -7,12 +7,7 @@ int main(int argc, const char *argv[]) {
 	Logger::init(Logger::DEBUG);
 	History::init();
 
-	bool boot0 = false;
-	if (argc > 1 && std::strcmp(argv[1], "--boot0") == 0) {
-		boot0 = true;
-	}
-
-	Emulator *emulator = new Emulator(boot0);
+	Emulator *emulator = new Emulator();
 	emulator->run();
 	delete emulator;
 

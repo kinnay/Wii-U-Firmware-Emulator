@@ -14,7 +14,7 @@
 
 class Emulator {
 public:
-	Emulator(bool boot0);
+	Emulator();
 	
 	void run();
 	void pause();
@@ -36,5 +36,4 @@ private:
 	int core;
 	
 	bool running;
-	bool boot0;
 };
