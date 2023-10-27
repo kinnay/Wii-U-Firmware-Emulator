@@ -6,6 +6,7 @@
 #include <string>
 #include <ciso646>
 #include <cstdio>
+#include <cstdint>
 #include <stdexcept>
 #include <type_traits>
 #include <sstream>
